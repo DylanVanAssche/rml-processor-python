@@ -7,7 +7,7 @@ print('Logical Source')
 
 class MockLogicalSource(LogicalSource):
     def __init__(self):
-        super().__init__('')
+        super().__init__()
 
     def __next__(self):
         # Abstract method mocking
