@@ -16,9 +16,10 @@ class JSONLogicalSource(LogicalSource):
         # Read JSON file
         with open(self._path) as f:
             self._data = json.load(f)
+            self._iterator = iter(self._iterator.find(self._data))
 
     def __next__(self):
         """
         Returns an iterator from the JSONPath expression.
         """
-        return self._iterator.find(self._data)
+        return next(self._iterator)

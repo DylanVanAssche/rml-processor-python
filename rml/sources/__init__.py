@@ -21,3 +21,4 @@ class LogicalSource(ABC):
 
 # Expose classes at module level
 from rml.sources.csv_source import CSVLogicalSource
+from rml.sources.json_source import JSONLogicalSource
