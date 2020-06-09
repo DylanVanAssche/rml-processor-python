@@ -11,6 +11,9 @@ class JSONLogicalSourceTests(unittest.TestCase):
         self.source = None
 
     def test_iterator(self) -> None:
+        """
+        Test if we can iterate over the results of the JSONPath expression
+        """
         self.source = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
         self.assertDictEqual(next(self.source).value,
                              {'id': '0', 'name': 'Herman', 'age': 65})
@@ -22,17 +25,32 @@ class JSONLogicalSourceTests(unittest.TestCase):
             next(self.source)
 
     def test_non_existing_file(self) -> None:
+        """
+        Test if we raise a FileNotFoundError exception when the input file does
+        not exist
+        """
         with self.assertRaises(FileNotFoundError):
             self.source = JSONLogicalSource('$.students.[*]', 'this/file/does/not/exist')
 
     def test_invalid_jsonpath(self) -> None:
-        self.source = JSONLogicalSource('abc', 'tests/assets/json/student.json')
+        """
+        Test if we raise a ValueError when the JSONPath expression is invalid
+        """
+        with self.assertRaises(ValueError):
+            self.source = JSONLogicalSource('&$"£*W$', 'tests/assets/json/student.json')
 
     def test_invalid_json(self) -> None:
+        """
+        Test if we raise a JSONDecodeError when the input file cannot be parsed
+        as valid JSON
+        """
         with self.assertRaises(JSONDecodeError):
             self.source = JSONLogicalSource('$.students.[*]', 'tests/assets/json/invalid.json')
 
     def test_empty_iterator(self) -> None:
+        """
+        Test if we handle an empty iterator
+        """
         self.source = JSONLogicalSource('$.empty', 'tests/assets/json/student.json')
         with self.assertRaises(StopIteration):
             next(self.source)

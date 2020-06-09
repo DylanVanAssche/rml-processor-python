@@ -9,7 +9,10 @@ class JSONLogicalSource(LogicalSource):
         A JSONPath Logical Source to iterate over JSON data.
         """
         super().__init__(reference_formulation)
-        self._iterator = parse(self._reference_formulation)
+        try:
+            self._iterator = parse(self._reference_formulation)
+        except:
+            raise ValueError('Invalid JSONPath expression')
         self._path = path
         self._data = {}
 

@@ -10,6 +10,9 @@ class CSVLogicalSourceTests(unittest.TestCase):
         self.source = None
 
     def test_iterator(self) -> None:
+        """
+        Test if we can iterate over every row
+        """
         self.source = CSVLogicalSource('tests/assets/csv/student.csv')
         self.assertDictEqual(next(self.source),
                              {'id': '0', 'name': 'Herman', 'age': '65'})
@@ -21,15 +24,25 @@ class CSVLogicalSourceTests(unittest.TestCase):
             next(self.source)
 
     def test_non_existing_file(self) -> None:
+        """
+        Test if a FileNotFoundError exception is raised when the input file
+        does not exist
+        """
         with self.assertRaises(FileNotFoundError):
             self.source = CSVLogicalSource('this/file/does/not/exist')
 
     def test_empty_iterator(self) -> None:
+        """
+        Test if we can handle an empty CSV file
+        """
         self.source = CSVLogicalSource('tests/assets/csv/empty.csv')
         with self.assertRaises(StopIteration):
             next(self.source)
 
     def test_missing_header(self) -> None:
+        """
+        Test if we raise a ValueError when no CSV header is available
+        """
         with self.assertRaises(ValueError):
             self.source = CSVLogicalSource('tests/assets/csv/no_header.csv')
 
