@@ -20,4 +20,5 @@ class LogicalSource(ABC):
         """
         pass
 
-from sources.csv_source import CSVLogicalSource
+# Expose classes at module level
+from rml.sources.csv_source import CSVLogicalSource

@@ -2,7 +2,7 @@
 
 import unittest
 
-from sources import CSVLogicalSource
+from rml.sources import CSVLogicalSource
 
 class CSVLogicalSourceTests(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:
