@@ -13,11 +13,11 @@ class XMLLogicalSourceTests(unittest.TestCase):
     def test_iterator(self) -> None:
         self.source = XMLLogicalSource('/students/student', 'tests/assets/xml/student.xml')
         self.assertDictEqual(next(self.source),
-                            {'id': '0', 'name': 'Herman', 'age': '65'})
+                             {'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertDictEqual(next(self.source),
-                            {'id': '1', 'name': 'Ann', 'age': '62'})
+                             {'id': '1', 'name': 'Ann', 'age': '62'})
         self.assertDictEqual(next(self.source),
-                            {'id': '2', 'name': 'Simon', 'age': '23'})
+                             {'id': '2', 'name': 'Simon', 'age': '23'})
         with self.assertRaises(StopIteration):
             next(self.source)
 
@@ -35,6 +35,8 @@ class XMLLogicalSourceTests(unittest.TestCase):
 
     def test_empty_iterator(self) -> None:
         self.source = XMLLogicalSource('/empty', 'tests/assets/xml/student.xml')
+        with self.assertRaises(StopIteration):
+            next(self.source)
 
 if __name__ == '__main__':
     unittest.main()

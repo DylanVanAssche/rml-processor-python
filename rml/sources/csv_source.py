@@ -1,6 +1,8 @@
-from csv import DictReader
+from csv import DictReader, Sniffer
 
 from . import LogicalSource
+
+BYTES_TO_SNIFF=1024
 
 class CSVLogicalSource(LogicalSource):
     def __init__(self, path):
@@ -11,6 +13,10 @@ class CSVLogicalSource(LogicalSource):
         super().__init__()
         self._path = path
         self._file = open(self._path)
+        with open(self._path) as csvfile:
+            sniffer = Sniffer()
+            if not sniffer.has_header(csvfile.read(BYTES_TO_SNIFF)):
+                raise ValueError('CSV file requires a header')
         self._iterator = DictReader(self._file)
 
     def __next__(self):

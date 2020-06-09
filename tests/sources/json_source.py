@@ -13,11 +13,11 @@ class JSONLogicalSourceTests(unittest.TestCase):
     def test_iterator(self) -> None:
         self.source = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
         self.assertDictEqual(next(self.source).value,
-                            {'id': '0', 'name': 'Herman', 'age': 65})
+                             {'id': '0', 'name': 'Herman', 'age': 65})
         self.assertDictEqual(next(self.source).value,
-                            {'id': '1', 'name': 'Ann', 'age': 62})
+                             {'id': '1', 'name': 'Ann', 'age': 62})
         self.assertDictEqual(next(self.source).value,
-                            {'id': '2', 'name': 'Simon', 'age': 23})
+                             {'id': '2', 'name': 'Simon', 'age': 23})
         with self.assertRaises(StopIteration):
             next(self.source)
 
@@ -34,6 +34,8 @@ class JSONLogicalSourceTests(unittest.TestCase):
 
     def test_empty_iterator(self) -> None:
         self.source = JSONLogicalSource('$.empty', 'tests/assets/json/student.json')
+        with self.assertRaises(StopIteration):
+            next(self.source)
 
 if __name__ == '__main__':
     unittest.main()
