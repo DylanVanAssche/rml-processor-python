@@ -23,9 +23,3 @@ class CSVLogicalSource(LogicalSource):
         except StopIteration:
             self._file.close()
             raise StopIteration
-
-    def __del__(self):
-        """
-        Clean up CSV file descriptor
-        """
-        self._file.close()

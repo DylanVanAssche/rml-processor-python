@@ -18,7 +18,6 @@ class LogicalSource(ABC):
         __next__() method must be implemented by every subclass.
         This methods provides the next value of the generator
         """
-        pass
 
 # Expose classes at module level
 from rml.sources.csv_source import CSVLogicalSource

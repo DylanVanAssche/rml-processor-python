@@ -1,1 +1,2 @@
 from tests.sources.csv_source import CSVLogicalSourceTests
+from tests.sources.logical_source import LogicalSourceTests
