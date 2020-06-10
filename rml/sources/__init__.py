@@ -23,3 +23,4 @@ class LogicalSource(ABC):
 from rml.sources.csv_source import CSVLogicalSource
 from rml.sources.json_source import JSONLogicalSource
 from rml.sources.xml_source import XMLLogicalSource
+from rml.sources.sql_source import SQLLogicalSource

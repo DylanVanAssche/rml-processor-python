@@ -12,11 +12,15 @@ class CSVLogicalSource(LogicalSource):
         """
         super().__init__()
         self._path = path
-        self._file = open(self._path)
-        with open(self._path) as csvfile:
+
+        with open(self._path) as f:
+            # Check if the CSV file contains a header
             sniffer = Sniffer()
-            if not sniffer.has_header(csvfile.read(BYTES_TO_SNIFF)):
+            if not sniffer.has_header(f.read(BYTES_TO_SNIFF)):
                 raise ValueError('CSV file requires a header')
+
+        # Create CSV file iterator
+        self._file = open(self._path)
         self._iterator = DictReader(self._file)
 
     def __next__(self):

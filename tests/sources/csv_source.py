@@ -35,8 +35,8 @@ class CSVLogicalSourceTests(unittest.TestCase):
         """
         Test if we can handle an empty CSV file
         """
-        self.source = CSVLogicalSource('tests/assets/csv/empty.csv')
         with self.assertRaises(StopIteration):
+            self.source = CSVLogicalSource('tests/assets/csv/empty.csv')
             next(self.source)
 
     def test_missing_header(self) -> None:
