@@ -59,6 +59,7 @@ class SQLLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(StopIteration):
             self.source = SQLLogicalSource('sqlite:///tests/assets/sql/empty.db',
                                            'SELECT id, name, age FROM students;')
+            next(self.source)
 
 if __name__ == '__main__':
     unittest.main()

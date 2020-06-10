@@ -25,4 +25,4 @@ class JSONLogicalSource(LogicalSource):
         """
         Returns an iterator from the JSONPath expression.
         """
-        return next(self._iterator)
+        return next(self._iterator).value

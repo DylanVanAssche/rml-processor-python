@@ -15,11 +15,11 @@ class JSONLogicalSourceTests(unittest.TestCase):
         Test if we can iterate over the results of the JSONPath expression
         """
         self.source = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
-        self.assertDictEqual(next(self.source).value,
+        self.assertDictEqual(next(self.source),
                              {'id': '0', 'name': 'Herman', 'age': 65})
-        self.assertDictEqual(next(self.source).value,
+        self.assertDictEqual(next(self.source),
                              {'id': '1', 'name': 'Ann', 'age': 62})
-        self.assertDictEqual(next(self.source).value,
+        self.assertDictEqual(next(self.source),
                              {'id': '2', 'name': 'Simon', 'age': 23})
         with self.assertRaises(StopIteration):
             next(self.source)
@@ -51,8 +51,8 @@ class JSONLogicalSourceTests(unittest.TestCase):
         """
         Test if we handle an empty iterator
         """
-        self.source = JSONLogicalSource('$.empty', 'tests/assets/json/student.json')
         with self.assertRaises(StopIteration):
+            self.source = JSONLogicalSource('$.empty', 'tests/assets/json/student.json')
             next(self.source)
 
 if __name__ == '__main__':

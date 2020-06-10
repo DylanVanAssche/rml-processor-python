@@ -11,6 +11,9 @@ nose = "*"
 coverage = "*"
 lxml = "*"
 sqlalchemy = "*"
+rdflib = "*"
+sparqlwrapper = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
