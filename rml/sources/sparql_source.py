@@ -5,7 +5,7 @@ from requests import get, HTTPError
 from . import LogicalSource
 
 class SPARQLLogicalSource(LogicalSource):
-    def __init__(self, reference_formulation, endpoint, query):
+    def __init__(self, reference_formulation: str, endpoint: str, query: str):
         """
         An SPARQL Logical Source to iterate over RDF data.
         The RML reference formulation is used to select the JSON results.

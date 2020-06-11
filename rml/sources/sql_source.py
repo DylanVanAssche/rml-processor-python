@@ -4,7 +4,7 @@ from sqlalchemy.exc import OperationalError
 from . import LogicalSource
 
 class SQLLogicalSource(LogicalSource):
-    def __init__(self, jdbc, query):
+    def __init__(self, jdbc: str, query: str):
         """
         An SQL Logical Source to iterate over RDB data.
         The RML reference formulation is not used for row-based iterators.

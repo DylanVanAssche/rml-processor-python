@@ -46,5 +46,20 @@ class CSVLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.source = CSVLogicalSource('tests/assets/csv/no_header.csv')
 
+    def test_delimiter(self) -> None:
+        """
+        Test if we can handle different delimiters such as TABS in TSV files.
+        """
+        self.source = CSVLogicalSource('tests/assets/csv/student.tsv',
+                                       delimiter='\t')
+        self.assertDictEqual(next(self.source),
+                             {'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertDictEqual(next(self.source),
+                             {'id': '1', 'name': 'Ann', 'age': '62'})
+        self.assertDictEqual(next(self.source),
+                             {'id': '2', 'name': 'Simon', 'age': '23'})
+        with self.assertRaises(StopIteration):
+            next(self.source)
+
 if __name__ == '__main__':
     unittest.main()

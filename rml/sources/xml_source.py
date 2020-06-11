@@ -3,7 +3,7 @@ from lxml import etree
 from . import LogicalSource
 
 class XMLLogicalSource(LogicalSource):
-    def __init__(self, reference_formulation, path):
+    def __init__(self, reference_formulation: str, path: str):
         """
         An XML Logical Source to iterate over XML data.
         The RML reference formulation is an XPath expression.

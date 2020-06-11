@@ -5,13 +5,14 @@ from . import LogicalSource
 BYTES_TO_SNIFF=1024
 
 class CSVLogicalSource(LogicalSource):
-    def __init__(self, path):
+    def __init__(self, path: str, delimiter: str = ','):
         """
         A CSV Logical Source to iterate over CSV data.
         The RML reference formulation is not used for row-based iterators.
         """
         super().__init__()
         self._path = path
+        self._delimiter = delimiter
 
         with open(self._path) as f:
             # Check if the CSV file contains a header
@@ -21,7 +22,7 @@ class CSVLogicalSource(LogicalSource):
 
         # Create CSV file iterator
         self._file = open(self._path)
-        self._iterator = DictReader(self._file)
+        self._iterator = DictReader(self._file, delimiter=self._delimiter)
 
     def __next__(self):
         """

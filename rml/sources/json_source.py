@@ -4,7 +4,7 @@ from jsonpath_ng import parse
 from . import LogicalSource
 
 class JSONLogicalSource(LogicalSource):
-    def __init__(self, reference_formulation, path):
+    def __init__(self, reference_formulation: str, path: str):
         """
         A JSONPath Logical Source to iterate over JSON data.
         """
