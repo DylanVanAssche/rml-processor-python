@@ -10,25 +10,18 @@ class XMLLogicalSource(LogicalSource):
         """
         super().__init__(reference_formulation)
         self._path = path
-        self._file = open(self._path)
 
         # Parse XML file
-        self._iterator = etree.parse(self._file)
+        with open(self._path) as f:
+            self._iterator = etree.parse(f)
 
         # Apply XPath expression
         self._iterator = self._iterator.xpath(self._reference_formulation)
+        self._iterator = iter(self._iterator)
 
     def __next__(self):
         """
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.
         """
-        try:
-            children = {}
-            element = self._iterator.pop(0)
-            for child in element:
-                children[child.tag] = child.text
-            return children
-        except IndexError:
-            self._file.close()
-            raise StopIteration
+        return next(self._iterator)

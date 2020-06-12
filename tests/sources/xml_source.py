@@ -2,6 +2,7 @@
 
 import unittest
 from lxml.etree import XMLSyntaxError, XPathEvalError
+from lxml import etree
 
 from rml.sources import XMLLogicalSource
 
@@ -15,12 +16,22 @@ class XMLLogicalSourceTests(unittest.TestCase):
         Test if we can iterate over each XML element
         """
         self.source = XMLLogicalSource('/students/student', 'tests/assets/xml/student.xml')
-        self.assertDictEqual(next(self.source),
-                             {'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertDictEqual(next(self.source),
-                             {'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertDictEqual(next(self.source),
-                             {'id': '2', 'name': 'Simon', 'age': '23'})
+
+        student = next(self.source)
+        self.assertEqual(student.xpath('./id')[0].text, '0')
+        self.assertEqual(student.xpath('./name')[0].text, 'Herman')
+        self.assertEqual(student.xpath('./age')[0].text, '65')
+
+        student = next(self.source)
+        self.assertEqual(student.xpath('./id')[0].text, '1')
+        self.assertEqual(student.xpath('./name')[0].text, 'Ann')
+        self.assertEqual(student.xpath('./age')[0].text, '62')
+
+        student = next(self.source)
+        self.assertEqual(student.xpath('./id')[0].text, '2')
+        self.assertEqual(student.xpath('./name')[0].text, 'Simon')
+        self.assertEqual(student.xpath('./age')[0].text, '23')
+
         with self.assertRaises(StopIteration):
             next(self.source)
 
