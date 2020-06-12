@@ -98,6 +98,7 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         # Apply XPath expression
         try:
             self._iterator = self._iterator.xpath(self._reference_formulation)
+            self._iterator = iter(self._iterator)
         except XPathEvalError:
             raise ValueError(f'Invalid XPath expression: {self._reference_formulation}')
 
@@ -106,16 +107,4 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.
         """
-        try:
-            children = {}
-            element = self._iterator.pop(0)
-            # If children, return children's text of element
-            if len(element):
-                for child in element:
-                    children[child.tag] = child.text
-                return children
-            # No children, return element's text
-            else:
-                return element.text
-        except IndexError:
-            raise StopIteration
+        return next(self._iterator)
