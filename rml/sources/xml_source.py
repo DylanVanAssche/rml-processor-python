@@ -23,7 +23,6 @@ class XMLLogicalSource(LogicalSource):
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.
         """
-        print(self._iterator)
         try:
             children = {}
             element = self._iterator.pop(0)
