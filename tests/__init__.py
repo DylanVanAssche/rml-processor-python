@@ -7,3 +7,4 @@ from tests.sources.xml_source import XMLLogicalSourceTests
 from tests.sources.sql_source import SQLLogicalSourceTests
 from tests.sources.sparql_source import SPARQLJSONLogicalSourceTests, SPARQLXMLLogicalSourceTests
 from tests.sources.dcat_source import DCATLogicalSourceTests
+from tests.sources.rdf_source import RDFLogicalSourceTests
