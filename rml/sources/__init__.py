@@ -26,4 +26,4 @@ from rml.sources.xml_source import XMLLogicalSource
 from rml.sources.sql_source import SQLLogicalSource
 from rml.sources.sparql_source import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
 from rml.sources.dcat_source import DCATLogicalSource
-from rml.sources.rdf_source import RDFLogicalSource
+from rml.sources.rdf_source import RDFLogicalSource, RDFFormat
