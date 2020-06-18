@@ -1,35 +1,31 @@
 from requests import get
 from requests.exceptions import HTTPError, ConnectionError
 from csv import DictReader, Sniffer
-from enum import Enum
 from os import makedirs
 from os.path import basename
 
-from . import LogicalSource, CSVLogicalSource, JSONLogicalSource, XMLLogicalSource
+#from . import LogicalSource, MIMEType
+#from . import CSVLogicalSource, JSONLogicalSource, XMLLogicalSource, RDFLogicalSource
+from rml.sources import *
 
 TMP_DIR='/tmp'
 ITER_BYTES=1024
 
-class MIMEType(Enum):
-    CSV = 'text/csv'
-    TSV = 'text/tab-separated-values'
-    JSON = 'application/json'
-    XML = 'application/xml'
-
 class DCATLogicalSource(LogicalSource):
-    def __init__(self, url : str, reference_formulation: str='', tmp_dir=TMP_DIR,
+    def __init__(self, url : str, format: MIMEType,
+                 reference_formulation: str='', tmp_dir=TMP_DIR,
                  delimiter=','):
         """
         A DCAT Logical Source to retrieve data from the Web and iterate over
         it.
         The RML reference formulation is not used for row-based iterators,
         but is used for XML (XPath) or JSON (JSONPath) data.
-        Data type is detected by the Content-Type HTTP header.
         """
         super().__init__(reference_formulation)
         self._url = url
         self._tmp_dir = tmp_dir
         self._delimiter = delimiter
+        self._format = format
 
         # Get file from DCAT catalogue
         try:
@@ -46,19 +42,31 @@ class DCATLogicalSource(LogicalSource):
                 f.write(block)
 
         # Select right logical source depending on HTTP Content-Type header
-        content_type = response.headers['content-type']
-        if content_type == MIMEType.CSV.value \
-           or content_type == MIMEType.TSV.value:
+        f = self._format.value
+        if f == MIMEType.CSV.value \
+           or f == MIMEType.TSV.value:
             self._source = CSVLogicalSource(f'{self._tmp_dir}/{file_name}',
                                             self._delimiter)
-        elif content_type == MIMEType.JSON.value:
+        elif f == MIMEType.JSON.value:
             self._source = JSONLogicalSource(self._reference_formulation,
                                              f'{self._tmp_dir}/{file_name}')
-        elif content_type == MIMEType.XML.value:
+        elif f == MIMEType.TEXT_XML.value or \
+             f == MIMEType.APPLICATION_XML.value:
             self._source = XMLLogicalSource(self._reference_formulation,
                                             f'{self._tmp_dir}/{file_name}')
+        elif f == MIMEType.RDF_XML.value or \
+             f == MIMEType.JSON_LD.value or \
+             f == MIMEType.N3.value or \
+             f == MIMEType.NQUADS.value or \
+             f == MIMEType.NTRIPLES.value or \
+             f == MIMEType.TRIG.value or \
+             f == MIMEType.TRIX.value or \
+             f == MIMEType.TURTLE.value:
+            self._source = RDFLogicalSource(f'{self._tmp_dir}/{file_name}',
+                                            self._reference_formulation,
+                                            self._format)
         else:
-            raise ValueError(f'Unsupported HTTP Content-Type: {content_type}')
+            raise ValueError(f'Unsupported MIME type: {self._format}')
 
     def __next__(self):
         """

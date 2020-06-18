@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from abc import ABC, abstractmethod
+from enum import Enum
 
 class LogicalSource(ABC):
     def __init__(self, reference_formulation: str = '') -> None:
@@ -19,11 +20,26 @@ class LogicalSource(ABC):
         This methods provides the next value of the generator
         """
 
+class MIMEType(Enum):
+    CSV = 'text/csv'
+    TSV = 'text/tab-separated-values'
+    JSON = 'application/json'
+    APPLICATION_XML = 'application/xml'
+    TEXT_XML = 'text/xml'
+    RDF_XML = 'application/rdf+xml'
+    JSON_LD = 'application/ld+json'
+    TRIX = 'trix' # MIME type = text/xml
+    TRIG = 'trig' # MIME type = text/turtle
+    N3 = 'text/n3'
+    NQUADS = 'application/n-quads'
+    TURTLE = 'turtle' # MIME type = text/turtle
+    NTRIPLES = 'nt' # MIME type = text/plain
+
 # Expose classes at module level
 from rml.sources.csv_source import CSVLogicalSource
 from rml.sources.json_source import JSONLogicalSource
 from rml.sources.xml_source import XMLLogicalSource
 from rml.sources.sql_source import SQLLogicalSource
 from rml.sources.sparql_source import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
+from rml.sources.rdf_source import RDFLogicalSource
 from rml.sources.dcat_source import DCATLogicalSource
-from rml.sources.rdf_source import RDFLogicalSource, RDFFormat

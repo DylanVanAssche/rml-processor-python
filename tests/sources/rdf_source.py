@@ -3,7 +3,7 @@
 import unittest
 from rdflib.term import Literal, URIRef
 
-from rml.sources import RDFLogicalSource, RDFFormat
+from rml.sources import RDFLogicalSource, MIMEType
 
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -39,7 +39,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.rdf',
                                        QUERY,
-                                       RDFFormat.XML)
+                                       MIMEType.RDF_XML)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -65,7 +65,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.jsonld',
                                        QUERY,
-                                       RDFFormat.JSON_LD)
+                                       MIMEType.JSON_LD)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -91,7 +91,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.ntriples',
                                        QUERY,
-                                       RDFFormat.NTRIPLES)
+                                       MIMEType.NTRIPLES)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -117,7 +117,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.ttl',
                                        QUERY,
-                                       RDFFormat.TURTLE)
+                                       MIMEType.TURTLE)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -143,7 +143,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.nquads',
                                        CONJUCTIVE_QUERY,
-                                       RDFFormat.NQUADS)
+                                       MIMEType.NQUADS)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -169,7 +169,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.trig',
                                        CONJUCTIVE_QUERY,
-                                       RDFFormat.TRIG)
+                                       MIMEType.TRIG)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -195,7 +195,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.trix',
                                        CONJUCTIVE_QUERY,
-                                       RDFFormat.TRIX)
+                                       MIMEType.TRIX)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -221,7 +221,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         """
         self.source = RDFLogicalSource('tests/assets/rdf/student.n3',
                                        QUERY,
-                                       RDFFormat.N3)
+                                       MIMEType.N3)
 
         student, student_name, student_age = next(self.source)
         self.assertEqual(student, URIRef('http://example.com/student/#0'))
@@ -249,7 +249,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             self.source = RDFLogicalSource('this/file/does/not/exist',
                                            QUERY,
-                                           RDFFormat.XML)
+                                           MIMEType.RDF_XML)
 
     def test_empty_iterator(self) -> None:
         """
@@ -258,7 +258,7 @@ class RDFLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(StopIteration):
             self.source = RDFLogicalSource('tests/assets/rdf/empty.rdf',
                                            QUERY,
-                                           RDFFormat.XML)
+                                           MIMEType.RDF_XML)
             next(self.source)
 
 if __name__ == '__main__':
