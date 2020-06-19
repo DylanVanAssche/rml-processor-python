@@ -4,8 +4,6 @@ from csv import DictReader, Sniffer
 from os import makedirs
 from os.path import basename
 
-#from . import LogicalSource, MIMEType
-#from . import CSVLogicalSource, JSONLogicalSource, XMLLogicalSource, RDFLogicalSource
 from rml.sources import *
 
 TMP_DIR='/tmp'

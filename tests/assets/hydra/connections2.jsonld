@@ -1,0 +1,114 @@
+{
+    "@context": {
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "lc": "http://semweb.mmlab.be/ns/linkedconnections#",
+        "hydra": "http://www.w3.org/ns/hydra/core#",
+        "gtfs": "http://vocab.gtfs.org/terms#",
+        "Connection": "lc:Connection",
+        "CancelledConnection": "lc:CancelledConnection",
+        "arrivalTime": {
+            "@id": "lc:arrivalTime",
+            "@type": "xsd:dateTime"
+        },
+        "departureTime": {
+            "@id": "lc:departureTime",
+            "@type": "xsd:dateTime"
+        },
+        "arrivalStop": {
+            "@type": "@id",
+            "@id": "lc:arrivalStop"
+        },
+        "departureStop": {
+            "@type": "@id",
+            "@id": "lc:departureStop"
+        },
+        "departureDelay": {
+            "@id": "lc:departureDelay",
+            "@type": "xsd:integer"
+        },
+        "arrivalDelay": {
+            "@id": "lc:arrivalDelay",
+            "@type": "xsd:integer"
+        },
+        "direction": {
+            "@id": "gtfs:headsign",
+            "@type": "xsd:string"
+        },
+        "gtfs:trip": {
+            "@type": "@id"
+        },
+        "gtfs:route": {
+            "@type": "@id"
+        },
+        "gtfs:pickupType": {
+            "@type": "@id"
+        },
+        "gtfs:dropOffType": {
+            "@type": "@id"
+        },
+        "gtfs:Regular": {
+            "@type": "@id"
+        },
+        "gtfs:NotAvailable": {
+            "@type": "@id"
+        },
+        "hydra:next": {
+            "@type": "@id"
+        },
+        "hydra:previous": {
+            "@type": "@id"
+        },
+        "hydra:property": {
+            "@type": "@id"
+        },
+        "hydra:variableRepresentation": {
+            "@type": "@id"
+        }
+    },
+    "@id": "http://127.0.0.1:8000/tests/assets/hydra/connections2.jsonld",
+    "@type": "hydra:PartialCollectionView",
+    "hydra:previous": "http://127.0.0.1:8000/tests/assets/connections1.jsonld",
+    "hydra:search": {
+        "@type": "hydra:IriTemplate",
+        "hydra:template": "https://graph.irail.be/sncb/connections{?departureTime}",
+        "hydra:variableRepresentation": "hydra:BasicRepresentation",
+        "hydra:mapping": {
+            "@type": "IriTemplateMapping",
+            "hydra:variable": "departureTime",
+            "hydra:required": true,
+            "hydra:property": "lc:departureTimeQuery"
+        }
+    },
+    "@graph": [
+        {
+            "@id": "http://irail.be/connections/8811262/20200619/IC2240",
+            "@type": "Connection",
+            "departureStop": "http://irail.be/stations/NMBS/008811262",
+            "arrivalStop": "http://irail.be/stations/NMBS/008811254",
+            "departureTime": "2020-06-19T16:55:00.000Z",
+            "arrivalTime": "2020-06-19T16:56:00.000Z",
+            "gtfs:trip": "http://irail.be/vehicle/IC2240/20200619",
+            "gtfs:route": "http://irail.be/vehicle/IC2240",
+            "direction": "Gand-Saint-Pierre",
+            "gtfs:pickupType": "gtfs:NotAvailable",
+            "gtfs:dropOffType": "gtfs:NotAvailable",
+            "departureDelay": 0,
+            "arrivalDelay": 0
+        },
+        {
+            "@id": "http://irail.be/connections/8833274/20200619/IC2640",
+            "@type": "Connection",
+            "departureStop": "http://irail.be/stations/NMBS/008833274",
+            "arrivalStop": "http://irail.be/stations/NMBS/008833266",
+            "departureTime": "2020-06-19T16:55:00.000Z",
+            "arrivalTime": "2020-06-19T16:56:00.000Z",
+            "gtfs:trip": "http://irail.be/vehicle/IC2640/20200619",
+            "gtfs:route": "http://irail.be/vehicle/IC2640",
+            "direction": "Anvers-Central",
+            "gtfs:pickupType": "gtfs:NotAvailable",
+            "gtfs:dropOffType": "gtfs:NotAvailable",
+            "departureDelay": 0,
+            "arrivalDelay": 0
+        }
+    ]
+}

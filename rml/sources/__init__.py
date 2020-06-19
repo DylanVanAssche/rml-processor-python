@@ -43,3 +43,4 @@ from rml.sources.sql_source import SQLLogicalSource
 from rml.sources.sparql_source import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
 from rml.sources.rdf_source import RDFLogicalSource
 from rml.sources.dcat_source import DCATLogicalSource
+from rml.sources.hydra_source import HydraLogicalSource

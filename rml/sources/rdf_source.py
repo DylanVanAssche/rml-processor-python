@@ -17,14 +17,16 @@ class RDFLogicalSource(LogicalSource):
         self._format = format
 
         # Create a context-aware graph for specific formats
+        # https://github.com/RDFLib/rdflib-jsonld/issues/40 JSON-LD requires
+        # ConjunctiveGraph to parse @graph triples
         f = self._format.value
         if f == MIMEType.NQUADS.value or \
+           f == MIMEType.JSON_LD.value or \
            f == MIMEType.TRIG.value or \
            f == MIMEType.TRIX.value:
             self._graph = ConjunctiveGraph()
         # Create a normal graph for other RDF formats
         elif f == MIMEType.RDF_XML.value or \
-             f == MIMEType.JSON_LD.value or \
              f == MIMEType.N3.value or \
              f == MIMEType.TURTLE.value or \
              f == MIMEType.NTRIPLES.value:
@@ -49,3 +51,11 @@ class RDFLogicalSource(LogicalSource):
         raises StopIteration when exhausted.
         """
         return next(self._iterator)
+
+    @property
+    def graph(self):
+        """
+        Returns the knowledge graph.
+        """
+        return self._graph
+
