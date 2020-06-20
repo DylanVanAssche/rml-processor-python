@@ -1,0 +1,39 @@
+@prefix gtfs: <http://vocab.gtfs.org/terms#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix lc: <http://semweb.mmlab.be/ns/linkedconnections#> .
+@prefix ns1: <http://127.0.0.1:8000/tests/assets/hydra/> .
+@prefix ns2: <file:///home/dylan/Projects/rml-blocks/tests/assets/hydra/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:connections0.n3 a hydra:PartialCollectionView ;
+    hydra:next ns1:connections1.n3 ;
+    hydra:search [ a hydra:IriTemplate ;
+            hydra:mapping [ a ns2:IriTemplateMapping ;
+                    hydra:property lc:departureTimeQuery ;
+                    hydra:required true ;
+                    hydra:variable "departureTime" ] ;
+            hydra:template "https://graph.irail.be/sncb/connections{?departureTime}" ;
+            hydra:variableRepresentation hydra:BasicRepresentation ] .
+
+<http://irail.be/connections/8814159/20200619/IC2039> a lc:Connection ;
+    lc:arrivalStop <http://irail.be/stations/NMBS/008814167> ;
+    lc:arrivalTime "2020-06-19T16:23:00+00:00"^^xsd:dateTime ;
+    lc:departureStop <http://irail.be/stations/NMBS/008814159> ;
+    lc:departureTime "2020-06-19T16:22:00+00:00"^^xsd:dateTime ;
+    gtfs:dropOffType gtfs:NotAvailable ;
+    gtfs:headsign "Charleroi-Sud"^^xsd:string ;
+    gtfs:pickupType gtfs:NotAvailable ;
+    gtfs:route <http://irail.be/vehicle/IC2039> ;
+    gtfs:trip <http://irail.be/vehicle/IC2039/20200619> .
+
+<http://irail.be/connections/8883808/20200619/IC1717> a lc:Connection ;
+    lc:arrivalStop <http://irail.be/stations/NMBS/008814332> ;
+    lc:arrivalTime "2020-06-19T16:23:00+00:00"^^xsd:dateTime ;
+    lc:departureStop <http://irail.be/stations/NMBS/008883808> ;
+    lc:departureTime "2020-06-19T16:22:00+00:00"^^xsd:dateTime ;
+    gtfs:dropOffType gtfs:NotAvailable ;
+    gtfs:headsign "Liège-Guillemins"^^xsd:string ;
+    gtfs:pickupType gtfs:NotAvailable ;
+    gtfs:route <http://irail.be/vehicle/IC1717> ;
+    gtfs:trip <http://irail.be/vehicle/IC1717/20200619> .
+

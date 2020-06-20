@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:gtfs="http://vocab.gtfs.org/terms#"
+   xmlns:hydra="http://www.w3.org/ns/hydra/core#"
+   xmlns:lc="http://semweb.mmlab.be/ns/linkedconnections#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="http://irail.be/connections/8811262/20200619/IC2240">
+    <lc:departureTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:55:00+00:00</lc:departureTime>
+    <gtfs:pickupType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+    <gtfs:dropOffType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+    <gtfs:headsign rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gand-Saint-Pierre</gtfs:headsign>
+    <lc:arrivalDelay rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</lc:arrivalDelay>
+    <lc:departureStop rdf:resource="http://irail.be/stations/NMBS/008811262"/>
+    <lc:arrivalTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:56:00+00:00</lc:arrivalTime>
+    <gtfs:trip rdf:resource="http://irail.be/vehicle/IC2240/20200619"/>
+    <lc:departureDelay rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</lc:departureDelay>
+    <rdf:type rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#Connection"/>
+    <lc:arrivalStop rdf:resource="http://irail.be/stations/NMBS/008811254"/>
+    <gtfs:route rdf:resource="http://irail.be/vehicle/IC2240"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N25dc2a37d3714bbb85d7f6b1fa16626f">
+    <hydra:template>https://graph.irail.be/sncb/connections{?departureTime}</hydra:template>
+    <hydra:mapping rdf:nodeID="N9292eaa916f2478896518852d4449b29"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#IriTemplate"/>
+    <hydra:variableRepresentation rdf:resource="http://www.w3.org/ns/hydra/core#BasicRepresentation"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://127.0.0.1:8000/tests/assets/hydra/connections2.rdf">
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#PartialCollectionView"/>
+    <hydra:previous rdf:resource="http://127.0.0.1:8000/tests/assets/connections1.rdf"/>
+    <hydra:search rdf:nodeID="N25dc2a37d3714bbb85d7f6b1fa16626f"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://irail.be/connections/8833274/20200619/IC2640">
+    <lc:arrivalTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:56:00+00:00</lc:arrivalTime>
+    <lc:departureTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:55:00+00:00</lc:departureTime>
+    <gtfs:pickupType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+    <gtfs:dropOffType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+    <lc:departureStop rdf:resource="http://irail.be/stations/NMBS/008833274"/>
+    <gtfs:route rdf:resource="http://irail.be/vehicle/IC2640"/>
+    <lc:departureDelay rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</lc:departureDelay>
+    <lc:arrivalDelay rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</lc:arrivalDelay>
+    <gtfs:headsign rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Anvers-Central</gtfs:headsign>
+    <lc:arrivalStop rdf:resource="http://irail.be/stations/NMBS/008833266"/>
+    <gtfs:trip rdf:resource="http://irail.be/vehicle/IC2640/20200619"/>
+    <rdf:type rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#Connection"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N9292eaa916f2478896518852d4449b29">
+    <hydra:variable>departureTime</hydra:variable>
+    <rdf:type rdf:resource="file:///home/dylan/Projects/rml-blocks/tests/assets/hydra/IriTemplateMapping"/>
+    <hydra:property rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#departureTimeQuery"/>
+    <hydra:required rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</hydra:required>
+  </rdf:Description>
+</rdf:RDF>

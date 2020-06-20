@@ -1,0 +1,44 @@
+@prefix gtfs: <http://vocab.gtfs.org/terms#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix lc: <http://semweb.mmlab.be/ns/linkedconnections#> .
+@prefix ns1: <file:///home/dylan/Projects/rml-blocks/tests/assets/hydra/> .
+@prefix ns2: <http://127.0.0.1:8000/tests/assets/hydra/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:connections1.trig {
+    ns2:connections1.trig a hydra:PartialCollectionView ;
+        hydra:next ns2:connections2.trig ;
+        hydra:previous ns2:connections0.trig ;
+        hydra:search [ a hydra:IriTemplate ;
+                hydra:mapping [ a ns1:IriTemplateMapping ;
+                        hydra:property lc:departureTimeQuery ;
+                        hydra:required true ;
+                        hydra:variable "departureTime" ] ;
+                hydra:template "https://graph.irail.be/sncb/connections{?departureTime}" ;
+                hydra:variableRepresentation hydra:BasicRepresentation ] .
+}
+
+ns2:connections1.trig {
+    <http://irail.be/connections/8813003/20200619/IC2118> a lc:Connection ;
+        lc:arrivalStop <http://irail.be/stations/NMBS/008813045> ;
+        lc:arrivalTime "2020-06-19T16:39:00+00:00"^^xsd:dateTime ;
+        lc:departureStop <http://irail.be/stations/NMBS/008813003> ;
+        lc:departureTime "2020-06-19T16:38:00+00:00"^^xsd:dateTime ;
+        gtfs:dropOffType gtfs:NotAvailable ;
+        gtfs:headsign "Arlon"^^xsd:string ;
+        gtfs:pickupType gtfs:Regular ;
+        gtfs:route <http://irail.be/vehicle/IC2118> ;
+        gtfs:trip <http://irail.be/vehicle/IC2118/20200619> .
+
+    <http://irail.be/connections/8895430/20200619/P8903> a lc:Connection ;
+        lc:arrivalStop <http://irail.be/stations/NMBS/008895422> ;
+        lc:arrivalTime "2020-06-19T16:38:00+00:00"^^xsd:dateTime ;
+        lc:departureStop <http://irail.be/stations/NMBS/008895430> ;
+        lc:departureTime "2020-06-19T16:38:00+00:00"^^xsd:dateTime ;
+        gtfs:dropOffType gtfs:NotAvailable ;
+        gtfs:headsign "Courtrai"^^xsd:string ;
+        gtfs:pickupType gtfs:NotAvailable ;
+        gtfs:route <http://irail.be/vehicle/P8903> ;
+        gtfs:trip <http://irail.be/vehicle/P8903/20200619> .
+}
+

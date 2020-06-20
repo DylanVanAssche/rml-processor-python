@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:gtfs="http://vocab.gtfs.org/terms#"
+   xmlns:hydra="http://www.w3.org/ns/hydra/core#"
+   xmlns:lc="http://semweb.mmlab.be/ns/linkedconnections#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="http://irail.be/connections/8895430/20200619/P8903">
+    <gtfs:pickupType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+    <lc:arrivalTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:38:00+00:00</lc:arrivalTime>
+    <lc:departureTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:38:00+00:00</lc:departureTime>
+    <lc:departureStop rdf:resource="http://irail.be/stations/NMBS/008895430"/>
+    <rdf:type rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#Connection"/>
+    <gtfs:headsign rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Courtrai</gtfs:headsign>
+    <lc:arrivalStop rdf:resource="http://irail.be/stations/NMBS/008895422"/>
+    <gtfs:route rdf:resource="http://irail.be/vehicle/P8903"/>
+    <gtfs:trip rdf:resource="http://irail.be/vehicle/P8903/20200619"/>
+    <gtfs:dropOffType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N865ea46d276a4a56afb0965b954d5fdf">
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#IriTemplate"/>
+    <hydra:mapping rdf:nodeID="Ne9188cd38ca044d185e8c38b0d413a58"/>
+    <hydra:variableRepresentation rdf:resource="http://www.w3.org/ns/hydra/core#BasicRepresentation"/>
+    <hydra:template>https://graph.irail.be/sncb/connections{?departureTime}</hydra:template>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://irail.be/connections/8813003/20200619/IC2118">
+    <gtfs:headsign rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Arlon</gtfs:headsign>
+    <rdf:type rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#Connection"/>
+    <gtfs:route rdf:resource="http://irail.be/vehicle/IC2118"/>
+    <lc:arrivalTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:39:00+00:00</lc:arrivalTime>
+    <lc:departureStop rdf:resource="http://irail.be/stations/NMBS/008813003"/>
+    <lc:arrivalStop rdf:resource="http://irail.be/stations/NMBS/008813045"/>
+    <gtfs:trip rdf:resource="http://irail.be/vehicle/IC2118/20200619"/>
+    <gtfs:pickupType rdf:resource="http://vocab.gtfs.org/terms#Regular"/>
+    <lc:departureTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-06-19T16:38:00+00:00</lc:departureTime>
+    <gtfs:dropOffType rdf:resource="http://vocab.gtfs.org/terms#NotAvailable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Ne9188cd38ca044d185e8c38b0d413a58">
+    <hydra:variable>departureTime</hydra:variable>
+    <hydra:required rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</hydra:required>
+    <hydra:property rdf:resource="http://semweb.mmlab.be/ns/linkedconnections#departureTimeQuery"/>
+    <rdf:type rdf:resource="file:///home/dylan/Projects/rml-blocks/tests/assets/hydra/IriTemplateMapping"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://127.0.0.1:8000/tests/assets/hydra/connections1.rdf">
+    <hydra:next rdf:resource="http://127.0.0.1:8000/tests/assets/hydra/connections2.rdf"/>
+    <hydra:search rdf:nodeID="N865ea46d276a4a56afb0965b954d5fdf"/>
+    <hydra:previous rdf:resource="http://127.0.0.1:8000/tests/assets/hydra/connections0.rdf"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#PartialCollectionView"/>
+  </rdf:Description>
+</rdf:RDF>

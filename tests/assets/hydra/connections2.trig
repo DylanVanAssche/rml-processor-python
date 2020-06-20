@@ -1,0 +1,47 @@
+@prefix gtfs: <http://vocab.gtfs.org/terms#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix lc: <http://semweb.mmlab.be/ns/linkedconnections#> .
+@prefix ns1: <http://127.0.0.1:8000/tests/assets/hydra/> .
+@prefix ns2: <file:///home/dylan/Projects/rml-blocks/tests/assets/hydra/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:connections2.trig {
+    <http://irail.be/connections/8811262/20200619/IC2240> a lc:Connection ;
+        lc:arrivalDelay 0 ;
+        lc:arrivalStop <http://irail.be/stations/NMBS/008811254> ;
+        lc:arrivalTime "2020-06-19T16:56:00+00:00"^^xsd:dateTime ;
+        lc:departureDelay 0 ;
+        lc:departureStop <http://irail.be/stations/NMBS/008811262> ;
+        lc:departureTime "2020-06-19T16:55:00+00:00"^^xsd:dateTime ;
+        gtfs:dropOffType gtfs:NotAvailable ;
+        gtfs:headsign "Gand-Saint-Pierre"^^xsd:string ;
+        gtfs:pickupType gtfs:NotAvailable ;
+        gtfs:route <http://irail.be/vehicle/IC2240> ;
+        gtfs:trip <http://irail.be/vehicle/IC2240/20200619> .
+
+    <http://irail.be/connections/8833274/20200619/IC2640> a lc:Connection ;
+        lc:arrivalDelay 0 ;
+        lc:arrivalStop <http://irail.be/stations/NMBS/008833266> ;
+        lc:arrivalTime "2020-06-19T16:56:00+00:00"^^xsd:dateTime ;
+        lc:departureDelay 0 ;
+        lc:departureStop <http://irail.be/stations/NMBS/008833274> ;
+        lc:departureTime "2020-06-19T16:55:00+00:00"^^xsd:dateTime ;
+        gtfs:dropOffType gtfs:NotAvailable ;
+        gtfs:headsign "Anvers-Central"^^xsd:string ;
+        gtfs:pickupType gtfs:NotAvailable ;
+        gtfs:route <http://irail.be/vehicle/IC2640> ;
+        gtfs:trip <http://irail.be/vehicle/IC2640/20200619> .
+}
+
+ns2:connections2.trig {
+    ns1:connections2.trig a hydra:PartialCollectionView ;
+        hydra:previous <http://127.0.0.1:8000/tests/assets/connections1.trig> ;
+        hydra:search [ a hydra:IriTemplate ;
+                hydra:mapping [ a ns2:IriTemplateMapping ;
+                        hydra:property lc:departureTimeQuery ;
+                        hydra:required true ;
+                        hydra:variable "departureTime" ] ;
+                hydra:template "https://graph.irail.be/sncb/connections{?departureTime}" ;
+                hydra:variableRepresentation hydra:BasicRepresentation ] .
+}
+
