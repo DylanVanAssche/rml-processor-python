@@ -15,6 +15,7 @@ rdflib = "*"
 sparqlwrapper = "*"
 requests = "*"
 rdflib-jsonld = "*"
+uritemplate = "*"
 
 [requires]
 python_version = "3.8"

@@ -9,7 +9,7 @@ class LogicalSource(ABC):
 
     def __iter__(self) -> iter:
         """
-        Every LogicalSource instance is a Python generator
+        Every LogicalSource instance is a Python iterator
         """
         return self
 
@@ -17,10 +17,11 @@ class LogicalSource(ABC):
     def __next__(self) -> dict:
         """
         __next__() method must be implemented by every subclass.
-        This methods provides the next value of the generator
+        This methods provides the next value of the iterator
         """
 
 class MIMEType(Enum):
+    SQL = 'sql'
     CSV = 'text/csv'
     TSV = 'text/tab-separated-values'
     JSON = 'application/json'
