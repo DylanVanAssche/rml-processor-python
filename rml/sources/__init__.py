@@ -35,6 +35,7 @@ class MIMEType(Enum):
     NQUADS = 'application/n-quads'
     TURTLE = 'turtle' # MIME type = text/turtle
     NTRIPLES = 'nt' # MIME type = text/plain
+    UNKNOWN = 'unknown' # Unsupported MIME type
 
 # Expose classes at module level
 from rml.sources.csv_source import CSVLogicalSource

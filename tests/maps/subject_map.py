@@ -31,9 +31,27 @@ XML_STUDENT_3 = """
     </student>
 """
 
+XML_STUDENT_TITLE = """
+    <student>
+        <id>0</id>
+        <name>Herman</name>
+        <age>65</age>
+        <title>King</title>
+    </student>
+"""
+
 class SubjectMapTests(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+    def test_unknown_mimetype(self) -> None:
+        """
+        Test if we raise a ValueError when MIMEType is unknown
+        """
+        with self.assertRaises(ValueError):
+            sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+                            MIMEType.UNKNOWN)
+            sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
     def test_unknown_termtype(self) -> None:
         """
@@ -44,18 +62,36 @@ class SubjectMapTests(unittest.TestCase):
                             MIMEType.CSV)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
-    def test_empty_template(self) -> None:
+    def test_keyvalue_empty_template(self) -> None:
         """
-        Test if we can resolve an empty template using CSV data
+        Test if we can resolve an empty template using key-value
         """
         sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
                         MIMEType.CSV)
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
-    def test_non_existing_reference(self) -> None:
+    def test_jsonpath_empty_template(self) -> None:
         """
-        Test if we can resolve an non existing reference using CSV data.
+        Test if we can resolve an empty template using key-value
+        """
+        sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
+                        MIMEType.CSV)
+        with self.assertRaises(NameError):
+            subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+
+    def test_xpath_empty_template(self) -> None:
+        """
+        Test if we can resolve an empty template using key-value
+        """
+        sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
+                        MIMEType.CSV)
+        with self.assertRaises(NameError):
+            subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
+
+    def test_keyvalue_non_existing_reference(self) -> None:
+        """
+        Test if we can resolve an non existing reference using key-value.
         This can happen when a certain column has NULL values.
         In this test case, only the first row has a valid value, others are
         NULL. No subject may be generated when the reference does not exist.
@@ -74,6 +110,50 @@ class SubjectMapTests(unittest.TestCase):
         # No subject generated
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+
+    def test_jsonpath_non_existing_reference(self) -> None:
+        """
+        Test if we can resolve an non existing reference using JSONPath.
+        This can happen when a certain column has NULL values.
+        In this test case, only the first row has a valid value, others are
+        NULL. No subject may be generated when the reference does not exist.
+        """
+        sm = SubjectMap('$.title', TermType.REFERENCE,
+                        MIMEType.JSON)
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
+                           'title': 'King'})
+        # Subject generated
+        self.assertEqual(subj, URIRef('King'))
+
+        # No subject generated
+        with self.assertRaises(NameError):
+            subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
+
+        # No subject generated
+        with self.assertRaises(NameError):
+            subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+
+    def test_xpath_non_existing_reference(self) -> None:
+        """
+        Test if we can resolve an non existing reference using XPath.
+        This can happen when a certain column has NULL values.
+        In this test case, only the first row has a valid value, others are
+        NULL. No subject may be generated when the reference does not exist.
+        """
+        sm = SubjectMap('/student/title', TermType.REFERENCE,
+                        MIMEType.TEXT_XML)
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_TITLE))
+
+        # Subject generated
+        self.assertEqual(subj, URIRef('King'))
+
+        # No subject generated
+        with self.assertRaises(NameError):
+            subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
+
+        # No subject generated
+        with self.assertRaises(NameError):
+            subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
 
     def test_xml_template(self) -> None:
         """
