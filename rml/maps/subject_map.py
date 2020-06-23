@@ -21,36 +21,60 @@ class SubjectMap(TermMap):
             raise ValueError(f'Unknown term type: {self._term_type}')
 
     def _resolve_template(self, data) -> str:
+        # term.expand() is broken when an XPath expression is used
+        # https://github.com/python-hyper/uritemplate/issues/56
+        ###########################################################
+        #term = URITemplate(self._term)
+        #variables = term.variables
+        #resolved_variables = {}
+
+        ## Resolve each variable in template
+        #if variables:
+        #    for var in variables:
+        #        var = str(var)
+        #        resolved_var = self._resolve_reference(var, data)
+        #        resolved_variables[var] = resolved_var
+        #    print(resolved_variables)
+
+        #    # Expand template
+        #    # term = term.expand(var_dict=resolved_variables)
+        #else:
+        #    raise NameError(f'Template is empty: {self._term}')
+        #return str(term)
+
         term = URITemplate(self._term)
         variables = term.variables
-        resolved_variables = {}
+        term = str(term)
 
-        # Resolve each variable in template
         if variables:
             for var in variables:
                 var = str(var)
                 resolved_var = self._resolve_reference(var, data)
-                resolved_variables[var] = resolved_var
-
-            # Expand template
-            term = term.expand(var_dict=resolved_variables)
+                var = '{' + var + '}'
+                term = term.replace(var, resolved_var)
+                print(term)
         else:
             raise NameError(f'Template is empty: {self._term}')
 
-        return str(term)
+        return term
 
     def _resolve_reference(self, reference, data) -> str:
         # XPath reference (XML)
         if self._reference_formulation == MIMEType.APPLICATION_XML or \
            self._reference_formulation == MIMEType.TEXT_XML:
-            ref = data.xpath(reference)
-            print(ref)
-            return ref
+            try:
+                ref = data.xpath(reference)[0]
+                ref = ref.text
+                print(ref)
+                return ref
+            except IndexError:
+                raise NameError(f'Reference {reference} invalid XPath')
         # JSONPath reference (JSON)
         elif self._reference_formulation == MIMEType.JSON:
             try:
                 jsonpath = parse(reference)
-                ref = jsonpath.find(data)
+                ref = jsonpath.find(data)[0]
+                ref = ref.value
                 print(ref)
                 return ref
             except:
