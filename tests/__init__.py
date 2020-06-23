@@ -14,3 +14,4 @@ from tests.sources.hydra_source import HydraLogicalSourceTests
 # Maps
 from tests.maps.subject_map import SubjectMapTests
 from tests.maps.predicate_map import PredicateMapTests
+from tests.maps.object_map import ObjectMapTests

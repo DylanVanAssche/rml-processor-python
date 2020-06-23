@@ -6,7 +6,7 @@ from ..sources import MIMEType
 
 class ObjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
-                 reference_formulation: MIMEType, is_iri = True: bool) -> None:
+                 reference_formulation: MIMEType, is_iri: bool = True) -> None:
         super().__init__(term, term_type, reference_formulation)
         self._is_iri = is_iri
 

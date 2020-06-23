@@ -109,3 +109,4 @@ class TermMap(ABC):
 # Expose classes at module level
 from rml.maps.subject_map import SubjectMap
 from rml.maps.predicate_map import PredicateMap
+from rml.maps.object_map import ObjectMap
