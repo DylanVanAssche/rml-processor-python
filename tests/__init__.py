@@ -15,3 +15,4 @@ from tests.sources.hydra_source import HydraLogicalSourceTests
 from tests.maps.subject_map import SubjectMapTests
 from tests.maps.predicate_map import PredicateMapTests
 from tests.maps.object_map import ObjectMapTests
+from tests.maps.triples_map import TriplesMapTests

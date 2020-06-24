@@ -110,3 +110,5 @@ class TermMap(ABC):
 from rml.maps.subject_map import SubjectMap
 from rml.maps.predicate_map import PredicateMap
 from rml.maps.object_map import ObjectMap
+from rml.maps.predicate_object_map import PredicateObjectMap
+from rml.maps.triples_map import TriplesMap
