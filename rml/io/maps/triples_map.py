@@ -1,7 +1,7 @@
 from typing import List
 
 from . import SubjectMap, PredicateObjectMap
-from ..io.sources import LogicalSource
+from rml.io.sources import LogicalSource
 
 class TriplesMap:
     def __init__(self, logical_source: LogicalSource, subject_map: SubjectMap,

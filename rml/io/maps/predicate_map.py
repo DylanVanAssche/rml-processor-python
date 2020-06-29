@@ -3,7 +3,7 @@ from rdflib.term import URIRef, Identifier
 from jsonpath_ng import parse
 
 from . import TermMap, TermType
-from ..io.sources import MIMEType
+from rml.io.sources import MIMEType
 
 class PredicateMap(TermMap):
     def __init__(self, term: str, term_type: TermType,

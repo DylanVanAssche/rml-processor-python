@@ -4,8 +4,8 @@ from rdflib.term import Identifier
 from uritemplate import URITemplate
 from jsonpath_ng import parse
 
-from ..namespace import R2RML, RML
-from ..io.sources import MIMEType
+from rml.namespace import R2RML, RML
+from rml.io.sources import MIMEType
 
 class TermType(Enum):
     CONSTANT = R2RML.constant
@@ -107,8 +107,9 @@ class TermMap(ABC):
             raise ValueError('Unknown MIMEType: {self._reference_formulation}')
 
 # Expose classes at module level
-from rml.maps.subject_map import SubjectMap
-from rml.maps.predicate_map import PredicateMap
-from rml.maps.object_map import ObjectMap
-from rml.maps.predicate_object_map import PredicateObjectMap
-from rml.maps.triples_map import TriplesMap
+from rml.io.maps.subject_map import SubjectMap
+from rml.io.maps.predicate_map import PredicateMap
+from rml.io.maps.object_map import ObjectMap
+from rml.io.maps.predicate_object_map import PredicateObjectMap
+
+from rml.io.maps.triples_map import TriplesMap

@@ -5,7 +5,7 @@ from rdflib.term import URIRef
 from lxml import etree
 
 from rml.io.sources import MIMEType
-from rml.maps import PredicateMap, TermType
+from rml.io.maps import PredicateMap, TermType
 
 XML_STUDENT_1 = """
     <student>

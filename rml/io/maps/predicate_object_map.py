@@ -1,7 +1,7 @@
 from typing import Union
 from rdflib.term import Identifier
 
-from . import PredicateMap, ObjectMap
+from ..maps import PredicateMap, ObjectMap
 
 class PredicateObjectMap:
     def __init__(self, predicate_map: PredicateMap,
