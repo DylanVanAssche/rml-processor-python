@@ -2,7 +2,7 @@ from rdflib.term import URIRef, Identifier
 from jsonpath_ng import parse
 
 from . import TermMap, TermType
-from ..sources import MIMEType
+from ..io.sources import MIMEType
 
 class SubjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,

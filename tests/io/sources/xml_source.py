@@ -4,7 +4,7 @@ import unittest
 from lxml.etree import XMLSyntaxError, XPathEvalError
 from lxml import etree
 
-from rml.sources import XMLLogicalSource
+from rml.io.sources import XMLLogicalSource
 
 class XMLLogicalSourceTests(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:

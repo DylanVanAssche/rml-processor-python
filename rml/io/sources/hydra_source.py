@@ -5,7 +5,7 @@ from os import makedirs
 from os.path import basename
 from rdflib import URIRef
 
-from rml.sources import *
+from rml.io.sources import *
 
 TMP_DIR='/tmp'
 ITER_BYTES=1024

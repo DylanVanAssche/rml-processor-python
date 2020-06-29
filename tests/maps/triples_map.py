@@ -5,7 +5,7 @@ from rdflib.term import URIRef, Literal
 from rdflib import XSD, FOAF
 from lxml import etree
 
-from rml.sources import JSONLogicalSource, XMLLogicalSource, MIMEType
+from rml.io.sources import JSONLogicalSource, XMLLogicalSource, MIMEType
 from rml.maps import SubjectMap, PredicateMap, ObjectMap, PredicateObjectMap, \
                      TriplesMap, TermType
 

@@ -5,7 +5,7 @@ from uritemplate import URITemplate
 from jsonpath_ng import parse
 
 from ..namespace import R2RML, RML
-from ..sources import MIMEType
+from ..io.sources import MIMEType
 
 class TermType(Enum):
     CONSTANT = R2RML.constant

@@ -2,7 +2,7 @@
 
 import unittest
 
-from rml.sources import LogicalSource
+from rml.io.sources import LogicalSource
 print('Logical Source')
 
 class MockLogicalSource(LogicalSource):
