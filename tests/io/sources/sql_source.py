@@ -3,7 +3,7 @@
 import unittest
 from sqlalchemy.exc import OperationalError
 
-from rml.sources import SQLLogicalSource
+from rml.io.sources import SQLLogicalSource
 
 class SQLLogicalSourceTests(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:

@@ -4,8 +4,8 @@ import unittest
 from rdflib.term import URIRef, Literal
 from lxml import etree
 
-from rml.sources import MIMEType
-from rml.maps import ObjectMap, TermType
+from rml.io.sources import MIMEType
+from rml.io.maps import ObjectMap, TermType
 
 XML_STUDENT_1 = """
     <student>

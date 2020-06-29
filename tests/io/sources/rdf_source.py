@@ -3,7 +3,7 @@
 import unittest
 from rdflib.term import Literal, URIRef
 
-from rml.sources import RDFLogicalSource, MIMEType
+from rml.io.sources import RDFLogicalSource, MIMEType
 
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>

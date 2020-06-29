@@ -3,7 +3,9 @@
 import unittest
 from json.decoder import JSONDecodeError
 
-from rml.sources import JSONLogicalSource
+from rml.io.sources.json_source import JSONLogicalSource
+
+
 
 class JSONLogicalSourceTests(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:

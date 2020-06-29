@@ -5,7 +5,7 @@ from json.decoder import JSONDecodeError
 from lxml.etree import XMLSyntaxError, XPathEvalError
 from rdflib.term import Literal, URIRef
 
-from rml.sources import HydraLogicalSource, MIMEType
+from rml.io.sources import HydraLogicalSource, MIMEType
 
 QUERY="""
 PREFIX lc:  <http://semweb.mmlab.be/ns/linkedconnections#>

@@ -2,7 +2,7 @@
 
 import unittest
 
-from rml.sources import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
+from rml.io.sources import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
 
 SPARQL_QUERY = """
     PREFIX dbo: <http://dbpedia.org/ontology/>

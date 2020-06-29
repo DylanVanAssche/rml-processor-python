@@ -38,11 +38,11 @@ class MIMEType(Enum):
     UNKNOWN = 'unknown' # Unsupported MIME type
 
 # Expose classes at module level
-from rml.sources.csv_source import CSVLogicalSource
-from rml.sources.json_source import JSONLogicalSource
-from rml.sources.xml_source import XMLLogicalSource
-from rml.sources.sql_source import SQLLogicalSource
-from rml.sources.sparql_source import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
-from rml.sources.rdf_source import RDFLogicalSource
-from rml.sources.dcat_source import DCATLogicalSource
-from rml.sources.hydra_source import HydraLogicalSource
+from rml.io.sources.rdf_source import RDFLogicalSource
+from rml.io.sources.hydra_source import HydraLogicalSource
+from rml.io.sources.json_source import JSONLogicalSource
+from rml.io.sources.csv_source import CSVLogicalSource
+from rml.io.sources.dcat_source import DCATLogicalSource
+from rml.io.sources.sql_source import SQLLogicalSource
+from rml.io.sources.xml_source import XMLLogicalSource
+

@@ -5,7 +5,7 @@ from json.decoder import JSONDecodeError
 from lxml.etree import XMLSyntaxError, XPathEvalError
 from rdflib.term import Literal, URIRef
 
-from rml.sources import DCATLogicalSource, MIMEType
+from rml.io.sources import DCATLogicalSource, MIMEType
 
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>

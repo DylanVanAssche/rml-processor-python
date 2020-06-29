@@ -2,7 +2,7 @@ from rdflib.term import URIRef, Literal, Identifier
 from jsonpath_ng import parse
 
 from . import TermMap, TermType
-from ..sources import MIMEType
+from rml.io.sources import MIMEType
 
 class ObjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
