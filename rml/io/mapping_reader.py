@@ -7,4 +7,6 @@ class MappingReader(object):
 
     def read(self, path):
         format = rdflib.util.guess_format(path)
+        if format != 'turtle':
+            raise IOError("[R2]RML only support Turtle-format!")
         return self.g.parse(path, format=format)
