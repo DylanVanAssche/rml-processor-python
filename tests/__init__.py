@@ -16,3 +16,6 @@ from tests.maps.subject_map import SubjectMapTests
 from tests.maps.predicate_map import PredicateMapTests
 from tests.maps.object_map import ObjectMapTests
 from tests.maps.triples_map import TriplesMapTests
+
+# io
+from tests.io.mapping_reader import MappingReaderTests
