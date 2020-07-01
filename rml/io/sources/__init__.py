@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from typing import Iterator
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -7,7 +8,7 @@ class LogicalSource(ABC):
     def __init__(self, reference_formulation: str = '') -> None:
         self._reference_formulation = reference_formulation
 
-    def __iter__(self) -> iter:
+    def __iter__(self) -> Iterator:
         """
         Every LogicalSource instance is a Python iterator
         """
@@ -39,10 +40,11 @@ class MIMEType(Enum):
 
 # Expose classes at module level
 from rml.io.sources.rdf_source import RDFLogicalSource
-from rml.io.sources.hydra_source import HydraLogicalSource
 from rml.io.sources.json_source import JSONLogicalSource
 from rml.io.sources.csv_source import CSVLogicalSource
-from rml.io.sources.dcat_source import DCATLogicalSource
 from rml.io.sources.sql_source import SQLLogicalSource
 from rml.io.sources.xml_source import XMLLogicalSource
-
+from rml.io.sources.sparql_source import SPARQLJSONLogicalSource, \
+                                         SPARQLXMLLogicalSource
+from rml.io.sources.hydra_source import HydraLogicalSource
+from rml.io.sources.dcat_source import DCATLogicalSource

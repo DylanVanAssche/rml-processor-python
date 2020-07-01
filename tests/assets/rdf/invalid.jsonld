@@ -1,19 +1,17 @@
 {
   "@graph": [
     {
-      "@id": "http://example.com/2",
+      "@id": "http://example.com/student/#2",
       "@type": "http://xmlns.com/foaf/0.1/Person",
       "http://xmlns.com/foaf/0.1/age": "23",
       "http://xmlns.com/foaf/0.1/name": "Simon"
     },
     {
-      "@id": "http://example.com/0",
+      "@id": "http://example.com/student/#0",
       "@type": "http://xmlns.com/foaf/0.1/Person",
-      "http://xmlns.com/foaf/0.1/age": "65",
-      "http://xmlns.com/foaf/0.1/name": "Herman"
-    },
+     "http://xmlns.com/foaf/0.1/name": "Herman"
     {
-      "@id": "http://example.com/1",
+      "@id": "http://example.com/student/#1",
       "@type": "http://xmlns.com/foaf/0.1/Person",
       "http://xmlns.com/foaf/0.1/age": "62",
       "http://xmlns.com/foaf/0.1/name": "Ann"

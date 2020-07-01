@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Tuple, Iterator
+from rdflib.term import URIRef, Identifier
 
 from . import SubjectMap, PredicateObjectMap
 from rml.io.sources import LogicalSource
@@ -10,13 +11,13 @@ class TriplesMap:
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
 
-    def __iter__(self) -> iter:
+    def __iter__(self) -> Iterator:
         """
         Every Triples Map is a Python iterator
         """
         return self
 
-    def __next__(self) -> List[tuple]:
+    def __next__(self) -> List[Tuple[URIRef, URIRef, Identifier]]:
         """
         Generates all triples of this TriplesMap according to the given Subject 
         Map, Predicate Map and Object Map for a single data record.

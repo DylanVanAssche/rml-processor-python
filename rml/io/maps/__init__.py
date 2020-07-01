@@ -30,27 +30,13 @@ class TermMap(ABC):
         """
 
     def _resolve_template(self, data) -> str:
-        # term.expand() is broken when an XPath expression is used
+        #######################################################################
+        # uritemplate has a builtin method to replace variables
+        # (term.expand()), but it follows the RFC specification too strict,
+        # XPatp expression with '/' are not allowed according to the RFC
+        # specification.
         # https://github.com/python-hyper/uritemplate/issues/56
-        ###########################################################
-        #term = URITemplate(self._term)
-        #variables = term.variables
-        #resolved_variables = {}
-
-        ## Resolve each variable in template
-        #if variables:
-        #    for var in variables:
-        #        var = str(var)
-        #        resolved_var = self._resolve_reference(var, data)
-        #        resolved_variables[var] = resolved_var
-        #    print(resolved_variables)
-
-        #    # Expand template
-        #    # term = term.expand(var_dict=resolved_variables)
-        #else:
-        #    raise NameError(f'Template is empty: {self._term}')
-        #return str(term)
-
+        #######################################################################
         term = URITemplate(self._term)
         variables = term.variables
         term = str(term)
@@ -73,7 +59,7 @@ class TermMap(ABC):
            self._reference_formulation == MIMEType.TEXT_XML:
             try:
                 ref = data.xpath(reference)[0]
-                ref = ref.text
+                ref = str(ref.text)
                 return ref
             except IndexError:
                 raise NameError(f'Reference {reference} invalid XPath')
@@ -82,7 +68,7 @@ class TermMap(ABC):
             try:
                 jsonpath = parse(reference)
                 ref = jsonpath.find(data)[0]
-                ref = ref.value
+                ref = str(ref.value)
                 return ref
             except:
                 raise NameError(f'Reference {reference} invalid JSONPath')
@@ -99,7 +85,7 @@ class TermMap(ABC):
              self._reference_formulation == MIMEType.TRIX or \
              self._reference_formulation == MIMEType.TURTLE:
             try:
-                ref = data[reference]
+                ref = str(data[reference])
                 return ref
             except KeyError:
                 raise NameError(f'Reference {reference} not found in {data}')
