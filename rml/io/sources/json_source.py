@@ -1,5 +1,7 @@
 import json
 from jsonpath_ng import parse
+from jsonpath_ng.parser import JsonPathParser
+from typing import Iterator, Dict
 
 from . import LogicalSource
 
@@ -10,19 +12,20 @@ class JSONLogicalSource(LogicalSource):
         """
         super().__init__(reference_formulation)
         try:
-            self._iterator = parse(self._reference_formulation)
+            json_path: JsonPathParser = parse(self._reference_formulation)
         except:
             raise ValueError('Invalid JSONPath expression')
-        self._path = path
-        self._data = {}
+        self._path: str = path
+        self._data: Dict = {}
 
         # Read JSON file
         with open(self._path) as f:
             self._data = json.load(f)
-            self._iterator = iter(self._iterator.find(self._data))
+            self._iterator: Iterator = iter(json_path.find(self._data))
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         """
         Returns an iterator from the JSONPath expression.
         """
-        return next(self._iterator).value
+        record: Dict = next(self._iterator).value
+        return record

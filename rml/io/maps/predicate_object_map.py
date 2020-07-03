@@ -1,7 +1,8 @@
-from typing import Union
+from typing import Union, Dict
+from lxml.etree import Element
 from rdflib.term import Identifier
 
-from ..maps import PredicateMap, ObjectMap
+from rml.io.maps import PredicateMap, ObjectMap
 
 class PredicateObjectMap:
     def __init__(self, predicate_map: PredicateMap,
@@ -9,7 +10,7 @@ class PredicateObjectMap:
         self._predicate_map = predicate_map
         self._object_map = object_map
 
-    def resolve(self, data) -> Union[Identifier, Identifier]:
+    def resolve(self, data: Union[Element, Dict]) -> Union[Identifier, Identifier]:
         """
         Resolves the predicate and object maps with the given data record.
         """

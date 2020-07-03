@@ -1,4 +1,5 @@
 from lxml import etree
+from lxml.etree import Element
 
 from . import LogicalSource
 
@@ -19,7 +20,7 @@ class XMLLogicalSource(LogicalSource):
         self._iterator = self._iterator.xpath(self._reference_formulation)
         self._iterator = iter(self._iterator)
 
-    def __next__(self):
+    def __next__(self) -> Element:
         """
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.

@@ -1,5 +1,7 @@
 from rdflib.term import URIRef, Literal, Identifier
 from jsonpath_ng import parse
+from typing import Union, Dict
+from lxml.etree import Element
 
 from . import TermMap, TermType
 from rml.io.sources import MIMEType
@@ -10,7 +12,7 @@ class ObjectMap(TermMap):
         super().__init__(term, term_type, reference_formulation)
         self._is_iri = is_iri
 
-    def resolve(self, data) -> Identifier:
+    def resolve(self, data: Union[Element, Dict]) -> Identifier:
         if self._term_type == TermType.TEMPLATE:
             if self._is_iri:
                 return URIRef(super()._resolve_template(data))

@@ -1,6 +1,7 @@
 from rdflib import ConjunctiveGraph, Graph
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.sparql import Query
+from typing import Dict, Iterator
 
 from . import LogicalSource, MIMEType
 
@@ -15,12 +16,12 @@ class RDFLogicalSource(LogicalSource):
         self._path: str = path
         self._query: Query = prepareQuery(query)
         self._format: MIMEType = format
-        self._graph: Graph = None
+        self._graph: Graph
 
         # Create a context-aware graph for specific formats
         # https://github.com/RDFLib/rdflib-jsonld/issues/40 JSON-LD requires
         # ConjunctiveGraph to parse @graph triples
-        f = self._format.value
+        f: str = self._format.value
         if f == MIMEType.NQUADS.value or \
            f == MIMEType.JSON_LD.value or \
            f == MIMEType.TRIG.value or \
@@ -45,16 +46,15 @@ class RDFLogicalSource(LogicalSource):
             raise ValueError(f'Unable to parse {self._path}')
 
         # Execute SPARQL query and return results iterator
-        self._iterator = self._graph.query(self._query)
-        self._iterator = iter(self._iterator)
+        self._iterator: Iterator = iter(self._graph.query(self._query))
 
-    def __next__(self) -> dict:
+    def __next__(self) -> Dict:
         """
         Returns a row from the RDF iterator.
         raises StopIteration when exhausted.
         """
-        row = next(self._iterator)
-        return row.asdict()
+        record: Dict = next(self._iterator).asdict()
+        return record
 
     @property
     def graph(self) -> Graph:
