@@ -3,7 +3,7 @@
 import unittest
 from rdflib.term import Literal, URIRef
 
-from rml.io.sources import RDFLogicalSource, MIMEType
+from rml.io.sources import LogicalSource, RDFLogicalSource, MIMEType
 
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -29,217 +29,213 @@ ORDER BY DESC(?age)
 """
 
 class RDFLogicalSourceTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.source = None
-
     def test_iterator_rdfxml(self) -> None:
         """
-        Test if we can iterate over every row
+        Test if we can iterate over every row using RDF XML
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.rdf',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.rdf',
                                        QUERY,
                                        MIMEType.RDF_XML)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_jsonld(self) -> None:
         """
-        Test if we can iterate over every row
+        Test if we can iterate over every row using JSON-LD
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.jsonld',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.jsonld',
                                        QUERY,
                                        MIMEType.JSON_LD)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_ntriples(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.ntriples',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.ntriples',
                                        QUERY,
                                        MIMEType.NTRIPLES)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_turtle(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.ttl',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.ttl',
                                        QUERY,
                                        MIMEType.TURTLE)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_nquads(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.nquads',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.nquads',
                                        CONJUCTIVE_QUERY,
                                        MIMEType.NQUADS)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_trig(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.trig',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.trig',
                                        CONJUCTIVE_QUERY,
                                        MIMEType.TRIG)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_trix(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.trix',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.trix',
                                        CONJUCTIVE_QUERY,
                                        MIMEType.TRIX)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_iterator_n3(self) -> None:
         """
         Test if we can iterate over every row
         """
-        self.source = RDFLogicalSource('tests/assets/rdf/student.n3',
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.n3',
                                        QUERY,
                                        MIMEType.N3)
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#0'))
-        self.assertEqual(student_name, Literal('Herman'))
-        self.assertEqual(student_age, Literal('65'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#1'))
-        self.assertEqual(student_name, Literal('Ann'))
-        self.assertEqual(student_age, Literal('62'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
 
-        student, student_name, student_age = next(self.source)
-        self.assertEqual(student, URIRef('http://example.com/student/#2'))
-        self.assertEqual(student_name, Literal('Simon'))
-        self.assertEqual(student_age, Literal('23'))
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_non_existing_file(self) -> None:
         """
@@ -247,19 +243,59 @@ class RDFLogicalSourceTests(unittest.TestCase):
         does not exist
         """
         with self.assertRaises(FileNotFoundError):
-            self.source = RDFLogicalSource('this/file/does/not/exist',
+            source: LogicalSource = RDFLogicalSource('this/file/does/not/exist',
                                            QUERY,
                                            MIMEType.RDF_XML)
+
+    def test_rdf_xml_parsing_error(self) -> None:
+        """
+        Test if a ValueError exception is raised when the input file cannot be
+        parsed.
+        """
+        with self.assertRaises(ValueError):
+            source: LogicalSource = RDFLogicalSource('tests/assets/rdf/invalid.rdf',
+                                           QUERY,
+                                           MIMEType.RDF_XML)
+    def test_jsonld_parsing_error(self) -> None:
+        """
+        Test if a ValueError exception is raised when the input file cannot be
+        parsed.
+        """
+        with self.assertRaises(ValueError):
+            source: LogicalSource = RDFLogicalSource('tests/assets/rdf/invalid.jsonld',
+                                           QUERY,
+                                           MIMEType.JSON_LD)
 
     def test_empty_iterator(self) -> None:
         """
         Test if we can handle an empty nput file
         """
         with self.assertRaises(StopIteration):
-            self.source = RDFLogicalSource('tests/assets/rdf/empty.rdf',
+            source: LogicalSource = RDFLogicalSource('tests/assets/rdf/empty.rdf',
                                            QUERY,
                                            MIMEType.RDF_XML)
-            next(self.source)
+            next(source)
+
+    def test_unknown_mimetype(self) -> None:
+        """
+        Test if a ValueError exception is raised when the MIME type is unknown.
+        """
+        with self.assertRaises(ValueError):
+            source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.rdf',
+                                           QUERY,
+                                           MIMEType.UNKNOWN)
+            next(source)
+
+    def test_graph_access(self) -> None:
+        """
+        Test if the exposed graph contains triples.
+        """
+        source: RDFLogicalSource = RDFLogicalSource('tests/assets/rdf/student.rdf',
+                                       QUERY,
+                                       MIMEType.RDF_XML)
+        self.assertGreater(len(source.graph), 0)
+
+
 
 if __name__ == '__main__':
     unittest.main()

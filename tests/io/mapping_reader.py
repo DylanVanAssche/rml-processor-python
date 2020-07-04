@@ -11,7 +11,7 @@ class MappingReaderTests(unittest.TestCase):
         del self.mapping_reader
 
     def test_read(self):
-        path = "../assets/io/mapping_files/mapping_001.ttl"
+        path = 'tests/assets/io/mapping_files/mapping_001.ttl'
         result = self.mapping_reader.read(path)
         self.assertGreater(len(result), 0)
 

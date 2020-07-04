@@ -59,7 +59,6 @@ class HydraLogicalSource(LogicalSource):
         # Store Hydra response temporary in /tmp
         makedirs(TMP_DIR, exist_ok=True)
         file_name = basename(url)
-        print(file_name)
         with open(f'{self._tmp_dir}/{file_name}', 'wb') as f:
             for block in response.iter_content(ITER_BYTES):
                 f.write(block)

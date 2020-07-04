@@ -18,9 +18,6 @@ ORDER BY DESC(?connection)
 """
 
 class HydraLogicalSourceTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.source = None
 
     def test_non_existing_resource(self) -> None:
         """
@@ -28,7 +25,7 @@ class HydraLogicalSourceTests(unittest.TestCase):
         does not exist
         """
         with self.assertRaises(FileNotFoundError):
-            self.source = HydraLogicalSource('http://graph.irail.be/empty',
+            source = HydraLogicalSource('http://graph.irail.be/empty',
                                              MIMEType.JSON_LD)
 
     def test_non_existing_url(self) -> None:
@@ -37,7 +34,7 @@ class HydraLogicalSourceTests(unittest.TestCase):
         resolved
         """
         with self.assertRaises(FileNotFoundError):
-            self.source = HydraLogicalSource('http://non-existing-url.be',
+            source = HydraLogicalSource('http://non-existing-url.be',
                                              MIMEType.JSON_LD)
 
     def test_iterator_jsonld(self) -> None:

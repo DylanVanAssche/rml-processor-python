@@ -11,8 +11,8 @@ ITER_BYTES=1024
 
 class DCATLogicalSource(LogicalSource):
     def __init__(self, url : str, format: MIMEType,
-                 reference_formulation: str='', tmp_dir=TMP_DIR,
-                 delimiter=','):
+            reference_formulation: str='', tmp_dir: str = TMP_DIR,
+                 delimiter: str = ','):
         """
         A DCAT Logical Source to retrieve data from the Web and iterate over
         it.
@@ -20,10 +20,11 @@ class DCATLogicalSource(LogicalSource):
         but is used for XML (XPath) or JSON (JSONPath) data.
         """
         super().__init__(reference_formulation)
-        self._url = url
-        self._tmp_dir = tmp_dir
-        self._delimiter = delimiter
-        self._format = format
+        self._url: str = url
+        self._tmp_dir: str = tmp_dir
+        self._delimiter: str = delimiter
+        self._format: MIMEType = format
+        self._source: LogicalSource
 
         # Get file from DCAT catalogue
         try:

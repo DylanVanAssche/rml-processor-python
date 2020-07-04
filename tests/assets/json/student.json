@@ -3,17 +3,17 @@
         {
             "id": "0",
             "name": "Herman",
-            "age": 65
+            "age": "65"
         },
         {
             "id": "1",
             "name": "Ann",
-            "age": 62
+            "age": "62"
         },
         {
             "id": "2",
             "name": "Simon",
-            "age": 23
+            "age": "23"
         }
     ]
 }

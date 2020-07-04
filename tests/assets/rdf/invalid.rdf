@@ -1,16 +1,16 @@
-<rdf:RDF xml:base="http://example.com/"
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+<rdf:RDF xml:base="http://example.com/student/"
+    xorg/1999/02/22-rdf-syntax-ns#"
     xmlns:foaf="http://xmlns.com/foaf/0.1/">
-    <foaf:Person rdf:about="0">
+    <foaf:Person rdf:about="#0">
         <foaf:name>Herman</foaf:name>
         <foaf:age>65</foaf:age>
     </foaf:Person>
-    <foaf:Person rdf:about="1">
+    <:about="#1">
         <foaf:name>Ann</foaf:name>
         <foaf:age>62</foaf:age>
     </foaf:Person>
-    <foaf:Person rdf:about="2">
+    <foaf:Person rdf:about="#2">
         <foaf:name>Simon</foaf:name>
         <foaf:age>23</foaf:age>
     </foaf:Person>
-</rdf:RDF>
+</rdfDF>

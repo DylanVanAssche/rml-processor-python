@@ -10,47 +10,47 @@
   <graph>
     <uri>file:///home/dylan/Projects/rml-blocks/tests/assets/rdf/student.rdf</uri>
     <triple>
-      <uri>http://example.com/student/#1</uri>
+      <uri>http://example.com/1</uri>
       <uri>http://xmlns.com/foaf/0.1/age</uri>
       <plainLiteral>62</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#0</uri>
+      <uri>http://example.com/0</uri>
       <uri>http://xmlns.com/foaf/0.1/name</uri>
       <plainLiteral>Herman</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#1</uri>
+      <uri>http://example.com/1</uri>
       <uri>http://xmlns.com/foaf/0.1/name</uri>
       <plainLiteral>Ann</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#1</uri>
+      <uri>http://example.com/1</uri>
       <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
       <uri>http://xmlns.com/foaf/0.1/Person</uri>
     </triple>
     <triple>
-      <uri>http://example.com/student/#2</uri>
+      <uri>http://example.com/2</uri>
       <uri>http://xmlns.com/foaf/0.1/age</uri>
       <plainLiteral>23</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#2</uri>
+      <uri>http://example.com/2</uri>
       <uri>http://xmlns.com/foaf/0.1/name</uri>
       <plainLiteral>Simon</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#0</uri>
+      <uri>http://example.com/0</uri>
       <uri>http://xmlns.com/foaf/0.1/age</uri>
       <plainLiteral>65</plainLiteral>
     </triple>
     <triple>
-      <uri>http://example.com/student/#0</uri>
+      <uri>http://example.com/0</uri>
       <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
       <uri>http://xmlns.com/foaf/0.1/Person</uri>
     </triple>
     <triple>
-      <uri>http://example.com/student/#2</uri>
+      <uri>http://example.com/2</uri>
       <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
       <uri>http://xmlns.com/foaf/0.1/Person</uri>
     </triple>
