@@ -3,7 +3,8 @@ from csv import DictReader, Sniffer
 
 from . import LogicalSource
 
-BYTES_TO_SNIFF=1024
+BYTES_TO_SNIFF = 1024
+
 
 class CSVLogicalSource(LogicalSource):
     def __init__(self, path: str, delimiter: str = ','):
@@ -23,7 +24,8 @@ class CSVLogicalSource(LogicalSource):
 
         # Create CSV file iterator
         self._file: IO = open(self._path)
-        self._iterator: Iterator = DictReader(self._file, delimiter=self._delimiter)
+        self._iterator: Iterator = DictReader(self._file,
+                                              delimiter=self._delimiter)
 
     def __next__(self) -> Dict:
         """

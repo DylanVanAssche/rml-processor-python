@@ -1,5 +1,6 @@
 from rdflib import Graph
 
+
 class MappingReader(object):
     def __init__(self) -> None:
         self._graph: Graph = Graph()

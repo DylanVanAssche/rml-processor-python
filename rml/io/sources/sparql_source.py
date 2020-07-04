@@ -8,7 +8,8 @@ from lxml.etree import XPathEvalError, Element
 from requests import get, HTTPError
 from typing import Union, Dict
 
-from . import LogicalSource
+from rml.io.sources import LogicalSource
+
 
 class SPARQLLogicalSource(LogicalSource, ABC):
     def __init__(self, reference_formulation: str, endpoint: str, query: str):
@@ -45,6 +46,7 @@ class SPARQLLogicalSource(LogicalSource, ABC):
         Iterates over SPARQL results, iteration depends on self._return_format
         """
 
+
 class SPARQLJSONLogicalSource(SPARQLLogicalSource):
     def __init__(self, reference_formulation: str, endpoint: str, query: str):
         """
@@ -63,7 +65,7 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         """
         try:
             self._iterator = parse(self._reference_formulation)
-        except:
+        except Exception:
             raise ValueError('Invalid JSONPath expression')
 
         results = self._engine.query().convert()
@@ -76,6 +78,7 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         """
         record: Dict = next(self._iterator).value
         return record
+
 
 class SPARQLXMLLogicalSource(SPARQLLogicalSource):
     def __init__(self, reference_formulation: str, endpoint: str, query: str):
@@ -103,7 +106,8 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
             self._iterator = self._iterator.xpath(self._reference_formulation)
             self._iterator = iter(self._iterator)
         except XPathEvalError:
-            raise ValueError(f'Invalid XPath expression: {self._reference_formulation}')
+            msg: str = f'Invalid XPath: {self._reference_formulation}'
+            raise ValueError(msg)
 
     def __next__(self) -> Element:
         """

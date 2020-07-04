@@ -8,6 +8,7 @@ HOST=127.0.0.1
 #                     UNIT, INTEGRATION & COVERAGE TESTS                      #
 #                                                                             #
 ###############################################################################
+
 # Run tests
 echo -e "\033[31;1m*** Running tests ***\033[0m"
 
@@ -34,3 +35,18 @@ kill -9 $HTTP_SERVER_PID > /dev/null 2>&1
 # Run static analyzer
 echo -e "\033[31;1m*** Running static analyzer ***\033[0m"
 mypy rml
+
+###############################################################################
+#                                                                             #
+#                               PEP8 COMPLIANCE                               #
+#                                                                             #
+###############################################################################
+
+# Run PEP8 compliance checks
+echo -e "\033[31;1m*** Running PEP8 compliance checker ***\033[0m"
+pycodestyle --count rml
+STATUS=$?
+if [ $STATUS -eq 0 ]
+then
+    echo "Fully PEP8 compliant!"
+fi

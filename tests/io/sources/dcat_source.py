@@ -40,6 +40,14 @@ class DCATLogicalSourceTests(unittest.TestCase):
             source = DCATLogicalSource('http://127.0.0.1:8000/non-existing',
                                        MIMEType.TEXT_XML)
 
+    def test_unknown_format(self) -> None:
+        """
+        Test if a ValueError exception when the format is not supported.
+        """
+        with self.assertRaises(ValueError):
+            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.csv',
+                                       MIMEType.UNKNOWN)
+
     def test_non_existing_url(self) -> None:
         """
         Test if a FileNotFoundError exception is raised when the url cannot be

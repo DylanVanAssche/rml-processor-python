@@ -4,6 +4,7 @@ from typing import Iterator, Dict
 from abc import ABC, abstractmethod
 from enum import Enum
 
+
 class LogicalSource(ABC):
     def __init__(self, reference_formulation: str = '') -> None:
         self._reference_formulation: str = reference_formulation
@@ -21,6 +22,7 @@ class LogicalSource(ABC):
         This methods provides the next value of the iterator
         """
 
+
 class MIMEType(Enum):
     SQL = 'sql'
     CSV = 'text/csv'
@@ -30,21 +32,22 @@ class MIMEType(Enum):
     TEXT_XML = 'text/xml'
     RDF_XML = 'application/rdf+xml'
     JSON_LD = 'application/ld+json'
-    TRIX = 'trix' # MIME type = text/xml
-    TRIG = 'trig' # MIME type = text/turtle
+    TRIX = 'trix'  # MIME type = text/xml
+    TRIG = 'trig'  # MIME type = text/turtle
     N3 = 'text/n3'
     NQUADS = 'application/n-quads'
-    TURTLE = 'turtle' # MIME type = text/turtle
-    NTRIPLES = 'nt' # MIME type = text/plain
-    UNKNOWN = 'unknown' # Unsupported MIME type
+    TURTLE = 'turtle'  # MIME type = text/turtle
+    NTRIPLES = 'nt'  # MIME type = text/plain
+    UNKNOWN = 'unknown'  # Unsupported MIME type
+
 
 # Expose classes at module level
-from rml.io.sources.rdf_source import RDFLogicalSource
-from rml.io.sources.json_source import JSONLogicalSource
-from rml.io.sources.csv_source import CSVLogicalSource
-from rml.io.sources.sql_source import SQLLogicalSource
-from rml.io.sources.xml_source import XMLLogicalSource
+from rml.io.sources.rdf_source import RDFLogicalSource  # nopep8
+from rml.io.sources.json_source import JSONLogicalSource  # nopep8
+from rml.io.sources.csv_source import CSVLogicalSource  # nopep8
+from rml.io.sources.sql_source import SQLLogicalSource  # nopep8
+from rml.io.sources.xml_source import XMLLogicalSource  # nopep8
 from rml.io.sources.sparql_source import SPARQLJSONLogicalSource, \
-                                         SPARQLXMLLogicalSource
-from rml.io.sources.hydra_source import HydraLogicalSource
-from rml.io.sources.dcat_source import DCATLogicalSource
+                                         SPARQLXMLLogicalSource  # nopep8
+from rml.io.sources.hydra_source import HydraLogicalSource  # nopep8
+from rml.io.sources.dcat_source import DCATLogicalSource  # nopep8

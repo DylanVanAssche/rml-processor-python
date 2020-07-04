@@ -7,17 +7,16 @@ from rdflib import URIRef
 from typing import Dict
 
 from rml.io.sources import *
+from rml.namespace import HYDRA
 
-TMP_DIR='/tmp'
-ITER_BYTES=1024
+TMP_DIR = '/tmp'
+ITER_BYTES = 1024
 
-class Hydra(Enum):
-    NEXT = URIRef('http://www.w3.org/ns/hydra/core#next')
-    PREVIOUS = URIRef('http://www.w3.org/ns/hydra/core#previous')
 
 class HydraLogicalSource(LogicalSource):
-    def __init__(self, url : str, format: MIMEType,
-            reference_formulation: str='', tmp_dir: str = TMP_DIR) -> None:
+    def __init__(self, url: str, format: MIMEType,
+                 reference_formulation: str = '',
+                 tmp_dir: str = TMP_DIR) -> None:
         """
         A Hydra Logical Source to retrieve data from a Hydra Web API and
         iterate over it.
@@ -33,13 +32,13 @@ class HydraLogicalSource(LogicalSource):
         # Verify format
         f: str = self._format.value
         if f == MIMEType.RDF_XML.value or \
-           f == MIMEType.JSON_LD.value or \
-           f == MIMEType.N3.value or \
-           f == MIMEType.NQUADS.value or \
-           f == MIMEType.NTRIPLES.value or \
-           f == MIMEType.TRIG.value or \
-           f == MIMEType.TRIX.value or \
-           f == MIMEType.TURTLE.value:
+                f == MIMEType.JSON_LD.value or \
+                f == MIMEType.N3.value or \
+                f == MIMEType.NQUADS.value or \
+                f == MIMEType.NTRIPLES.value or \
+                f == MIMEType.TRIG.value or \
+                f == MIMEType.TRIX.value or \
+                f == MIMEType.TURTLE.value:
             # Start fetching if format is supported
             self._fetch(self._url)
         else:
@@ -66,14 +65,16 @@ class HydraLogicalSource(LogicalSource):
                 tmp_file.write(block)
 
         # Update source
-        self._source: RDFLogicalSource = RDFLogicalSource(f'{self._tmp_dir}/{file_name}',
-                                        self._reference_formulation,
-                                        self._format)
+        path: str = f'{self._tmp_dir}/{file_name}'
+        rf: str = self._reference_formulation
+        format: MIMEType = self._format
+        self._source: RDFLogicalSource = RDFLogicalSource(path, rf, format)
+
         # Try to get the next page
         try:
             subj: URIRef
             obj: URIRef
-            subj, obj = next(self._source.graph.subject_objects(Hydra.NEXT.value))
+            subj, obj = next(self._source.graph.subject_objects(HYDRA.next))
             self._next_page = obj
         except StopIteration:
             # Raising StopIteration would stop the iteration immediately and
