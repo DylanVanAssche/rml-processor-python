@@ -4,6 +4,7 @@ import unittest
 
 from rml.io.sources import CSVLogicalSource
 
+
 class CSVLogicalSourceTests(unittest.TestCase):
     def test_iterator(self) -> None:
         """

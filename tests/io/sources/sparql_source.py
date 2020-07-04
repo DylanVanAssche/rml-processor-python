@@ -18,49 +18,45 @@ SPARQL_QUERY = """
 """
 
 class SPARQLJSONLogicalSourceTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.source = None
-
     def test_iterator_single_value(self) -> None:
         """
         Test if we can iterate over the results of the JSONPath expression
         """
-        self.source = SPARQLJSONLogicalSource('$.results.bindings.[*].actor',
+        source = SPARQLJSONLogicalSource('$.results.bindings.[*].actor',
                                               'http://dbpedia.org/sparql',
                                               SPARQL_QUERY)
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/Jennifer_Aniston'
                              })
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/David_Schwimmer'
                              })
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/Lisa_Kudrow'
                              })
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/Matt_LeBlanc'
                              })
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/Matthew_Perry'
                              })
-        self.assertDictEqual(next(self.source),
+        self.assertDictEqual(next(source),
                              {
                                  'type' : 'uri',
                                  'value' : 'http://dbpedia.org/resource/Courteney_Cox'
                              })
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_non_existing_endpoint(self) -> None:
         """
@@ -68,7 +64,7 @@ class SPARQLJSONLogicalSourceTests(unittest.TestCase):
         not exist
         """
         with self.assertRaises(FileNotFoundError):
-            self.source = SPARQLJSONLogicalSource('$.results.bindings.[*].actor.value',
+            source = SPARQLJSONLogicalSource('$.results.bindings.[*].actor.value',
                                                   'http://dbpedia.org/empty',
                                                   SPARQL_QUERY)
 
@@ -77,7 +73,7 @@ class SPARQLJSONLogicalSourceTests(unittest.TestCase):
         Test if we raise a ValueError when the JSONPath expression is invalid
         """
         with self.assertRaises(ValueError):
-            self.source = SPARQLJSONLogicalSource('&$"£*W$',
+            source = SPARQLJSONLogicalSource('&$"£*W$',
                                                   'http://dbpedia.org/sparql',
                                                   SPARQL_QUERY)
 
@@ -86,55 +82,51 @@ class SPARQLJSONLogicalSourceTests(unittest.TestCase):
         Test if we handle an empty iterator
         """
         with self.assertRaises(StopIteration):
-            self.source = SPARQLJSONLogicalSource('$.empty',
+            source = SPARQLJSONLogicalSource('$.empty',
                                                   'http://dbpedia.org/sparql',
                                                   SPARQL_QUERY)
-            next(self.source)
+            next(source)
 
 class SPARQLXMLLogicalSourceTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.source = None
-
     def test_iterator(self) -> None:
         """
         Test if we can iterate over the results of the XPath expression
         """
-        self.source = SPARQLXMLLogicalSource('//result/binding[@name="actor"]',
+        source = SPARQLXMLLogicalSource('//result/binding[@name="actor"]',
                                               'http://dbpedia.org/sparql',
                                               SPARQL_QUERY)
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/Jennifer_Aniston')
 
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/David_Schwimmer')
 
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/Lisa_Kudrow')
 
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/Matt_LeBlanc')
 
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/Matthew_Perry')
 
-        actor = next(self.source)
+        actor = next(source)
         self.assertEqual(actor.xpath('./uri')[0].tag, 'uri')
         self.assertEqual(actor.xpath('./uri')[0].text,
                          'http://dbpedia.org/resource/Courteney_Cox')
 
         with self.assertRaises(StopIteration):
-            next(self.source)
+            next(source)
 
     def test_non_existing_endpoint(self) -> None:
         """
@@ -142,7 +134,7 @@ class SPARQLXMLLogicalSourceTests(unittest.TestCase):
         not exist
         """
         with self.assertRaises(FileNotFoundError):
-            self.source = SPARQLXMLLogicalSource('/sparql/results/result/binding',
+            source = SPARQLXMLLogicalSource('/sparql/results/result/binding',
                                                   'http://dbpedia.org/empty',
                                                   SPARQL_QUERY)
 
@@ -151,7 +143,7 @@ class SPARQLXMLLogicalSourceTests(unittest.TestCase):
         Test if we raise a ValueError when the XPath expression is invalid
         """
         with self.assertRaises(ValueError):
-            self.source = SPARQLXMLLogicalSource('&$"£*W$',
+            source = SPARQLXMLLogicalSource('&$"£*W$',
                                                   'http://dbpedia.org/sparql',
                                                   SPARQL_QUERY)
 
@@ -160,10 +152,10 @@ class SPARQLXMLLogicalSourceTests(unittest.TestCase):
         Test if we handle an empty iterator
         """
         with self.assertRaises(StopIteration):
-            self.source = SPARQLXMLLogicalSource('/empty',
+            source = SPARQLXMLLogicalSource('/empty',
                                                   'http://dbpedia.org/sparql',
                                                   SPARQL_QUERY)
-            next(self.source)
+            next(source)
 
 if __name__ == '__main__':
     unittest.main()

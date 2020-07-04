@@ -2,7 +2,6 @@
 
 import unittest
 from rdflib.term import URIRef, Literal
-from rdflib import XSD, FOAF
 
 from rml.io.sources import JSONLogicalSource, XMLLogicalSource, \
                            CSVLogicalSource, SPARQLXMLLogicalSource, \
@@ -11,6 +10,7 @@ from rml.io.sources import JSONLogicalSource, XMLLogicalSource, \
                            HydraLogicalSource, MIMEType
 from rml.io.maps import SubjectMap, PredicateMap, ObjectMap, \
                         PredicateObjectMap, TriplesMap, TermType
+from rml.namespace import FOAF, LINKED_CONNECTIONS, XSD
 
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -120,31 +120,31 @@ class TriplesMapTests(unittest.TestCase):
     def _assert_hydra_single_triple(self, tm: TriplesMap) -> bool:
         # Hydra page 0
         expected_result = [(URIRef('http://irail.be/connections/8883808/20200619/IC1717'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008883808'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8814159/20200619/IC2039'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008814159'))]
         self.assertEqual(next(tm), expected_result)
 
         # Hydra page 1
         expected_result = [(URIRef('http://irail.be/connections/8895430/20200619/P8903'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008895430'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8813003/20200619/IC2118'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008813003'))]
         self.assertEqual(next(tm), expected_result)
 
         # Hydra page 2
         expected_result = [(URIRef('http://irail.be/connections/8833274/20200619/IC2640'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008833274'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8811262/20200619/IC2240'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008811262'))]
         self.assertEqual(next(tm), expected_result)
 
@@ -153,49 +153,49 @@ class TriplesMapTests(unittest.TestCase):
     def _assert_hydra_multiple_triples(self, tm:TriplesMap) -> bool:
         # Hydra page 0
         expected_result = [(URIRef('http://irail.be/connections/8883808/20200619/IC1717'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008883808')), \
                             (URIRef('http://irail.be/connections/8883808/20200619/IC1717'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008814332'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8814159/20200619/IC2039'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008814159')), \
                             (URIRef('http://irail.be/connections/8814159/20200619/IC2039'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008814167'))]
         self.assertEqual(next(tm), expected_result)
 
         # Hydra page 1
         expected_result = [(URIRef('http://irail.be/connections/8895430/20200619/P8903'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008895430')), \
                             (URIRef('http://irail.be/connections/8895430/20200619/P8903'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008895422'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8813003/20200619/IC2118'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008813003')), \
                             (URIRef('http://irail.be/connections/8813003/20200619/IC2118'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008813045'))]
         self.assertEqual(next(tm), expected_result)
 
         # Hydra page 2
         expected_result = [(URIRef('http://irail.be/connections/8833274/20200619/IC2640'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008833274')), \
                             (URIRef('http://irail.be/connections/8833274/20200619/IC2640'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008833266'))]
         self.assertEqual(next(tm), expected_result)
         expected_result = [(URIRef('http://irail.be/connections/8811262/20200619/IC2240'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#departureStop'), \
+                            LINKED_CONNECTIONS.departureStop, \
                             URIRef('http://irail.be/stations/NMBS/008811262')), \
                             (URIRef('http://irail.be/connections/8811262/20200619/IC2240'), \
-                            URIRef('http://semweb.mmlab.be/ns/linkedconnections#arrivalStop'), \
+                            LINKED_CONNECTIONS.arrivalStop, \
                             URIRef('http://irail.be/stations/NMBS/008811254'))]
         self.assertEqual(next(tm), expected_result)
 

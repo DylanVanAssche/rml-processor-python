@@ -6,6 +6,7 @@ from lxml import etree
 
 from rml.io.sources import MIMEType
 from rml.io.maps import PredicateMap, TermType
+from rml.namespace import FOAF
 
 XML_STUDENT_1 = """
     <student>
@@ -32,9 +33,6 @@ XML_STUDENT_3 = """
 """
 
 class PredicateMapTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
     def test_unknown_termtype(self) -> None:
         """
         Test if we raise a ValueError when TermType is unknown
@@ -51,11 +49,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TEXT_XML)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_json_constant(self) -> None:
         """
@@ -64,11 +62,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.JSON)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_csv_constant(self) -> None:
         """
@@ -77,11 +75,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.CSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_tsv_constant(self) -> None:
         """
@@ -90,11 +88,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_sql_constant(self) -> None:
         """
@@ -103,11 +101,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.SQL)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_jsonld_constant(self) -> None:
         """
@@ -116,11 +114,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.JSON_LD)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_n3_constant(self) -> None:
         """
@@ -129,11 +127,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.N3)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_nquads_constant(self) -> None:
         """
@@ -142,11 +140,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.NQUADS)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_ntriples_constant(self) -> None:
         """
@@ -155,11 +153,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.NTRIPLES)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_rdf_constant(self) -> None:
         """
@@ -168,11 +166,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.RDF_XML)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_trig_constant(self) -> None:
         """
@@ -181,11 +179,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TRIG)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_trix_constant(self) -> None:
         """
@@ -194,11 +192,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TRIX)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_turtle_constant(self) -> None:
         """
@@ -207,11 +205,11 @@ class PredicateMapTests(unittest.TestCase):
         sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TURTLE)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
 if __name__ == '__main__':
     unittest.main()
