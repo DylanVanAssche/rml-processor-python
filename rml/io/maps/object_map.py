@@ -54,12 +54,13 @@ class ObjectMap(TermMap):
         if self._language is not None or self._datatype is not None:
             try:
                 return Literal(term,
-                               lang = self._language,
-                               datatype = self._datatype)
-            # Invalid language tag, invalid datatype or both specified
+                               lang=self._language,
+                               datatype=self._datatype)
+            # Both specified
             except TypeError:
                 raise TypeError('Literals can only have a language tag or '
                                 'a datatype, not both')
+            # Invalid language tag
             except Exception:
                 raise ValueError(f'Invalid language tag: {self._language}')
         else:
