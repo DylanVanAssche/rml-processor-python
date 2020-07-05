@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from typing import Iterator
+from typing import Iterator, Dict
 from abc import ABC, abstractmethod
 from enum import Enum
 
 class LogicalSource(ABC):
     def __init__(self, reference_formulation: str = '') -> None:
-        self._reference_formulation = reference_formulation
+        self._reference_formulation: str = reference_formulation
 
     def __iter__(self) -> Iterator:
         """
@@ -15,7 +15,7 @@ class LogicalSource(ABC):
         return self
 
     @abstractmethod
-    def __next__(self) -> dict:
+    def __next__(self) -> Dict:
         """
         __next__() method must be implemented by every subclass.
         This methods provides the next value of the iterator

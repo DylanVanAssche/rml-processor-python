@@ -1,4 +1,4 @@
-from typing import List, Tuple, Iterator
+from typing import List, Iterator, Tuple
 from rdflib.term import URIRef, Identifier
 
 from . import SubjectMap, PredicateObjectMap

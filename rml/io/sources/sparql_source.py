@@ -4,8 +4,9 @@ from io import StringIO
 from SPARQLWrapper import SPARQLWrapper, JSON, XML
 from jsonpath_ng import parse
 from lxml import etree
-from lxml.etree import XPathEvalError
+from lxml.etree import XPathEvalError, Element
 from requests import get, HTTPError
+from typing import Union, Dict
 
 from . import LogicalSource
 
@@ -19,26 +20,27 @@ class SPARQLLogicalSource(LogicalSource, ABC):
         super().__init__(reference_formulation)
         self._query = query
         self._endpoint = endpoint
+        self._return_format: str
 
-    def _check_endpoint(self):
+    def _check_endpoint(self) -> None:
         try:
             get(self._endpoint).raise_for_status()
         except HTTPError:
             raise FileNotFoundError
 
-    def _execute_query(self):
+    def _execute_query(self) -> None:
         self._engine = SPARQLWrapper(self._endpoint,
                                      returnFormat=self._return_format)
         self._engine.setQuery(self._query)
 
     @abstractmethod
-    def _parse_results(self):
+    def _parse_results(self) -> None:
         """
         Parse SPARQL results, parsing depends on self._return_format
         """
 
     @abstractmethod
-    def __next__(self):
+    def __next__(self) -> Union[Dict, Element]:
         """
         Iterates over SPARQL results, iteration depends on self._return_format
         """
@@ -55,7 +57,7 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         self._execute_query()
         self._parse_results()
 
-    def _parse_results(self):
+    def _parse_results(self) -> None:
         """
         Parse SPARQL results as JSON using a JSONPath expression
         """
@@ -67,12 +69,13 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         results = self._engine.query().convert()
         self._iterator = iter(self._iterator.find(results))
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         """
         Returns a result from the SPARQL iterator.
         raises StopIteration when exhausted.
         """
-        return next(self._iterator).value
+        record: Dict = next(self._iterator).value
+        return record
 
 class SPARQLXMLLogicalSource(SPARQLLogicalSource):
     def __init__(self, reference_formulation: str, endpoint: str, query: str):
@@ -86,7 +89,7 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         self._execute_query()
         self._parse_results()
 
-    def _parse_results(self):
+    def _parse_results(self) -> None:
         """
         Parse SPARQL results as XML using an XPath expression
         """
@@ -102,7 +105,7 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         except XPathEvalError:
             raise ValueError(f'Invalid XPath expression: {self._reference_formulation}')
 
-    def __next__(self):
+    def __next__(self) -> Element:
         """
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.

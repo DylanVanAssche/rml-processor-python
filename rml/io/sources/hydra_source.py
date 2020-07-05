@@ -1,9 +1,10 @@
-from requests import get
+from requests import get, Response
 from requests.exceptions import HTTPError, ConnectionError
 from csv import DictReader, Sniffer
 from os import makedirs
 from os.path import basename
 from rdflib import URIRef
+from typing import Dict
 
 from rml.io.sources import *
 
@@ -16,7 +17,7 @@ class Hydra(Enum):
 
 class HydraLogicalSource(LogicalSource):
     def __init__(self, url : str, format: MIMEType,
-                 reference_formulation: str='', tmp_dir=TMP_DIR):
+            reference_formulation: str='', tmp_dir: str = TMP_DIR) -> None:
         """
         A Hydra Logical Source to retrieve data from a Hydra Web API and
         iterate over it.
@@ -24,12 +25,13 @@ class HydraLogicalSource(LogicalSource):
         but is used for XML (XPath) or JSON (JSONPath) data.
         """
         super().__init__(reference_formulation)
-        self._url = url
-        self._tmp_dir = tmp_dir
-        self._format = format
+        self._url: str = url
+        self._tmp_dir: str = tmp_dir
+        self._format: MIMEType = format
+        self._next_page: URIRef
 
         # Verify format
-        f = self._format.value
+        f: str = self._format.value
         if f == MIMEType.RDF_XML.value or \
            f == MIMEType.JSON_LD.value or \
            f == MIMEType.N3.value or \
@@ -43,7 +45,7 @@ class HydraLogicalSource(LogicalSource):
         else:
             raise ValueError(f'Unsupported MIME type: {self._format}')
 
-    def _fetch(self, url):
+    def _fetch(self, url: str) -> None:
         """
         Fetch a Hydra fragment.
         Raises StopIteration if no next fragment exists.
@@ -51,24 +53,26 @@ class HydraLogicalSource(LogicalSource):
 
         # Get Hydra fragment
         try:
-            response = get(url)
+            response: Response = get(url)
             response.raise_for_status()
         except (HTTPError, ConnectionError) as e:
             raise FileNotFoundError('Unable to retrieve {url}: {e}')
 
         # Store Hydra response temporary in /tmp
         makedirs(TMP_DIR, exist_ok=True)
-        file_name = basename(url)
-        with open(f'{self._tmp_dir}/{file_name}', 'wb') as f:
+        file_name: str = basename(url)
+        with open(f'{self._tmp_dir}/{file_name}', 'wb') as tmp_file:
             for block in response.iter_content(ITER_BYTES):
-                f.write(block)
+                tmp_file.write(block)
 
         # Update source
-        self._source = RDFLogicalSource(f'{self._tmp_dir}/{file_name}',
+        self._source: RDFLogicalSource = RDFLogicalSource(f'{self._tmp_dir}/{file_name}',
                                         self._reference_formulation,
                                         self._format)
         # Try to get the next page
         try:
+            subj: URIRef
+            obj: URIRef
             subj, obj = next(self._source.graph.subject_objects(Hydra.NEXT.value))
             self._next_page = obj
         except StopIteration:
@@ -76,7 +80,7 @@ class HydraLogicalSource(LogicalSource):
             # misses the current page (last page)
             self._next_page = None
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         """
         Returns a row from the underlying source.
         Raises StopIteration when exhausted.

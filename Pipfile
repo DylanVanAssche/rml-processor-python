@@ -16,6 +16,7 @@ sparqlwrapper = "*"
 requests = "*"
 rdflib-jsonld = "*"
 uritemplate = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"

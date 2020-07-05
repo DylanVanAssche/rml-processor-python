@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
+from typing import Dict
 
 from . import LogicalSource
 
@@ -25,7 +26,7 @@ class SQLLogicalSource(LogicalSource):
             self._connection.close()
             raise ValueError
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         """
         Returns a row from the SQL iterator.
         raises StopIteration when exhausted.

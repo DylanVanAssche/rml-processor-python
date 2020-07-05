@@ -1,8 +1,10 @@
-from requests import get
+from requests import get, Response
 from requests.exceptions import HTTPError, ConnectionError
 from csv import DictReader, Sniffer
 from os import makedirs
 from os.path import basename
+from lxml.etree import Element
+from typing import Dict, Union
 
 from rml.io.sources import *
 
@@ -11,7 +13,7 @@ ITER_BYTES=1024
 
 class DCATLogicalSource(LogicalSource):
     def __init__(self, url : str, format: MIMEType,
-            reference_formulation: str='', tmp_dir: str = TMP_DIR,
+                 reference_formulation: str='', tmp_dir: str = TMP_DIR,
                  delimiter: str = ','):
         """
         A DCAT Logical Source to retrieve data from the Web and iterate over
@@ -28,20 +30,20 @@ class DCATLogicalSource(LogicalSource):
 
         # Get file from DCAT catalogue
         try:
-            response = get(self._url)
+            response: Response = get(self._url)
             response.raise_for_status()
         except (HTTPError, ConnectionError) as e:
             raise FileNotFoundError('Unable to retrieve {self._url}: {e}')
 
         # Store file temporary in /tmp
         makedirs(TMP_DIR, exist_ok=True)
-        file_name = basename(self._url)
-        with open(f'{self._tmp_dir}/{file_name}', 'wb') as f:
+        file_name: str = basename(self._url)
+        with open(f'{self._tmp_dir}/{file_name}', 'wb') as tmp_file:
             for block in response.iter_content(ITER_BYTES):
-                f.write(block)
+                tmp_file.write(block)
 
         # Select right logical source depending on HTTP Content-Type header
-        f = self._format.value
+        f: str = self._format.value
         if f == MIMEType.CSV.value \
            or f == MIMEType.TSV.value:
             self._source = CSVLogicalSource(f'{self._tmp_dir}/{file_name}',
@@ -67,7 +69,7 @@ class DCATLogicalSource(LogicalSource):
         else:
             raise ValueError(f'Unsupported MIME type: {self._format}')
 
-    def __next__(self):
+    def __next__(self) -> Union[Dict, Element]:
         """
         Returns a row from the underlying source.
         Raises StopIteration when exhausted.

@@ -1,3 +1,4 @@
+from typing import Iterator, IO, Dict
 from csv import DictReader, Sniffer
 
 from . import LogicalSource
@@ -11,20 +12,20 @@ class CSVLogicalSource(LogicalSource):
         The RML reference formulation is not used for row-based iterators.
         """
         super().__init__()
-        self._path = path
-        self._delimiter = delimiter
+        self._path: str = path
+        self._delimiter: str = delimiter
 
         with open(self._path) as f:
             # Check if the CSV file contains a header
-            sniffer = Sniffer()
+            sniffer: Sniffer = Sniffer()
             if not sniffer.has_header(f.read(BYTES_TO_SNIFF)):
                 raise ValueError('CSV file requires a header')
 
         # Create CSV file iterator
-        self._file = open(self._path)
-        self._iterator = DictReader(self._file, delimiter=self._delimiter)
+        self._file: IO = open(self._path)
+        self._iterator: Iterator = DictReader(self._file, delimiter=self._delimiter)
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         """
         Returns a row from the CSV iterator.
         raises StopIteration when exhausted.
