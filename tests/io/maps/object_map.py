@@ -6,7 +6,7 @@ from lxml import etree
 
 from rml.io.sources import MIMEType
 from rml.io.maps import ObjectMap, TermType
-from rml.namespace import FOAF
+from rml.namespace import FOAF, XSD
 
 XML_STUDENT_1 = """
     <student>
@@ -171,13 +171,60 @@ class ObjectMapTests(unittest.TestCase):
         Test if we can resolve a literal reference
         """
         sm = ObjectMap('/student/name', TermType.REFERENCE,
-                        MIMEType.TEXT_XML, is_iri=False)
+                       MIMEType.TEXT_XML, is_iri=False)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(subj, Literal('Herman'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
         self.assertEqual(subj, Literal('Ann'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
         self.assertEqual(subj, Literal('Simon'))
+
+    def test_literal_language(self) -> None:
+        """
+        Test if we can generate a Literal with a given language tag.
+        """
+        sm = ObjectMap('/student/name', TermType.REFERENCE,
+                       MIMEType.TEXT_XML, language='en-us', is_iri=False)
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
+        self.assertEqual(subj, Literal('Herman', lang='en-us'))
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
+        self.assertEqual(subj, Literal('Ann', lang='en-us'))
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
+        self.assertEqual(subj, Literal('Simon', lang='en-us'))
+
+    def test_literal_datatype(self) -> None:
+        """
+        Test if we can generate a Literal with a given datatype.
+        """
+        sm = ObjectMap('/student/name', TermType.REFERENCE,
+                       MIMEType.TEXT_XML, datatype=XSD.string, is_iri=False)
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
+        self.assertEqual(subj, Literal('Herman', datatype=XSD.string))
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
+        self.assertEqual(subj, Literal('Ann', datatype=XSD.string))
+        subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
+        self.assertEqual(subj, Literal('Simon', datatype=XSD.string))
+
+    def test_literal_error_both(self) -> None:
+        """
+        Test if we raise a TypeError when a language tag and datatype are
+        specified when generating a Literal.
+        """
+        with self.assertRaises(TypeError):
+            sm = ObjectMap('/student/name', TermType.REFERENCE,
+                           MIMEType.TEXT_XML, datatype=XSD.string,
+                           language='en-us', is_iri=False)
+            subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
+
+    def test_invalid_lang_tag(self) -> None:
+        """
+        Test if we raise a ValueError when an invalid language tag is specified
+        when generating a Literal.
+        """
+        with self.assertRaises(ValueError):
+            sm = ObjectMap('/student/name', TermType.REFERENCE,
+                           MIMEType.TEXT_XML, language='$£WDSD', is_iri=False)
+            subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
 
     def test_xml_template(self) -> None:
         """
