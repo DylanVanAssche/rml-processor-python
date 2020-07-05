@@ -2,6 +2,7 @@
 
 import unittest
 from rdflib.term import URIRef, Literal
+from os.path import abspath
 
 from rml.io.sources import JSONLogicalSource, XMLLogicalSource, \
                            CSVLogicalSource, SPARQLXMLLogicalSource, \
@@ -12,11 +13,13 @@ from rml.io.maps import SubjectMap, PredicateMap, ObjectMap, \
                         PredicateObjectMap, TriplesMap, TermType
 from rml.namespace import FOAF, LINKED_CONNECTIONS, XSD
 
+# Resolve RDF file to absolute path for SPARQL
+student_rdf_path = abspath('tests/assets/rdf/student.rdf')
 CONJUCTIVE_QUERY="""
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 SELECT ?person ?name ?age
-FROM <file:///home/dylan/Projects/rml-blocks/tests/assets/rdf/student.rdf>
+FROM <file://""" + student_rdf_path + """>
 WHERE {
     ?person foaf:name ?name .
     ?person foaf:age ?age .
