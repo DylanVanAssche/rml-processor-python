@@ -4,6 +4,7 @@ from typing import Dict
 
 from . import LogicalSource
 
+
 class SQLLogicalSource(LogicalSource):
     def __init__(self, jdbc: str, query: str):
         """
@@ -33,7 +34,7 @@ class SQLLogicalSource(LogicalSource):
         """
         try:
             row = dict(next(self._iterator))
-            return { k.lower(): v for k, v in row.items() }
+            return {k.lower(): v for k, v in row.items()}
         except StopIteration:
             self._connection.close()
             raise StopIteration

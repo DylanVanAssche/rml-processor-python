@@ -5,6 +5,7 @@ from typing import Iterator, Dict
 
 from . import LogicalSource
 
+
 class JSONLogicalSource(LogicalSource):
     def __init__(self, reference_formulation: str, path: str):
         """
@@ -13,7 +14,7 @@ class JSONLogicalSource(LogicalSource):
         super().__init__(reference_formulation)
         try:
             json_path: JsonPathParser = parse(self._reference_formulation)
-        except:
+        except Exception:
             raise ValueError('Invalid JSONPath expression')
         self._path: str = path
         self._data: Dict = {}

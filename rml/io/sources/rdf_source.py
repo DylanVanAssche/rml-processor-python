@@ -5,6 +5,7 @@ from typing import Dict, Iterator
 
 from . import LogicalSource, MIMEType
 
+
 class RDFLogicalSource(LogicalSource):
     def __init__(self, path: str, query: str, format: MIMEType) -> None:
         """
@@ -23,16 +24,16 @@ class RDFLogicalSource(LogicalSource):
         # ConjunctiveGraph to parse @graph triples
         f: str = self._format.value
         if f == MIMEType.NQUADS.value or \
-           f == MIMEType.JSON_LD.value or \
-           f == MIMEType.TRIG.value or \
-           f == MIMEType.TRIX.value:
-               self._graph = ConjunctiveGraph()
+                f == MIMEType.JSON_LD.value or \
+                f == MIMEType.TRIG.value or \
+                f == MIMEType.TRIX.value:
+            self._graph = ConjunctiveGraph()
         # Create a normal graph for other RDF formats
         elif f == MIMEType.RDF_XML.value or \
-             f == MIMEType.N3.value or \
-             f == MIMEType.TURTLE.value or \
-             f == MIMEType.NTRIPLES.value:
-                 self._graph = Graph()
+                f == MIMEType.N3.value or \
+                f == MIMEType.TURTLE.value or \
+                f == MIMEType.NTRIPLES.value:
+            self._graph = Graph()
         # Raise ValueError when MIME type is not supported
         else:
             raise ValueError('Unknown RDF MIME type: {self._format}')
@@ -62,4 +63,3 @@ class RDFLogicalSource(LogicalSource):
         Returns the knowledge graph.
         """
         return self._graph
-

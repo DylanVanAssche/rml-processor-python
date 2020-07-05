@@ -4,9 +4,10 @@ from rdflib.term import URIRef, Identifier
 from . import SubjectMap, PredicateObjectMap
 from rml.io.sources import LogicalSource
 
+
 class TriplesMap:
     def __init__(self, logical_source: LogicalSource, subject_map: SubjectMap,
-            predicate_object_maps: List[PredicateObjectMap]) -> None:
+                 predicate_object_maps: List[PredicateObjectMap]) -> None:
         self._logical_source = logical_source
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
@@ -19,7 +20,7 @@ class TriplesMap:
 
     def __next__(self) -> List[Tuple[URIRef, URIRef, Identifier]]:
         """
-        Generates all triples of this TriplesMap according to the given Subject 
+        Generates all triples of this TriplesMap according to the given Subject
         Map, Predicate Map and Object Map for a single data record.
         """
         # Get data record

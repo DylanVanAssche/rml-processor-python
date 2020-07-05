@@ -3,6 +3,7 @@ from lxml.etree import Element
 
 from . import LogicalSource
 
+
 class XMLLogicalSource(LogicalSource):
     def __init__(self, reference_formulation: str, path: str):
         """

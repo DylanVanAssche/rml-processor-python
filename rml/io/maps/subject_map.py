@@ -6,6 +6,7 @@ from lxml.etree import Element
 from . import TermMap, TermType
 from rml.io.sources import MIMEType
 
+
 class SubjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
                  reference_formulation: MIMEType) -> None:

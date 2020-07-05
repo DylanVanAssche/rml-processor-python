@@ -8,12 +8,13 @@ from typing import Dict, Union
 
 from rml.io.sources import *
 
-TMP_DIR='/tmp'
-ITER_BYTES=1024
+TMP_DIR = '/tmp'
+ITER_BYTES = 1024
+
 
 class DCATLogicalSource(LogicalSource):
-    def __init__(self, url : str, format: MIMEType,
-                 reference_formulation: str='', tmp_dir: str = TMP_DIR,
+    def __init__(self, url: str, format: MIMEType,
+                 reference_formulation: str = '', tmp_dir: str = TMP_DIR,
                  delimiter: str = ','):
         """
         A DCAT Logical Source to retrieve data from the Web and iterate over
@@ -45,24 +46,24 @@ class DCATLogicalSource(LogicalSource):
         # Select right logical source depending on HTTP Content-Type header
         f: str = self._format.value
         if f == MIMEType.CSV.value \
-           or f == MIMEType.TSV.value:
+                or f == MIMEType.TSV.value:
             self._source = CSVLogicalSource(f'{self._tmp_dir}/{file_name}',
                                             self._delimiter)
         elif f == MIMEType.JSON.value:
             self._source = JSONLogicalSource(self._reference_formulation,
                                              f'{self._tmp_dir}/{file_name}')
         elif f == MIMEType.TEXT_XML.value or \
-             f == MIMEType.APPLICATION_XML.value:
+                f == MIMEType.APPLICATION_XML.value:
             self._source = XMLLogicalSource(self._reference_formulation,
                                             f'{self._tmp_dir}/{file_name}')
         elif f == MIMEType.RDF_XML.value or \
-             f == MIMEType.JSON_LD.value or \
-             f == MIMEType.N3.value or \
-             f == MIMEType.NQUADS.value or \
-             f == MIMEType.NTRIPLES.value or \
-             f == MIMEType.TRIG.value or \
-             f == MIMEType.TRIX.value or \
-             f == MIMEType.TURTLE.value:
+                f == MIMEType.JSON_LD.value or \
+                f == MIMEType.N3.value or \
+                f == MIMEType.NQUADS.value or \
+                f == MIMEType.NTRIPLES.value or \
+                f == MIMEType.TRIG.value or \
+                f == MIMEType.TRIX.value or \
+                f == MIMEType.TURTLE.value:
             self._source = RDFLogicalSource(f'{self._tmp_dir}/{file_name}',
                                             self._reference_formulation,
                                             self._format)

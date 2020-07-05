@@ -36,6 +36,15 @@ class HydraLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             source = HydraLogicalSource('http://non-existing-url.be',
                                              MIMEType.JSON_LD)
+    def test_unknown_format(self) -> None:
+        """
+        Test if a ValueError exception is raised when the format is not
+        supported.
+        """
+        with self.assertRaises(ValueError):
+            source = HydraLogicalSource('http://127.0.0.1:8000/tests/assets/hydra/connections0.jsonld',
+                                        MIMEType.UNKNOWN,
+                                        reference_formulation=QUERY)
 
     def test_iterator_jsonld(self) -> None:
         """
