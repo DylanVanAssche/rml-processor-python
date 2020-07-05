@@ -10,10 +10,16 @@ from rml.io.sources import MIMEType
 class ObjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
                  reference_formulation: MIMEType, is_iri: bool = True) -> None:
+        """
+        Creates an ObjectMap
+        """
         super().__init__(term, term_type, reference_formulation)
         self._is_iri = is_iri
 
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
+        """
+        Resolves an object into an RDF Identifier.
+        """
         if self._term_type == TermType.TEMPLATE:
             if self._is_iri:
                 return URIRef(super()._resolve_template(data))

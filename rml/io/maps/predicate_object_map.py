@@ -8,6 +8,9 @@ from rml.io.maps import PredicateMap, ObjectMap
 class PredicateObjectMap:
     def __init__(self, predicate_map: PredicateMap,
                  object_map: ObjectMap) -> None:
+        """
+        Creates a PredicateObjectMap
+        """
         self._predicate_map = predicate_map
         self._object_map = object_map
 

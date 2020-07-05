@@ -30,6 +30,7 @@ WHERE {
 ORDER BY DESC(?age)
 """
 
+
 class DCATLogicalSourceTests(unittest.TestCase):
     def test_non_existing_resource(self) -> None:
         """

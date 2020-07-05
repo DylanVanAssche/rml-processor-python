@@ -36,6 +36,9 @@ class TermMap(ABC):
         """
 
     def _resolve_template(self, data: Union[Element, Dict]) -> str:
+        """
+        Resolves a string template.
+        """
         #######################################################################
         # uritemplate has a builtin method to replace variables
         # (term.expand()), but it follows the RFC specification too strict,
@@ -60,6 +63,9 @@ class TermMap(ABC):
 
     def _resolve_reference(self, reference: str,
                            data: Union[Element, Dict]) -> str:
+        """
+        Resolves a reference.
+        """
         # XPath reference (XML)
         if self._reference_formulation == MIMEType.APPLICATION_XML or \
            self._reference_formulation == MIMEType.TEXT_XML:

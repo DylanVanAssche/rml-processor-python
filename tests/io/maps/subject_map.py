@@ -6,6 +6,7 @@ from lxml import etree
 
 from rml.io.sources import MIMEType
 from rml.io.maps import SubjectMap, TermType
+from rml.namespace import FOAF
 
 XML_STUDENT_1 = """
     <student>
@@ -41,9 +42,6 @@ XML_STUDENT_TITLE = """
 """
 
 class SubjectMapTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
     def test_unknown_mimetype(self) -> None:
         """
         Test if we raise a ValueError when MIMEType is unknown
@@ -188,11 +186,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TEXT_XML)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_json_template(self) -> None:
         """
@@ -227,11 +225,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.JSON)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_csv_template(self) -> None:
         """
@@ -266,11 +264,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.CSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_tsv_template(self) -> None:
         """
@@ -305,11 +303,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_sql_template(self) -> None:
         """
@@ -344,11 +342,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.SQL)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_jsonld_template(self) -> None:
         """
@@ -383,11 +381,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.JSON_LD)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_n3_template(self) -> None:
         """
@@ -422,11 +420,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.N3)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_nquads_template(self) -> None:
         """
@@ -461,11 +459,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.NQUADS)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_ntriples_template(self) -> None:
         """
@@ -500,11 +498,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.NTRIPLES)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_rdf_template(self) -> None:
         """
@@ -539,11 +537,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.RDF_XML)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_trig_template(self) -> None:
         """
@@ -578,11 +576,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TRIG)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_trix_template(self) -> None:
         """
@@ -617,11 +615,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TRIX)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
     def test_turtle_template(self) -> None:
         """
@@ -656,11 +654,11 @@ class SubjectMapTests(unittest.TestCase):
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
                         MIMEType.TURTLE)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
         subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://xmlns.com/foaf/0.1/Person'))
+        self.assertEqual(subj, FOAF.Person)
 
 if __name__ == '__main__':
     unittest.main()

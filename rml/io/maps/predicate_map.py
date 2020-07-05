@@ -11,9 +11,15 @@ from rml.io.sources import MIMEType
 class PredicateMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
                  reference_formulation: MIMEType) -> None:
+        """
+        Creates a PredicateMap.
+        """
         super().__init__(term, term_type, reference_formulation)
 
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
+        """
+        Resolves a predicate into an RDF Identifier.
+        """
         if self._term_type == TermType.CONSTANT:
             return URIRef(self._term)
         else:

@@ -17,8 +17,8 @@ WHERE {
 ORDER BY DESC(?connection)
 """
 
-class HydraLogicalSourceTests(unittest.TestCase):
 
+class HydraLogicalSourceTests(unittest.TestCase):
     def test_non_existing_resource(self) -> None:
         """
         Test if a FileNotFoundError exception is raised when the resource
