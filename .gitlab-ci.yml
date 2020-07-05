@@ -1,0 +1,22 @@
+image: python:3.8
+stages:
+  - test
+
+
+test:
+  stage: test
+  script:
+  - echo $CI_JOB_STAGE
+  - apt-get update -qy
+  - apt-get install -y python-dev python-pip
+  - pip install pipenv
+  - pipenv install
+  - echo -e "\033[31;1m*** Running tests ***\033[0m"
+  - pipenv run python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 &
+  - pipenv run nosetests --with-coverage --cover-package=rml
+  - echo -e "\033[31;1m*** Running static analyzer ***\033[0m"
+  - pipenv run mypy rml
+  - echo -e "\033[31;1m*** Running PEP8 compliance checker ***\033[0m"
+  - pipenv run pycodestyle --count rml
+
+
