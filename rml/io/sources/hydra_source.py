@@ -1,22 +1,21 @@
 from requests import get, Response
 from requests.exceptions import HTTPError, ConnectionError
 from csv import DictReader, Sniffer
-from os import makedirs
 from os.path import basename
+from os import remove
 from rdflib import URIRef
 from typing import Dict
+from tempfile import NamedTemporaryFile
 
 from rml.io.sources import *
 from rml.namespace import HYDRA
 
-TMP_DIR = '/tmp'
 ITER_BYTES = 1024
 
 
 class HydraLogicalSource(LogicalSource):
     def __init__(self, url: str, format: MIMEType,
-                 reference_formulation: str = '',
-                 tmp_dir: str = TMP_DIR) -> None:
+                 reference_formulation: str = '') -> None:
         """
         A Hydra Logical Source to retrieve data from a Hydra Web API and
         iterate over it.
@@ -25,9 +24,9 @@ class HydraLogicalSource(LogicalSource):
         """
         super().__init__(reference_formulation)
         self._url: str = url
-        self._tmp_dir: str = tmp_dir
         self._format: MIMEType = format
         self._next_page: URIRef
+        self._tmp_file: str
 
         # Verify format
         f: str = self._format.value
@@ -58,14 +57,13 @@ class HydraLogicalSource(LogicalSource):
             raise FileNotFoundError('Unable to retrieve {url}: {e}')
 
         # Store Hydra response temporary in /tmp
-        makedirs(TMP_DIR, exist_ok=True)
-        file_name: str = basename(url)
-        with open(f'{self._tmp_dir}/{file_name}', 'wb') as tmp_file:
+        with NamedTemporaryFile(delete=False) as tmp_file:
+            self._tmp_file = tmp_file.name
             for block in response.iter_content(ITER_BYTES):
                 tmp_file.write(block)
 
         # Update source
-        path: str = f'{self._tmp_dir}/{file_name}'
+        path: str = self._tmp_file
         rf: str = self._reference_formulation
         format: MIMEType = self._format
         self._source: RDFLogicalSource = RDFLogicalSource(path, rf, format)
@@ -95,4 +93,6 @@ class HydraLogicalSource(LogicalSource):
                 self._fetch(self._next_page)
                 return next(self._source)
             else:
+                if self._tmp_file is not None:
+                    remove(self._tmp_file)
                 raise StopIteration
