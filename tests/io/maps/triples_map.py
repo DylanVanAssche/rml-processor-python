@@ -201,6 +201,21 @@ class TriplesMapTests(unittest.TestCase):
 
         return True
 
+    def test_iterator(self) -> None:
+        """
+        Test if we can create an iterator from a Triples Map.
+        """
+        ls = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
+        sm = SubjectMap("http://example.com/{id}", TermType.TEMPLATE,
+                        MIMEType.JSON)
+        pm = PredicateMap("http://xmlns.com/foaf/0.1/name", TermType.CONSTANT,
+                          MIMEType.JSON)
+        om = ObjectMap("name", TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        pom = []
+        pom.append(PredicateObjectMap(pm, om))
+        tm = TriplesMap(ls, sm, pom)
+        iterator = iter(tm)
+
     def test_json_generate_triple(self) -> None:
         """
         Test if we can generate a triple using JSON data.

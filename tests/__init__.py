@@ -4,6 +4,10 @@ from tests.io.sources.json_source import JSONLogicalSourceTests
 from tests.io.sources.xml_source import XMLLogicalSourceTests
 from tests.io.sources.sql_source import SQLLogicalSourceTests
 from tests.io.sources.rdf_source import RDFLogicalSourceTests
+from tests.io.sources.dcat_source import DCATLogicalSourceTests
+from tests.io.sources.hydra_source import HydraLogicalSourceTests
+from tests.io.sources.sparql_source import SPARQLXMLLogicalSourceTests, \
+                                           SPARQLJSONLogicalSourceTests
 
 # Maps
 from tests.io.maps.subject_map import SubjectMapTests

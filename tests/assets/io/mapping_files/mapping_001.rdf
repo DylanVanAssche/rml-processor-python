@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rml="http://semweb.mmlab.be/ns/rml#"
+   xmlns:rr="http://www.w3.org/ns/r2rml#"
+>
+  <rdf:Description rdf:nodeID="ub1bL21C25">
+    <rr:predicate rdf:resource="http://xmlns.com/foaf/0.1/name"/>
+    <rr:objectMap rdf:nodeID="ub1bL23C18"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ub1bL23C18">
+    <rml:reference>Name</rml:reference>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/base/TriplesMap1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/r2rml#TriplesMap"/>
+    <rr:subjectMap rdf:nodeID="ub1bL17C17"/>
+    <rr:predicateObjectMap rdf:nodeID="ub1bL21C25"/>
+    <rml:logicalSource rdf:nodeID="ub1bL12C21"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ub1bL17C17">
+    <rr:template>http://example.com/{Name}</rr:template>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ub1bL12C21">
+    <rml:source>student.csv</rml:source>
+    <rml:referenceFormulation rdf:resource="http://semweb.mmlab.be/ns/ql#CSV"/>
+  </rdf:Description>
+</rdf:RDF>

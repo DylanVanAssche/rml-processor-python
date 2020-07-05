@@ -11,7 +11,7 @@ class TriplesMap:
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[List[Tuple[URIRef, URIRef, Identifier]]]:
         """
         Every Triples Map is a Python iterator
         """
