@@ -2,7 +2,26 @@
 
 from typing import Iterator, Dict
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import Enum, unique
+
+
+@unique
+class MIMEType(Enum):
+    SQL = 'sql'
+    CSV = 'text/csv'
+    TSV = 'text/tab-separated-values'
+    JSON = 'application/json'
+    APPLICATION_XML = 'application/xml'
+    TEXT_XML = 'text/xml'
+    RDF_XML = 'application/rdf+xml'
+    JSON_LD = 'application/ld+json'
+    TRIX = 'trix'  # MIME type = text/xml
+    TRIG = 'trig'  # MIME type = text/turtle
+    N3 = 'text/n3'
+    NQUADS = 'application/n-quads'
+    TURTLE = 'turtle'  # MIME type = text/turtle
+    NTRIPLES = 'nt'  # MIME type = text/plain
+    UNKNOWN = 'unknown'  # Unsupported MIME type
 
 
 class LogicalSource(ABC):
@@ -22,23 +41,12 @@ class LogicalSource(ABC):
         This methods provides the next value of the iterator
         """
 
-
-class MIMEType(Enum):
-    SQL = 'sql'
-    CSV = 'text/csv'
-    TSV = 'text/tab-separated-values'
-    JSON = 'application/json'
-    APPLICATION_XML = 'application/xml'
-    TEXT_XML = 'text/xml'
-    RDF_XML = 'application/rdf+xml'
-    JSON_LD = 'application/ld+json'
-    TRIX = 'trix'  # MIME type = text/xml
-    TRIG = 'trig'  # MIME type = text/turtle
-    N3 = 'text/n3'
-    NQUADS = 'application/n-quads'
-    TURTLE = 'turtle'  # MIME type = text/turtle
-    NTRIPLES = 'nt'  # MIME type = text/plain
-    UNKNOWN = 'unknown'  # Unsupported MIME type
+    @property
+    @abstractmethod
+    def mime_type(self) -> MIMEType:
+        """
+        The MIME type of the data access by this Logical Source.
+        """
 
 
 # Expose classes at module level

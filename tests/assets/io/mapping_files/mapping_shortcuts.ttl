@@ -1,0 +1,85 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+
+@base <http://example.com/base/> .
+
+<TriplesMapCSV>
+    a rr:TriplesMap ;
+        
+    rml:logicalSource [ 
+        rml:source "tests/assets/csv/student.csv" ;
+        rml:referenceFormulation ql:CSV ;
+    ];
+	
+    rr:subjectMap [ 
+        rr:template "http://example.com/{id}" ;
+    ]; 
+	
+    rr:predicateObjectMap [ 
+        rr:predicate foaf:name ; 
+        rr:objectMap [ 
+            rr:constant ex:test;
+            rr:language "en-us";
+        ]
+    ];
+
+    rr:predicateObjectMap [ 
+        rr:predicate foaf:age ; 
+        rr:objectMap [ 
+            rml:reference "age" ;
+            rr:datatype xsd:int ;
+        ]
+    ].
+
+<TriplesMapCSV2>
+    a rr:TriplesMap ;
+        
+    rml:logicalSource [ 
+        rml:source "tests/assets/csv/student.csv" ;
+        rml:referenceFormulation ql:CSV ;
+    ];
+
+    rr:subject ex:MyStudentIRI ;
+	
+    rr:predicateObjectMap [ 
+        rr:predicate foaf:name ; 
+        rr:object ex:test;
+    ];
+
+    rr:predicateObjectMap [ 
+        rr:predicate foaf:age ; 
+        rr:objectMap [ 
+            rr:template "{age}" ;
+            rr:datatype xsd:int ;
+        ]
+    ].
+
+<TriplesMapCSV3>
+    a rr:TriplesMap ;
+        
+    rml:logicalSource [ 
+        rml:source "tests/assets/csv/student.csv" ;
+        rml:referenceFormulation ql:CSV ;
+    ];
+	
+    rr:subjectMap [ 
+        rr:constant ex:MyStudentIRI2 ;
+    ]; 
+	
+    rr:predicateObjectMap [ 
+        rr:predicateMap [ rml:reference "name" ] ; 
+        rr:object ex:test;
+    ];
+
+    rr:predicateObjectMap [ 
+        rr:predicateMap [ rr:template "{name}" ] ; 
+        rr:objectMap [ 
+            rr:template "{age}" ;
+            rr:datatype xsd:int ;
+        ]
+    ].

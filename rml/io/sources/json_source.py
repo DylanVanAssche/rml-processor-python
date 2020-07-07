@@ -3,7 +3,7 @@ from jsonpath_ng import parse
 from jsonpath_ng.parser import JsonPathParser
 from typing import Iterator, Dict
 
-from . import LogicalSource
+from rml.io.sources import LogicalSource, MIMEType
 
 
 class JSONLogicalSource(LogicalSource):
@@ -30,3 +30,10 @@ class JSONLogicalSource(LogicalSource):
         """
         record: Dict = next(self._iterator).value
         return record
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Return MIMEType.JSON
+        """
+        return MIMEType.JSON

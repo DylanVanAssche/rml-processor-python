@@ -61,6 +61,14 @@ class DCATLogicalSourceTests(unittest.TestCase):
             source = DCATLogicalSource('http://non-existing-url.be',
                                        MIMEType.TEXT_XML)
 
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.csv',
+                                   MIMEType.CSV)
+        self.assertEqual(source.mime_type, MIMEType.CSV)
+
     def test_csv_iterator(self) -> None:
         """
         Test if we can iterate over every row of an CSV resource

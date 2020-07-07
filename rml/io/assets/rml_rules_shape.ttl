@@ -1,0 +1,1015 @@
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix format: <http://www.w3.org/ns/formats/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+
+# Validate an RML Triples Map
+schema:TriplesMapShape
+    a sh:NodeShape ;
+    sh:targetClass rr:TriplesMap ;
+    sh:message "R2RML Triples Map violation" ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type rr:subject rr:subjectMap) ;
+    # A single rml:logicalSource for a rr:triplesMap is required.
+    sh:property [
+        sh:path rml:logicalSource ;
+        sh:name "RML Logical Source" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node schema:LogicalSourceShape ;
+    ];
+    # Either an rr:subject or rr:SubjectMap is required
+    sh:xone (
+        [
+            sh:property [
+                sh:path rr:subjectMap ;
+                sh:name "R2RML Subject Map" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:BlankNodeOrIRI ;
+                sh:node schema:SubjectMapShape ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rr:subject ;
+                sh:name "R2RML subject" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:BlankNodeOrIRI ;
+                sh:node schema:SubjectShape ;
+            ]
+        ]
+    );
+    sh:property [
+        sh:path rr:predicateObjectMap ;
+        sh:name "R2RML Predicate Object Map" ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:node schema:PredicateObjectMapShape ; 
+    ] .
+
+# Validate an RML Logical Source
+schema:LogicalSourceShape
+    a sh:NodeShape ;
+    sh:message "RML Logical Source violation" ;
+    sh:targetObjectsOf rml:logicalSource ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type rml:source rr:sqlVersion rr:tableName rr:sqlQuery rml:query rml:referenceFormulation rml:iterator) ;
+    sh:xone (
+    # Local file JSON or XML
+    [
+        # rml:source is Literal -> local file
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in (ql:JSONPath ql:XPath) ;
+        ] ;
+        sh:property [
+            sh:path rml:iterator ;
+            sh:name "RML iterator" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # Local file CSV/TSV
+    [
+        # rml:source is Literal -> local file
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+    ]
+    # Local file RDF
+    [
+        # rml:source is Literal -> local file
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+        sh:property [
+            sh:path  rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:SPARQL ) ;
+        ] ;
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # SQL database rr:tableName
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:D2RQSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rr:sqlVersion ;
+            sh:name "R2RML SQL version" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (rr:SQL2008) ; # We only support SQL 2008 at the moment
+        ];
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+        sh:property [
+            sh:path rr:tableName ;
+            sh:name "R2RML table name" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] 
+    ]
+    # SQL database rr:sqlQuery
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:D2RQSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rr:sqlVersion ;
+            sh:name "R2RML SQL version" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (rr:SQL2008) ; # We only support SQL 2008 at the moment
+        ];
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+        sh:property [
+            sh:path rr:sqlQuery ;
+            sh:name "R2RML SQL query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] 
+    ]
+    # SQL database rml:query
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:D2RQSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rr:sqlVersion ;
+            sh:name "R2RML SQL version" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (rr:SQL2008) ; # We only support SQL 2008 at the moment
+        ];
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] 
+    ]
+    # SQL database rml:query with rr:tableName
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:D2RQSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rr:sqlVersion ;
+            sh:name "R2RML SQL version" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (rr:SQL2008) ; # We only support SQL 2008 at the moment
+        ];
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ];
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 0 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+        sh:property [
+            sh:path rr:tableName ;
+            sh:name "RML table name" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ]
+    ]
+    # SPARQL endpoint JSON/XML format
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:SPARQLSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in (ql:JSONPath ql:XPath) ;
+        ] ;
+        sh:property [
+            sh:path rml:iterator ;
+            sh:name "RML iterator" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # SPARQL endpoint CSV/TSV format
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:SPARQLSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:CSV ql:TSV ) ;
+        ] ;
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # DCAT dataset JSON/XML
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:DCATSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:JSONPath ql:XPath ) ;
+        ] ;
+        sh:property [
+            sh:path rml:iterator ;
+            sh:name "RML iterator" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # DCAT dataset CSV/TSV
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:DCATSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:CSV ql:TSV ) ;
+        ] ;
+    ]
+    # DCAT dataset RDF
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:DCATSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:class ql:SPARQL ;
+        ] ;
+        sh:property [
+            sh:path rml:query ;
+            sh:name "RML query" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # Hydra Web API JSON/XML
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:HydraWebAPISourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:JSONPath ql:XPath ) ;
+        ] ;
+        sh:property [
+            sh:path rml:iterator ;
+            sh:name "RML iterator" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # Hydra Web API RDF
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:HydraWebAPISourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in ( ql:SPARQL ) ;
+        ] ;
+        sh:property [
+            sh:path rml:iterator ;
+            sh:name "RML iterator" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:datatype xsd:string ;
+        ] ;
+    ]
+    # CSVW
+    [
+        # rml:source is Blank Node or IRI -> external data source
+        sh:closed "true"^^xsd:boolean ;
+        sh:property [
+            sh:path rml:source ;
+            sh:name "RML source" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:node schema:CSVWSourceShape ;
+        ] ;
+        sh:property [
+            sh:path rml:referenceFormulation ;
+            sh:name "RML reference formulation" ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:in (ql:CSV ql:TSV) ;
+        ] ;
+    ]
+).
+
+# Validate an RML Logical Source D2RQ database
+schema:D2RQSourceShape
+    a sh:NodeShape ;
+    sh:name "D2RQ database Source" ;
+    sh:description "A Source description for a D2RQ database. 1 d2rq:jdbcDSN, 1 d2rq:jdbcDriver, 1 d2rq:username and 1 d2rq:password are required." ;
+    sh:message "RML Source D2RQ database violation" ;
+    sh:targetClass d2rq:Database ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:property [
+        sh:path d2rq:jdbcDSN ;
+        sh:name "D2RQ jdbc DSN" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ];
+    sh:property [
+        sh:path d2rq:jdbcDriver ;
+        sh:name "D2RQ jdbc Driver" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ];
+    sh:property [
+        sh:path d2rq:username ;
+        sh:name "D2RQ username" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ];
+    sh:property [
+        sh:path d2rq:password ;
+        sh:name "D2RQ password" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ].
+
+# Validate an RML Logical Source SPARQL endpoint
+schema:SPARQLSourceShape
+    a sh:NodeShape ;
+    sh:targetClass sd:Service ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "SPARQL endpoint Source" ;
+    sh:description "A Source description for a SPARQL endpoint. 1 sd:endpoint, 1 sd:supportedLanguage and 1 sd:resultFormat are required." ;
+    sh:message "RML Source SPARQL endpoint violation" ;
+    sh:property [
+        sh:path sd:endpoint ;
+        sh:name "SD endpoint" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+    ];
+    sh:property [
+        sh:path sd:supportedLanguage ;
+        sh:name "SD supported language" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:in (sd:SPARQL10Query sd:SPARQL11Query sd:SPARQL11Update)
+    ];
+    sh:property [
+        sh:path sd:resultFormat ;
+        sh:name "SD result format" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:in (format:SPARQL_Results_XML format:SPARQL_Results_JSON format:SPARQL_Results_CSV format:SPARQL_Results_TSV)
+    ] .
+
+# Validate an RML Logical Source DCAT dataset
+schema:DCATSourceShape
+    a sh:NodeShape ;
+    sh:targetClass dcat:Dataset ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "DCAT dataset Source" ;
+    sh:description "A Source description for a DCAT dataset. 1 dcat:distribution is required." ;
+    sh:message "RML Source DCAT dataset violation" ;
+    sh:property [
+        sh:path dcat:distribution ;
+        sh:name "DCAT distribution" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:class dcat:Distribution ;
+        sh:node schema:DCATDistributionShape ;
+    ] .
+
+schema:DCATDistributionShape
+    a sh:NodeShape ;
+    sh:targetClass dcat:Distribution ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "DCAT distribution" ;
+    sh:description "A DCAT distribution description for a DCAT dataset. 1 dcat:downloadURL is required." ;
+    sh:message "DCAT distribution violation" ;
+    sh:property [
+        sh:path dcat:downloadURL ;
+        sh:name "DCAT download URL" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path dcat:mediaType ;
+        sh:name "DCAT media type (MIME)" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] .
+
+# Validate an RML Hydra Web API
+schema:HydraWebAPISourceShape
+    a sh:NodeShape ;
+    sh:targetClass hydra:IriTemplate ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "Hydra IRITemplate Source" ;
+    sh:description "A Source description for a Hydra Web API. 1 hydra:template and 1 hydra:mapping are required." ;
+    sh:message "RML Source Hydra Web API violation" ;
+    sh:property [
+        sh:path hydra:template ;
+        sh:name "Hydra template" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path hydra:mapping ;
+        sh:name "Hydra mapping" ;
+        sh:minCount 0 ; # If no hydra:mapping is provided, fall back to hydra:next for navigation.
+        sh:nodeKind sh:BlankNode ;
+        sh:node schema:HydraTemplateMappingShape ;
+    ] .
+
+schema:HydraTemplateMappingShape
+    a sh:NodeShape;
+    sh:targetClass hydra:TemplateMapping ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "Hydra Template Mapping" ;
+    sh:description "Hydra Template Mapping for a Hydra Web API. 1 hydra:template and multiple hydra:mapping are required." ;
+    sh:message "Hydra Template Mapping violation" ;
+    sh:property [
+        sh:path hydra:variable  ;
+        sh:name "Hydra variable" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string;
+    ] ;
+    sh:property [
+        sh:path hydra:required ;
+        sh:name "Hydra required" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:boolean ;
+    ] .
+   
+
+# Validate an RML CSVW
+schema:CSVWSourceShape
+    a sh:NodeShape ;
+    sh:targetClass csvw:Table ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "CSVW Table Source" ;
+    sh:description "A Source description for a CSVW Table. 1 csvw:url and 1 csw:dialect are required." ;
+    sh:message "RML Source CSVW violation" ;
+    sh:property [
+        sh:path csvw:url ;
+        sh:name "CSVW url" ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path csvw:dialect ;
+        sh:name "CSVW dialect" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:BlankNode ;
+        sh:node schema:CSVWDialectShape ;
+    ] .
+
+schema:CSVWDialectShape
+    a sh:NodeShape ;
+    sh:targetClass csvw:Dialect ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "CSVW Dialect" ;
+    sh:description "Dialect description for a CSVW Table. 1 csvw:delimiter, 1 csw:encoding, 1 csvw:doubleQuote, 1 csvw:quoteChar and csvw:skipInitialSpace are optional." ;
+    sh:message "CSVW Dialect violation" ;
+    sh:property [
+        sh:path csvw:delimiter ;
+        sh:name "CSVW delimiter" ;
+        sh:minLength 1 ;
+        sh:maxLength 1 ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path csvw:encoding ;
+        sh:name "CSVW encoding" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path csvw:doubleQuote ;
+        sh:name "CSVW double quote" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path csvw:quoteChar ;
+        sh:name "CSVW quote character" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:minLength 1 ;
+        sh:maxLength 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path csvw:skipInitialSpace ;
+        sh:name "CSVW skip initial space" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:boolean ;
+    ] .
+
+# Validate an R2RML Subject Map
+schema:SubjectMapShape
+    a sh:NodeShape ;
+    sh:targetClass sh:SubjectMap ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type rr:template rml:reference rr:constant) ;
+    sh:name "R2RML rr:subjectMap" ;
+    sh:description "R2RML rr:subjectMap requires either 1 rr:template or 1 rml:reference or 1 rr:constant, optionally 1 rr:termType to indicate the type of term and 1 rr:class to generate an rdf:type triple." ;
+    sh:message "R2RML rr:subjectMap violation" ;
+    # Either an rr:template or rml:reference or rr:constant is required
+    sh:xone (
+        [
+            sh:property [
+                sh:path rr:template ;
+                sh:name "R2RML template" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:Literal ;
+                sh:datatype xsd:string ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rml:reference ;
+                sh:name "RML reference" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:Literal ;
+                sh:datatype xsd:string ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rr:constant ;
+                sh:name "R2RML constant" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:IRI ;
+            ]
+        ]
+
+    ) ;
+    # Optionally rr:class
+    sh:property [
+        sh:path rr:class ;
+        sh:name "R2RML rr:class" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    # Optionally rr:termType
+    sh:property [
+        sh:path rr:termType ;
+        sh:name "R2RML rr:termType" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:in (rr:IRI rr:BlankNode) ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+    ] .
+
+# Validate an R2RML Subject
+schema:subjectShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rr:subject ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:message "R2RML rr:subject violation" ;
+    sh:nodeKind sh:IRI .
+
+# Validate an R2RML Object Map
+schema:ObjectMapShape
+    a sh:NodeShape ;
+    sh:targetClass rr:ObjectMap ;
+    sh:name "R2RML rr:objectMap" ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type rr:template rml:reference rr:constant rr:termType rr:language rr:datatype) ;
+    sh:description "R2RML rr:objectMap specifies the object used to generate a triple. It requires either 1 rr:template or 1 rml:reference or 1 rr:constant and optionally 1 rr:termType, 1 rr:datatype or 1 rr:language." ;
+    sh:message "R2RML rr:objectMap violation" ;
+    # Either an rr:template or rml:reference or rr:constant is required
+    sh:xone (
+        [
+            sh:property [
+                sh:path rr:template ;
+                sh:name "R2RML template" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:datatype xsd:string ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rml:reference ;
+                sh:name "RML reference" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:datatype xsd:string ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rr:constant ;
+                sh:name "R2RML constant" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:IRI ;
+            ]
+        ]
+    );
+    sh:xone (
+    # Optionally rr:termType
+    [ 
+        sh:property [
+            sh:path rr:termType ;
+            sh:name "R2RML rr:termType" ;
+            sh:description "R2RML rr:termType describes if the term is either an IRI, Blank Node or Literal." ;
+            sh:maxCount 1 ;
+            sh:minCount 0 ;
+            sh:in (rr:IRI rr:BlankNode rr:Literal) ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+        ]
+    ]
+    # rr:language, with optionally rr:termType
+    [
+        sh:property [
+            sh:path rr:language ;
+            sh:name "R2RML rr:language" ;
+            sh:description "R2RML rr:language defines the language tag for a Literal." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:datatype xsd:string ;
+        ];
+        sh:property [
+            sh:path rr:termType ;
+            sh:name "R2RML rr:termType" ;
+            sh:description "R2RML rr:termType describes if the term is either an IRI, Blank Node or Literal." ;
+            sh:maxCount 1 ;
+            sh:minCount 0 ;
+            sh:in (rr:IRI rr:BlankNode rr:Literal) ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+        ]
+    ]
+    # rr:datatype with optionally rr:termType
+    [
+        sh:property [
+            sh:path rr:datatype ;
+            sh:name "R2RML rr:datatype" ;
+            sh:description "R2RML rr:datatype defines the datatype for a Literal." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+        ];
+        sh:property [
+            sh:path rr:termType ;
+            sh:name "R2RML rr:termType" ;
+            sh:description "R2RML rr:termType describes if the term is either an IRI, Blank Node or Literal." ;
+            sh:maxCount 1 ;
+            sh:minCount 0 ;
+            sh:in (rr:IRI rr:BlankNode rr:Literal) ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+        ]
+    ]
+    ).
+
+# Validate an R2RML object
+schema:objectShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rr:object ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "R2RML rr:object" ;
+    sh:description "R2RML rr:object <object> shortcut for rr:objectMap [ rr:constant <object> ]." ;
+    sh:message "R2RML rr:object violation" ;
+    sh:nodeKind sh:IRI .
+
+# Validate an R2RML Predicate Map
+schema:PredicateMapShape
+    a sh:NodeShape ;
+    sh:targetClass rr:PredicateMap ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "R2RML rr:predicateMap" ;
+    sh:description "R2RML rr:predicateMap specifies the predicate used to generate the triple. It is required to have 1 rr:constant with an IRI as object." ;
+    sh:message "R2RML rr:predicateMap violation" ;
+    # rr:constant is required
+    sh:property [
+        sh:path rr:constant ;
+        sh:name "R2RML constant" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+    ] .
+
+# Validate an R2RML predicate
+schema:predicateShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rr:predicate ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "R2RML rr:predicate" ;
+    sh:description "R2RML rr:predicate <object> is a short cut for rr:predicateMap [ rr:constant <object> ]. The provided object is always an IRI." ;
+    sh:message "R2RML rr:predicate violation" ;
+    sh:nodeKind sh:IRI .
+
+# Validate an R2RML Predicate Object Map
+schema:PredicateObjectMapShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rr:predicateObjectMap ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type rr:predicate rr:object rr:predicateMap rr:objectMap) ;
+    sh:name "R2RML rr:predicateObjectMap" ;
+    sh:description "An R2RML rr:predicateObjectMap connects the right rr:predicateMap and rr:objectMap with each other. An R2RML rr:predicateObjectMap requires 1 rr:predicateMap or 1 rr:predicate and 1 rr:objectMap or 1 rr:object." ;
+    sh:message "R2RML Predicate Object Map violation" ;
+    # Either an rr:predicate or an rr:predicateMap is required
+    sh:xone (
+        [
+            sh:property [
+                sh:path rr:predicate ;
+                sh:name "R2RML predicate shortcut" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:IRI ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rr:predicateMap ;
+                sh:name "R2RML Predicate Map" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:BlankNodeOrIRI ;
+            ]
+        ]
+    );
+    # Either an rr:object or an rr:objectMap is required
+    sh:xone (
+        [
+            sh:property [
+                sh:path rr:object ;
+                sh:name "R2RML object shortcut" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:IRI ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path rr:objectMap ;
+                sh:name "R2RML Object Map" ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:nodeKind sh:BlankNodeOrIRI;
+            ]
+        ]
+    ).
+

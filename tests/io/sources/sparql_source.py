@@ -2,7 +2,8 @@
 
 import unittest
 
-from rml.io.sources import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource
+from rml.io.sources import SPARQLJSONLogicalSource, SPARQLXMLLogicalSource, \
+                           MIMEType
 
 SPARQL_QUERY = """
     PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -18,6 +19,15 @@ SPARQL_QUERY = """
 """
 
 class SPARQLJSONLogicalSourceTests(unittest.TestCase):
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = SPARQLJSONLogicalSource('$.results.bindings.[*].actor',
+                                              'http://dbpedia.org/sparql',
+                                              SPARQL_QUERY)
+        self.assertEqual(source.mime_type, MIMEType.JSON)
+
     def test_iterator_single_value(self) -> None:
         """
         Test if we can iterate over the results of the JSONPath expression
@@ -88,6 +98,15 @@ class SPARQLJSONLogicalSourceTests(unittest.TestCase):
             next(source)
 
 class SPARQLXMLLogicalSourceTests(unittest.TestCase):
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = SPARQLXMLLogicalSource('//result/binding[@name="actor"]',
+                                              'http://dbpedia.org/sparql',
+                                              SPARQL_QUERY)
+        self.assertEqual(source.mime_type, MIMEType.TEXT_XML)
+
     def test_iterator(self) -> None:
         """
         Test if we can iterate over the results of the XPath expression

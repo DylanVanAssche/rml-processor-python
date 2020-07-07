@@ -8,7 +8,7 @@ from lxml.etree import XPathEvalError, Element
 from requests import get, HTTPError
 from typing import Union, Dict
 
-from rml.io.sources import LogicalSource
+from rml.io.sources import LogicalSource, MIMEType
 
 
 class SPARQLLogicalSource(LogicalSource, ABC):
@@ -46,6 +46,13 @@ class SPARQLLogicalSource(LogicalSource, ABC):
         Iterates over SPARQL results, iteration depends on self._return_format
         """
 
+    @property
+    @abstractmethod
+    def mime_type(self) -> MIMEType:
+        """
+        The MIME type of the SPARQL results.
+        """
+
 
 class SPARQLJSONLogicalSource(SPARQLLogicalSource):
     def __init__(self, reference_formulation: str, endpoint: str, query: str):
@@ -78,6 +85,13 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         """
         record: Dict = next(self._iterator).value
         return record
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns MIMEType.JSON.
+        """
+        return MIMEType.JSON
 
 
 class SPARQLXMLLogicalSource(SPARQLLogicalSource):
@@ -115,3 +129,10 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         raises StopIteration when exhausted.
         """
         return next(self._iterator)
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns MIMEType.TEXT_XML.
+        """
+        return MIMEType.TEXT_XML
