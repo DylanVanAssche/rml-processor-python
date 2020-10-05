@@ -1,7 +1,7 @@
 from typing import Iterator, IO, Dict
 from csv import DictReader, Sniffer
 
-from . import LogicalSource
+from rml.io.sources import LogicalSource, MIMEType
 
 BYTES_TO_SNIFF = 1024
 
@@ -37,3 +37,10 @@ class CSVLogicalSource(LogicalSource):
         except StopIteration:
             self._file.close()
             raise StopIteration
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns MIMEType.CSV.
+        """
+        return MIMEType.CSV

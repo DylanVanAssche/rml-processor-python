@@ -46,6 +46,15 @@ class HydraLogicalSourceTests(unittest.TestCase):
                                         MIMEType.UNKNOWN,
                                         reference_formulation=QUERY)
 
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = HydraLogicalSource('http://127.0.0.1:8000/tests/assets/hydra/connections0.jsonld',
+                                    MIMEType.JSON_LD,
+                                    reference_formulation=QUERY)
+        self.assertEqual(source.mime_type, MIMEType.JSON_LD)
+
     def test_iterator_jsonld(self) -> None:
         """
         Test if we can iterate over every row

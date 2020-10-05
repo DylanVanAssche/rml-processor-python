@@ -4,9 +4,16 @@ import unittest
 from lxml.etree import XMLSyntaxError, XPathEvalError
 from lxml import etree
 
-from rml.io.sources import XMLLogicalSource
+from rml.io.sources import XMLLogicalSource, MIMEType
 
 class XMLLogicalSourceTests(unittest.TestCase):
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = XMLLogicalSource('/students/student', 'tests/assets/xml/student.xml')
+        self.assertEqual(source.mime_type, MIMEType.TEXT_XML)
+
     def test_iterator(self) -> None:
         """
         Test if we can iterate over each XML element

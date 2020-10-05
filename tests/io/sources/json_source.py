@@ -3,7 +3,7 @@
 import unittest
 from json.decoder import JSONDecodeError
 
-from rml.io.sources.json_source import JSONLogicalSource
+from rml.io.sources import JSONLogicalSource, MIMEType
 
 
 
@@ -21,6 +21,13 @@ class JSONLogicalSourceTests(unittest.TestCase):
                              {'id': '2', 'name': 'Simon', 'age': '23'})
         with self.assertRaises(StopIteration):
             next(source)
+
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
+        self.assertEqual(source.mime_type, MIMEType.JSON)
 
     def test_non_existing_file(self) -> None:
         """

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import Enum, unique
 from rdflib.term import Identifier
 from uritemplate import URITemplate
 from uritemplate.variable import URIVariable
@@ -12,6 +12,7 @@ from rml.namespace import R2RML, RML
 from rml.io.sources import MIMEType
 
 
+@unique
 class TermType(Enum):
     CONSTANT = R2RML.constant
     TEMPLATE = R2RML.template

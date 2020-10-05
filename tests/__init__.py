@@ -17,6 +17,7 @@ from tests.io.maps.triples_map import TriplesMapTests
 
 # io
 from tests.io.mapping_reader import MappingReaderTests
+from tests.io.mapping_validator import MappingValidatorTests
 
 # targets
 from tests.io.targets.logical_target import LogicalTargetTests

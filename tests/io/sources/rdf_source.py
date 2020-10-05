@@ -32,6 +32,15 @@ ORDER BY DESC(?age)
 """
 
 class RDFLogicalSourceTests(unittest.TestCase):
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source: LogicalSource = RDFLogicalSource('tests/assets/rdf/student.rdf',
+                                       QUERY,
+                                       MIMEType.RDF_XML)
+        self.assertEqual(source.mime_type, MIMEType.RDF_XML)
+
     def test_iterator_rdfxml(self) -> None:
         """
         Test if we can iterate over every row using RDF XML

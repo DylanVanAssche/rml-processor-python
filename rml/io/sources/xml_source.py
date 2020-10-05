@@ -1,7 +1,7 @@
 from lxml import etree
 from lxml.etree import Element
 
-from . import LogicalSource
+from rml.io.sources import LogicalSource, MIMEType
 
 
 class XMLLogicalSource(LogicalSource):
@@ -27,3 +27,10 @@ class XMLLogicalSource(LogicalSource):
         raises StopIteration when exhausted.
         """
         return next(self._iterator)
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns MIMEType.TEXT_XML
+        """
+        return MIMEType.TEXT_XML

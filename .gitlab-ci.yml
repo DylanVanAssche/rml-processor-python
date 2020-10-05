@@ -1,7 +1,8 @@
 image: python:3.8
 stages:
   - test
-
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
 
 test:
   stage: test

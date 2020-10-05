@@ -18,6 +18,9 @@ rdflib-jsonld = "*"
 uritemplate = "*"
 mypy = "*"
 pycodestyle = "*"
+pyshacl = "*"
+parameterized = "*"
+requests-file = "*"
 
 [requires]
 python_version = "3.8"

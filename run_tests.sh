@@ -20,7 +20,7 @@ disown
 
 # Run tests
 echo "Running tests"
-nosetests --with-coverage --cover-package=rml
+nosetests --cover-erase --with-coverage --cover-package=rml
 
 # Stop HTTP server
 echo "Stopping HTTP server"

@@ -1,5 +1,6 @@
-from requests import get, Response
+from requests import Session, Response
 from requests.exceptions import HTTPError, ConnectionError
+from requests_file import FileAdapter
 from csv import DictReader, Sniffer
 from os import remove
 from os.path import basename
@@ -7,13 +8,14 @@ from lxml.etree import Element
 from typing import Dict, Union
 from tempfile import NamedTemporaryFile
 
-from rml.io.sources import *
+from rml.io.sources import LogicalSource, MIMEType, JSONLogicalSource, \
+                           XMLLogicalSource, CSVLogicalSource, RDFLogicalSource
 
 ITER_BYTES = 1024
 
 
 class DCATLogicalSource(LogicalSource):
-    def __init__(self, url: str, format: MIMEType,
+    def __init__(self, url: str, mime_type: MIMEType,
                  reference_formulation: str = '',
                  delimiter: str = ',') -> None:
         """
@@ -25,13 +27,15 @@ class DCATLogicalSource(LogicalSource):
         super().__init__(reference_formulation)
         self._url: str = url
         self._delimiter: str = delimiter
-        self._format: MIMEType = format
+        self._mime_type: MIMEType = mime_type
         self._source: LogicalSource
         self._tmp_file: str
+        self._session = Session()
+        self._session.mount('file://', FileAdapter())  # Support local files
 
         # Get file from DCAT catalogue
         try:
-            response: Response = get(self._url)
+            response: Response = self._session.get(self._url)
             response.raise_for_status()
         except (HTTPError, ConnectionError) as e:
             raise FileNotFoundError('Unable to retrieve {self._url}: {e}')
@@ -43,7 +47,7 @@ class DCATLogicalSource(LogicalSource):
                 tmp_file.write(block)
 
         # Select right logical source depending on HTTP Content-Type header
-        f: str = self._format.value
+        f: str = self._mime_type.value
         if f == MIMEType.CSV.value \
                 or f == MIMEType.TSV.value:
             self._source = CSVLogicalSource(self._tmp_file,
@@ -65,9 +69,9 @@ class DCATLogicalSource(LogicalSource):
                 f == MIMEType.TURTLE.value:
             self._source = RDFLogicalSource(self._tmp_file,
                                             self._reference_formulation,
-                                            self._format)
+                                            self._mime_type)
         else:
-            raise ValueError(f'Unsupported MIME type: {self._format}')
+            raise ValueError(f'Unsupported MIME type: {self._mime_type}')
 
     def __next__(self) -> Union[Dict, Element]:
         """
@@ -80,3 +84,10 @@ class DCATLogicalSource(LogicalSource):
             if self._tmp_file is not None:
                 remove(self._tmp_file)
             raise StopIteration
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns the provided MIME type of the DCAT dataset.
+        """
+        return self._mime_type

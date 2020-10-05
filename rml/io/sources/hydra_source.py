@@ -14,7 +14,7 @@ ITER_BYTES = 1024
 
 
 class HydraLogicalSource(LogicalSource):
-    def __init__(self, url: str, format: MIMEType,
+    def __init__(self, url: str, mime_type: MIMEType,
                  reference_formulation: str = '') -> None:
         """
         A Hydra Logical Source to retrieve data from a Hydra Web API and
@@ -24,12 +24,12 @@ class HydraLogicalSource(LogicalSource):
         """
         super().__init__(reference_formulation)
         self._url: str = url
-        self._format: MIMEType = format
+        self._mime_type: MIMEType = mime_type
         self._next_page: URIRef
         self._tmp_file: str
 
-        # Verify format
-        f: str = self._format.value
+        # Verify mime_type
+        f: str = self._mime_type.value
         if f == MIMEType.RDF_XML.value or \
                 f == MIMEType.JSON_LD.value or \
                 f == MIMEType.N3.value or \
@@ -38,10 +38,10 @@ class HydraLogicalSource(LogicalSource):
                 f == MIMEType.TRIG.value or \
                 f == MIMEType.TRIX.value or \
                 f == MIMEType.TURTLE.value:
-            # Start fetching if format is supported
+            # Start fetching if mime_type is supported
             self._fetch(self._url)
         else:
-            raise ValueError(f'Unsupported MIME type: {self._format}')
+            raise ValueError(f'Unsupported MIME type: {self._mime_type}')
 
     def _fetch(self, url: str) -> None:
         """
@@ -65,8 +65,8 @@ class HydraLogicalSource(LogicalSource):
         # Update source
         path: str = self._tmp_file
         rf: str = self._reference_formulation
-        format: MIMEType = self._format
-        self._source: RDFLogicalSource = RDFLogicalSource(path, rf, format)
+        mime_type: MIMEType = self._mime_type
+        self._source: RDFLogicalSource = RDFLogicalSource(path, rf, mime_type)
 
         # Try to get the next page
         try:
@@ -96,3 +96,10 @@ class HydraLogicalSource(LogicalSource):
                 if self._tmp_file is not None:
                     remove(self._tmp_file)
                 raise StopIteration
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns the provided mime type for the Hydra IriTemplate.
+        """
+        return self._mime_type

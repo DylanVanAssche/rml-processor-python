@@ -2,7 +2,7 @@
 
 import unittest
 
-from rml.io.sources import CSVLogicalSource
+from rml.io.sources import CSVLogicalSource, MIMEType
 
 
 class CSVLogicalSourceTests(unittest.TestCase):
@@ -19,6 +19,13 @@ class CSVLogicalSourceTests(unittest.TestCase):
                              {'id': '2', 'name': 'Simon', 'age': '23'})
         with self.assertRaises(StopIteration):
             next(source)
+
+    def test_mime_type(self) -> None:
+        """
+        Test the MIME type property
+        """
+        source = CSVLogicalSource('tests/assets/csv/student.csv')
+        self.assertEqual(source.mime_type, MIMEType.CSV)
 
     def test_non_existing_file(self) -> None:
         """

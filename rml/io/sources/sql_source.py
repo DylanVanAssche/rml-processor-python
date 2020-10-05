@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from typing import Dict
 
-from . import LogicalSource
+from rml.io.sources import LogicalSource, MIMEType
 
 
 class SQLLogicalSource(LogicalSource):
@@ -38,3 +38,10 @@ class SQLLogicalSource(LogicalSource):
         except StopIteration:
             self._connection.close()
             raise StopIteration
+
+    @property
+    def mime_type(self) -> MIMEType:
+        """
+        Returns MIMEType.SQL.
+        """
+        return MIMEType.SQL
