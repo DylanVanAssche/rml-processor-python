@@ -1,4 +1,3 @@
-from uritemplate import URITemplate
 from rdflib.term import URIRef, Identifier
 from jsonpath_ng import parse
 from typing import Union, Dict
@@ -20,7 +19,11 @@ class PredicateMap(TermMap):
         """
         Resolves a predicate into an RDF Identifier.
         """
-        if self._term_type == TermType.CONSTANT:
+        if self._term_type == TermType.TEMPLATE:
+            return URIRef(super()._resolve_template(data))
+        elif self._term_type == TermType.REFERENCE:
+            return URIRef(super()._resolve_reference(self._term, data))
+        elif self._term_type == TermType.CONSTANT:
             return URIRef(self._term)
         else:
             raise ValueError(f'Unknown term type: {self._term_type}')

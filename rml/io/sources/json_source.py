@@ -14,8 +14,8 @@ class JSONLogicalSource(LogicalSource):
         super().__init__(reference_formulation)
         try:
             json_path: JsonPathParser = parse(self._reference_formulation)
-        except Exception:
-            raise ValueError('Invalid JSONPath expression')
+        except Exception as e:
+            raise ValueError(f'Invalid JSONPath expression: {e}')
         self._path: str = path
         self._data: Dict = {}
 

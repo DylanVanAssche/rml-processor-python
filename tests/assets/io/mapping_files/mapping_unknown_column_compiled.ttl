@@ -1,0 +1,33 @@
+@prefix ns1: <http://www.w3.org/ns/r2rml#> .
+@prefix ns2: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ns3: <http://semweb.mmlab.be/ns/rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.com/base/TriplesMapSQL_SQLITE_LOGIN> a ns1:TriplesMap ;
+    ns3:logicalSource [ ns3:query "SELECT id, name, age FROM students;" ;
+            ns3:source <http://example.com/base/#SQL_SQLITE_LOGIN_source> ;
+            ns1:sqlVersion ns1:SQL2008 ] ;
+    ns1:predicateObjectMap [ ns1:objectMap [ ns3:reference "AGE" ;
+                    ns1:datatype xsd:integer ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/age> ;
+                    ns1:termType ns1:IRI ] ] ;
+    ns1:subjectMap [ ns1:template "http://example.com/{NAME}_LOGIN" ] .
+
+<http://example.com/base/TriplesMapSQL_SQLITE_NO_LOGIN> a ns1:TriplesMap ;
+    ns3:logicalSource [ ns3:query "SELECT id, name, age FROM students;" ;
+            ns3:source <http://example.com/base/#SQL_SQLITE_NO_LOGIN_source> ;
+            ns1:sqlVersion ns1:SQL2008 ] ;
+    ns1:predicateObjectMap [ ns1:objectMap [ ns3:reference "UNKNOWN_COLUMN" ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/age> ;
+                    ns1:termType ns1:IRI ] ] ;
+    ns1:subjectMap [ ns1:template "http://example.com/{NAME}_NO_LOGIN" ] .
+
+<http://example.com/base/#SQL_SQLITE_LOGIN_source> a ns2:Database ;
+    ns2:jdbcDSN "sqlite:///tests/assets/sql/student.db" ;
+    ns2:jdbcDriver "com.sqlite.jdbc.Driver" ;
+    ns2:password "password" ;
+    ns2:username "username" .
+
+<http://example.com/base/#SQL_SQLITE_NO_LOGIN_source> a ns2:Database ;
+    ns2:jdbcDSN "sqlite:///tests/assets/sql/student.db" ;
+    ns2:jdbcDriver "com.sqlite.jdbc.Driver" .

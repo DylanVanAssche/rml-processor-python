@@ -1,0 +1,20 @@
+@prefix ex: <http://example.com/> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.com/base/TriplesMapCSV> a rr:TriplesMap ;
+    rml:logicalSource [ rml:referenceFormulation ql:CSV ;
+            rml:source "tests/assets/csv/student.csv" ] ;
+    rr:predicateObjectMap [ rr:graphMap _:ub7bL20C21 ;
+            rr:objectMap [ rr:constant ex:test ] ;
+            rr:predicateMap [ rml:reference "name" ] ],
+        [ rr:graphMap _:ub7bL20C21 ;
+            rr:objectMap [ rr:datatype xsd:int ;
+                    rr:template "{age}" ] ;
+            rr:predicateMap [ rr:template "{name}" ] ] ;
+    rr:subjectMap [ rr:constant ex:MyStudentIRI2 ] .
+
+_:ub7bL20C21 rr:constant ex:MyGraph .
+

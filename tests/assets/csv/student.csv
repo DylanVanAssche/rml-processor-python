@@ -1,4 +1,4 @@
-id,name,age
-0,Herman,65
-1,Ann,62
-2,Simon,23
+id,name,age,iri
+0,Herman,65,http://example.com/myStudent1
+1,Ann,62,http://example.com/myStudent2
+2,Simon,23,http://example.com/myStudent3

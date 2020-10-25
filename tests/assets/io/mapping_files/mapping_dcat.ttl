@@ -27,7 +27,7 @@
         rml:iterator "/students/student" ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/xml/{name}" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;
@@ -52,7 +52,7 @@
         rml:iterator "$.students.[*]" ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/json/{name}" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;
@@ -76,7 +76,7 @@
         rml:referenceFormulation ql:CSV ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/csv/{name}" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;
@@ -97,18 +97,18 @@
     a rr:TriplesMap;
     rml:logicalSource [
         rml:source <#DCAT_RDFXML_source> ;
-        rml:referenceFormulation ql:XML;
-        rml:query '''PREFIX foaf: <http://xmlns.com/foaf/0.1/>                  
+        rml:referenceFormulation ql:XPath;
+        rml:query """PREFIX foaf: <http://xmlns.com/foaf/0.1/>                  
                      PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
                      SELECT ?person ?name ?age                                  
                      WHERE {                                                    
                          ?person foaf:name ?name .                              
                          ?person foaf:age ?age .                                
                      }                                                          
-                     ORDER BY DESC(?age)''' ;
+                     ORDER BY DESC(?age)""" ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/rdfxml/{name}" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;

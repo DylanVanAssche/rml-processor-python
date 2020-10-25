@@ -2,7 +2,9 @@ import unittest
 from contextlib import redirect_stdout
 from io import StringIO
 from typing import List
+from rdflib.term import URIRef
 
+from rml.namespace import R2RML, FOAF
 from rml.io.targets import StdoutLogicalTarget
 from rml.io.sources import JSONLogicalSource, SPARQLJSONLogicalSource, MIMEType
 from rml.io.maps import TriplesMap, SubjectMap, PredicateMap, \
@@ -17,6 +19,32 @@ SPARQL_QUERY = """
     }
 """
 
+EXPECTED_OUTPUT_1 = """<http://example.com/0> <http://xmlns.com/foaf/0.1/name> <Herman> .
+<http://example.com/1> <http://xmlns.com/foaf/0.1/name> <Ann> .
+<http://example.com/2> <http://xmlns.com/foaf/0.1/name> <Simon> .
+"""
+
+EXPECTED_OUTPUT_2 = """<http://example.com/0> <http://xmlns.com/foaf/0.1/name> <Herman> .
+"""
+
+EXPECTED_OUTPUT_3 = """<http://example.com/0> <http://xmlns.com/foaf/0.1/name> <Herman> .
+<http://dbpedia.org/resource/Jennifer_Aniston> <http://xmlns.com/foaf/0.1/name> <Jennifer Aniston> .
+<http://example.com/1> <http://xmlns.com/foaf/0.1/name> <Ann> .
+<http://dbpedia.org/resource/David_Schwimmer> <http://xmlns.com/foaf/0.1/name> <David Schwimmer> .
+<http://example.com/2> <http://xmlns.com/foaf/0.1/name> <Simon> .
+<http://dbpedia.org/resource/Lisa_Kudrow> <http://xmlns.com/foaf/0.1/name> <Lisa Kudrow> .
+<http://dbpedia.org/resource/Matt_LeBlanc> <http://xmlns.com/foaf/0.1/name> <Matt LeBlanc> .
+<http://dbpedia.org/resource/Matthew_Perry> <http://xmlns.com/foaf/0.1/name> <Matthew Perry> .
+<http://dbpedia.org/resource/Courteney_Cox> <http://xmlns.com/foaf/0.1/name> <Courteney Cox> .
+"""
+
+EXPECTED_OUTPUT_4 = """<http://example.com/0> <http://xmlns.com/foaf/0.1/name> <Herman> .
+<http://dbpedia.org/resource/Jennifer_Aniston> <http://xmlns.com/foaf/0.1/name> <Jennifer Aniston> .
+"""
+
+EXPECTED_OUTPUT_5 = """
+"""
+
 
 class StdoutLogicalTargetTests(unittest.TestCase):
     def test_write_all_single_triples_map(self) -> None:
@@ -26,7 +54,7 @@ class StdoutLogicalTargetTests(unittest.TestCase):
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.JSON)
+                        MIMEType.JSON, None, None)
         pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
                           MIMEType.JSON)
         om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
@@ -40,13 +68,7 @@ class StdoutLogicalTargetTests(unittest.TestCase):
             with redirect_stdout(buf):
                 target = StdoutLogicalTarget(list_tm)
                 target.write_all()
-            self.assertEqual(buf.getvalue(),
-                             '<http://example.com/0> '
-                             '<http://xmlns.com/foaf/0.1/name> <Herman>\n'
-                             '<http://example.com/1> '
-                             '<http://xmlns.com/foaf/0.1/name> <Ann>\n'
-                             '<http://example.com/2> '
-                             '<http://xmlns.com/foaf/0.1/name> <Simon>\n')
+            self.assertEqual(buf.getvalue(), EXPECTED_OUTPUT_1)
 
     def test_write_single_triples_map(self) -> None:
         """
@@ -55,7 +77,7 @@ class StdoutLogicalTargetTests(unittest.TestCase):
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.JSON)
+                        MIMEType.JSON, None, None)
         pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
                           MIMEType.JSON)
         om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
@@ -70,9 +92,7 @@ class StdoutLogicalTargetTests(unittest.TestCase):
                 target = StdoutLogicalTarget(list_tm)
                 target.write()
             output = buf.getvalue()
-            self.assertEqual(output,
-                             '<http://example.com/0> '
-                             '<http://xmlns.com/foaf/0.1/name> <Herman>\n')
+            self.assertEqual(output, EXPECTED_OUTPUT_2)
 
     def test_write_all_multiple_triples_map(self) -> None:
         """
@@ -84,9 +104,9 @@ class StdoutLogicalTargetTests(unittest.TestCase):
                                               'http://dbpedia.org/sparql',
                                               SPARQL_QUERY)
         sm1 = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                         MIMEType.JSON)
+                         MIMEType.JSON, None, None)
         sm2 = SubjectMap('actor.value', TermType.REFERENCE,
-                         MIMEType.JSON)
+                         MIMEType.JSON, None, None)
         pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
                           MIMEType.JSON)
         om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON,
@@ -108,44 +128,21 @@ class StdoutLogicalTargetTests(unittest.TestCase):
                 target = StdoutLogicalTarget(list_tm)
                 target.write_all()
             output = buf.getvalue()
-            self.assertEqual(output,
-                             '<http://example.com/0> '
-                             '<http://xmlns.com/foaf/0.1/name> <Herman>\n'
-                             '<http://dbpedia.org/resource/Jennifer_Aniston> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<Jennifer Aniston>\n'
-                             '<http://example.com/1> '
-                             '<http://xmlns.com/foaf/0.1/name> <Ann>\n'
-                             '<http://dbpedia.org/resource/David_Schwimmer> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<David Schwimmer>\n'
-                             '<http://example.com/2> '
-                             '<http://xmlns.com/foaf/0.1/name> <Simon>\n'
-                             '<http://dbpedia.org/resource/Lisa_Kudrow> '
-                             '<http://xmlns.com/foaf/0.1/name> <Lisa Kudrow>\n'
-                             '<http://dbpedia.org/resource/Matt_LeBlanc> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<Matt LeBlanc>\n'
-                             '<http://dbpedia.org/resource/Matthew_Perry> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<Matthew Perry>\n'
-                             '<http://dbpedia.org/resource/Courteney_Cox> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<Courteney Cox>\n')
+            self.assertEqual(output, EXPECTED_OUTPUT_3)
 
     def test_write_multiple_triples_map(self) -> None:
         """
         Test write a single record of triples of multiple triples maps
         """
         ls1 = JSONLogicalSource('$.students.[*]',
-                               'tests/assets/json/student.json')
+                                'tests/assets/json/student.json')
         ls2 = SPARQLJSONLogicalSource('$.results.bindings.[*]',
-                                              'http://dbpedia.org/sparql',
-                                              SPARQL_QUERY)
+                                      'http://dbpedia.org/sparql',
+                                      SPARQL_QUERY)
         sm1 = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                         MIMEType.JSON)
+                         MIMEType.JSON, None, None)
         sm2 = SubjectMap('actor.value', TermType.REFERENCE,
-                         MIMEType.JSON)
+                         MIMEType.JSON, None, None)
         pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
                           MIMEType.JSON)
         om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON,
@@ -167,12 +164,7 @@ class StdoutLogicalTargetTests(unittest.TestCase):
                 target = StdoutLogicalTarget(list_tm)
                 target.write()
             output = buf.getvalue()
-            self.assertEqual(output,
-                             '<http://example.com/0> '
-                             '<http://xmlns.com/foaf/0.1/name> <Herman>\n'
-                             '<http://dbpedia.org/resource/Jennifer_Aniston> '
-                             '<http://xmlns.com/foaf/0.1/name> '
-                             '<Jennifer Aniston>\n')
+            self.assertEqual(output, EXPECTED_OUTPUT_4)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,13 @@
+<http://dbpedia.org/resource/David_Schwimmer_XML> <http://xmlns.com/foaf/0.1/name> "David Schwimmer" .
+<http://dbpedia.org/resource/Matthew_Perry_JSON> <http://xmlns.com/foaf/0.1/name> "Matthew Perry" .
+<http://dbpedia.org/resource/David_Schwimmer_JSON> <http://xmlns.com/foaf/0.1/name> "David Schwimmer" .
+<http://dbpedia.org/resource/Matt_LeBlanc_JSON> <http://xmlns.com/foaf/0.1/name> "Matt LeBlanc" .
+<http://dbpedia.org/resource/Jennifer_Aniston_XML> <http://xmlns.com/foaf/0.1/name> "Jennifer Aniston" .
+<http://dbpedia.org/resource/Courteney_Cox_XML> <http://xmlns.com/foaf/0.1/name> "Courteney Cox" .
+<http://dbpedia.org/resource/Matthew_Perry_XML> <http://xmlns.com/foaf/0.1/name> "Matthew Perry" .
+<http://dbpedia.org/resource/Matt_LeBlanc_XML> <http://xmlns.com/foaf/0.1/name> "Matt LeBlanc" .
+<http://dbpedia.org/resource/Jennifer_Aniston_JSON> <http://xmlns.com/foaf/0.1/name> "Jennifer Aniston" .
+<http://dbpedia.org/resource/Lisa_Kudrow_XML> <http://xmlns.com/foaf/0.1/name> "Lisa Kudrow" .
+<http://dbpedia.org/resource/Lisa_Kudrow_JSON> <http://xmlns.com/foaf/0.1/name> "Lisa Kudrow" .
+<http://dbpedia.org/resource/Courteney_Cox_JSON> <http://xmlns.com/foaf/0.1/name> "Courteney Cox" .
+

@@ -1,0 +1,6 @@
+<http://example.com/Herman_NO_LOGIN> <http://xmlns.com/foaf/0.1/age> "65"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+<http://example.com/Ann_NO_LOGIN> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>  .
+<http://example.com/Herman_NO_LOGIN> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>  .
+<http://example.com/Simon_NO_LOGIN> <http://xmlns.com/foaf/0.1/age> "23"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+<http://example.com/Ann_NO_LOGIN> <http://xmlns.com/foaf/0.1/age> "62"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+<http://example.com/Simon_NO_LOGIN> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>  .

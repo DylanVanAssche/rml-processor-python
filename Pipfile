@@ -4,23 +4,27 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+docker = "*"
+nose = "*"
+coverage = "*"
+mypy = "*"
+pycodestyle = "*"
+parameterized = "*"
 
 [packages]
 jsonpath-ng = "*"
-nose = "*"
-coverage = "*"
 lxml = "*"
-sqlalchemy = "*"
-rdflib = "*"
-sparqlwrapper = "*"
+SQLAlchemy = "*"
+SPARQLWrapper = "*"
 requests = "*"
 rdflib-jsonld = "*"
-uritemplate = "*"
-mypy = "*"
-pycodestyle = "*"
 pyshacl = "*"
-parameterized = "*"
 requests-file = "*"
+psycopg2 = "*"
+PyMySQL = "*"
+cryptography = "*"
+pyodbc = "*"
+rdflib = "*"
 
 [requires]
 python_version = "3.8"

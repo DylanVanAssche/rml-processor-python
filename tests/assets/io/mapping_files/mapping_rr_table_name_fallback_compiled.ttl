@@ -1,0 +1,18 @@
+@prefix ns1: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ns2: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ns3: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://example.com/base/TriplesMapSQL_SQLITE_NO_LOGIN> a ns3:TriplesMap ;
+    ns1:logicalSource [ ns1:query "SELECT * FROM students" ;
+            ns1:source <http://example.com/base/#SQL_SQLITE_NO_LOGIN_source> ;
+            ns3:sqlVersion ns3:SQL2008 ] ;
+    ns3:predicateObjectMap [ ns3:objectMap [ ns3:constant <http://xmlns.com/foaf/0.1/Person> ] ;
+            ns3:predicateMap [ ns3:constant rdf:type ;
+                    ns3:termType ns3:IRI ] ] ;
+    ns3:subjectMap [ ns3:constant "http://example.com/me" ] .
+
+<http://example.com/base/#SQL_SQLITE_NO_LOGIN_source> a ns2:Database ;
+    ns2:jdbcDSN "sqlite:///tests/assets/sql/student.db" ;
+    ns2:jdbcDriver "com.sqlite.jdbc.Driver" .
+

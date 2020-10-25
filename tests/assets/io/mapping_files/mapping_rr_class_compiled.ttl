@@ -1,0 +1,14 @@
+@prefix ns1: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ns2: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://example.com/base/TriplesMapCSV> a ns2:TriplesMap ;
+    ns1:logicalSource [ ns1:referenceFormulation <http://semweb.mmlab.be/ns/ql#CSV> ;
+            ns1:source "tests/assets/csv/student.csv" ] ;
+    ns2:predicateObjectMap [ ns2:objectMap [ ns2:constant <http://example.com/Student> ];
+            ns2:predicateMap [ ns2:constant rdf:type ] ],
+        [ ns2:objectMap [ ns1:reference "name" ] ;
+            ns2:predicateMap [ ns2:constant <http://xmlns.com/foaf/0.1/name> ;
+                    ns2:termType ns2:IRI ] ] ;
+    ns2:subjectMap [ ns2:template "http://example.com/{id}" ] .
+
