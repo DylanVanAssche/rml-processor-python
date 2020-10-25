@@ -1,12 +1,13 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.engine.reflection import Inspector
 from typing import Dict
 
 from rml.io.sources import LogicalSource, MIMEType
 
 
 class SQLLogicalSource(LogicalSource):
-    def __init__(self, jdbc: str, query: str):
+    def __init__(self, jdbc: str, query: str = None, table_name: str = None):
         """
         An SQL Logical Source to iterate over RDB data.
         The RML reference formulation is not used for row-based iterators.
@@ -14,18 +15,22 @@ class SQLLogicalSource(LogicalSource):
         super().__init__()
         self._jdbc = jdbc
         self._query = query
+
+        # Connect to database
         try:
             # Pass through logging
             self._engine = create_engine(self._jdbc, echo=True)
             self._connection = self._engine.connect()
-        except OperationalError:
-            raise FileNotFoundError
+        except OperationalError as e:
+            raise FileNotFoundError(f'Cannot connect to database {self._jdbc}:'
+                                    f' {e}')
 
+        # Execute SQL query on database
         try:
             self._iterator = self._connection.execute(self._query)
         except OperationalError:
             self._connection.close()
-            raise ValueError
+            raise ValueError(f'Connection to database lost: {self._jdbc}')
 
     def __next__(self) -> Dict:
         """
@@ -34,7 +39,7 @@ class SQLLogicalSource(LogicalSource):
         """
         try:
             row = dict(next(self._iterator))
-            return {k.lower(): v for k, v in row.items()}
+            return row
         except StopIteration:
             self._connection.close()
             raise StopIteration

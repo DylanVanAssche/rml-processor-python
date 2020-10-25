@@ -12,11 +12,14 @@ class CSVLogicalSourceTests(unittest.TestCase):
         """
         source = CSVLogicalSource('tests/assets/csv/student.csv')
         self.assertDictEqual(next(source),
-                             {'id': '0', 'name': 'Herman', 'age': '65'})
+                             {'id': '0', 'name': 'Herman', 'age': '65',
+                              'iri': 'http://example.com/myStudent1'})
         self.assertDictEqual(next(source),
-                             {'id': '1', 'name': 'Ann', 'age': '62'})
+                             {'id': '1', 'name': 'Ann', 'age': '62',
+                              'iri': 'http://example.com/myStudent2'})
         self.assertDictEqual(next(source),
-                             {'id': '2', 'name': 'Simon', 'age': '23'})
+                             {'id': '2', 'name': 'Simon', 'age': '23',
+                              'iri': 'http://example.com/myStudent3'})
         with self.assertRaises(StopIteration):
             next(source)
 

@@ -1,19 +1,19 @@
+from itertools import product
 from rdflib import Graph
-from rdflib.term import URIRef, Literal, BNode
+from rdflib.term import URIRef, Literal, BNode, Identifier
 from typing import List, Optional, Union
 
 from rml.io.sources import LogicalSource, CSVLogicalSource, \
                            JSONLogicalSource, XMLLogicalSource, \
                            RDFLogicalSource, DCATLogicalSource, \
-                           HydraLogicalSource, SQLLogicalSource, \
-                           SPARQLXMLLogicalSource, SPARQLJSONLogicalSource, \
-                           MIMEType
+                           SQLLogicalSource, SPARQLXMLLogicalSource, \
+                           SPARQLJSONLogicalSource, MIMEType
 from rml.io.targets import LogicalTarget
 from rml.io.maps import TriplesMap, PredicateObjectMap, SubjectMap, \
                         ObjectMap, PredicateMap, TermType
 from rml.namespace import RML, R2RML, RDF, QL, D2RQ, SD, CSVW, DCAT, HYDRA, \
                           FORMATS
-from rml.io import MappingValidator
+from rml.io import MappingValidator, MappingCompiler
 from rml.io import RML_RULES_SHAPE
 
 
@@ -25,7 +25,10 @@ class MappingReader:
         self._graph: Graph = Graph()
         self._path: str = path
         self._validator: MappingValidator = MappingValidator(RML_RULES_SHAPE)
+        self._compiler: MappingCompiler = MappingCompiler()
         self._read()
+        self._validator.validate(self.rules)
+        self._compiler.compile(self.rules)
 
     def _read(self) -> None:
         """
@@ -56,27 +59,23 @@ class MappingReader:
         print(f'Triples Map: {tm}')
 
         # Logical Source
-        ls_list = []
+        ls_list: List[LogicalSource] = []
         for ls in self._graph.objects(tm, RML.logicalSource):
             ls_list.append(self._resolve_logical_source(ls))
 
         mime_type: MIMEType = ls_list[0].mime_type
 
         # Subject Map
-        sm_list = []
+        sm_list: List[SubjectMap] = []
         for subject_map in self._graph.objects(tm, R2RML.subjectMap):
             sm_list.append(self._resolve_subject_map(subject_map, mime_type))
 
-        if not sm_list:  # no rr:subjectMap, check for rr:subject
-            for subject in self._graph.objects(tm, R2RML.subject):
-                sm_list.append(self._resolve_subject(subject, mime_type))
-
         # Predicate Object Maps
-        pom_list = []
+        pom_list: List[PredicateObjectMap] = []
         for pred_obj_map in self._graph.objects(tm,
                                                 R2RML.predicateObjectMap):
-            pom = self._resolve_predicate_object_map(pred_obj_map, mime_type)
-            pom_list.append(pom)
+            pom_list += self._resolve_predicate_object_map(pred_obj_map,
+                                                           mime_type)
 
         resolved_tm: TriplesMap = TriplesMap(ls_list[0], sm_list[0], pom_list)
         print('-' * 80)
@@ -107,12 +106,14 @@ class MappingReader:
         if _rml_iterator is not None:
             rml_iterator = _rml_iterator.toPython()
         rml_query: Literal = self._graph.value(ls, RML.query)
+        rr_table_name: Literal = self._graph.value(ls, R2RML.tableName)
 
         print(f'\tSource: {rml_source}')
         print(f'\tType: {rml_source_type}')
         print(f'\tReference formulation: {rml_reference_formulation}')
         print(f'\tIterator: {rml_iterator}')
         print(f'\tQuery: {rml_query}')
+        print(f'\tTable Name: {rr_table_name}')
 
         # Local file
         if rml_source_type is None:
@@ -179,6 +180,7 @@ class MappingReader:
             # JSON file
             elif rml_reference_formulation == QL.JSONPath:
                 print('Local JSON file')
+                print(rml_iterator)
                 return JSONLogicalSource(rml_iterator, rml_source)
             # XML file
             elif rml_reference_formulation == QL.XPath:
@@ -216,7 +218,11 @@ class MappingReader:
                     d2rq_jdbc_driver is not None:
                 print('WARNING: Only limited SQL database access is '
                       'supported, see Gitlab issue #36')
+
+            # Mapping validator enforces rr:tableName or rml:query
+            # Mapping compiler translates rr:tableName to rml:query
             return SQLLogicalSource(d2rq_jdbc_DSN, query=rml_query.toPython())
+
         # SPARQL endpoint
         elif rml_source_type == SD.Service:
             print('SPARQL endpoint')
@@ -274,11 +280,13 @@ class MappingReader:
                 rml_iterator = rml_query
             return DCATLogicalSource(dcat_download_url, dcat_media_type,
                                      rml_iterator)
-        else:
-            raise ValueError(f'Unknown Logical Source description: {ls}')
+        else:  # pragma: no cover
+            raise ValueError(f'Unknown Logical Source description: {ls}. This '
+                             'should be catched by the shape validation! '
+                             'Report this as an issue!')
 
     def _resolve_predicate_object_map(self, pom: URIRef, mime_type: MIMEType) \
-            -> PredicateObjectMap:
+            -> List[PredicateObjectMap]:
         print(f'Predicate Object Map: {pom}')
 
         # Predicate Map
@@ -287,20 +295,16 @@ class MappingReader:
             pm_list.append(self._resolve_predicate_map(predicate_map,
                                                        mime_type))
 
-        if not pm_list:  # no rr:predicateMap, check for rr:predicate
-            for predicate in self._graph.objects(pom, R2RML.predicate):
-                pm_list.append(self._resolve_predicate(predicate, mime_type))
-
         # Object Map
         om_list = []
         for object_map in self._graph.objects(pom, R2RML.objectMap):
             om_list.append(self._resolve_object_map(object_map, mime_type))
 
-        if not om_list:  # no rr:objectMap, check for rr:object
-            for object in self._graph.objects(pom, R2RML.object):
-                om_list.append(self._resolve_object(object, mime_type))
+        pom_list: List[PredicateObjectMap] = []
+        for pm, om in product(pm_list, om_list):
+            pom_list.append(PredicateObjectMap(pm, om))
 
-        return PredicateObjectMap(pm_list[0], om_list[0])
+        return pom_list
 
     def _resolve_subject_map(self, sm: URIRef,
                              mime_type: MIMEType) -> SubjectMap:
@@ -309,30 +313,26 @@ class MappingReader:
         rr_template = self._graph.value(sm, R2RML.template)
         rml_reference = self._graph.value(sm, RML.reference)
         rr_constant: URIRef = self._graph.value(sm, R2RML.constant)
-        rr_class: URIRef = self._graph.value(sm, R2RML['class'])  # keyword
+        rr_term_type: Identifier = self._graph.value(sm, R2RML.termType)
 
         print(f'\tTemplate: {rr_template}')
         print(f'\tReference: {rml_reference}')
         print(f'\tConstant: {rr_constant}')
-        print(f'\tClass: {rr_class}')
+        print(f'\tTerm type: {rr_term_type}')
 
         if rr_template is not None:
-            return SubjectMap(rr_template.toPython(),
-                              TermType.TEMPLATE, mime_type)
+            return SubjectMap(rr_template.toPython(), TermType.TEMPLATE,
+                              mime_type, rr_term_type)
         elif rml_reference is not None:
-            return SubjectMap(rml_reference.toPython(),
-                              TermType.REFERENCE, mime_type)
+            return SubjectMap(rml_reference.toPython(), TermType.REFERENCE,
+                              mime_type, rr_term_type)
         elif rr_constant is not None:
-            return SubjectMap(rr_constant, TermType.CONSTANT, mime_type)
+            return SubjectMap(rr_constant, TermType.CONSTANT, mime_type,
+                              rr_term_type)
         else:  # pragma: no cover
             raise ValueError(f'Unable to resolve rr:subjectMap {sm}, should '
                              'be catched by shape validation. Report this as '
                              'an issue!')
-
-    def _resolve_subject(self, s: URIRef, mime_type: MIMEType) -> SubjectMap:
-        print(f'Subject Map shortcut: {s}')
-        print(f'\tConstant: {s}')
-        return SubjectMap(s, TermType.CONSTANT, mime_type)
 
     def _resolve_object_map(self, om: URIRef, mime_type: MIMEType) \
             -> ObjectMap:
@@ -356,52 +356,46 @@ class MappingReader:
         # - has rr:datatype
         # See the RML spec (https://rml.io/spec) for a detailed explanation.
         if rr_template is not None:
-            if rr_term_type == R2RML.IRI:
-                return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
-                                 mime_type, language=rr_language,
-                                 datatype=rr_datatype)
-            elif rr_term_type == R2RML.Literal:
+            if rr_term_type == R2RML.Literal or rr_language is not None or \
+                    rr_datatype is not None:
                 return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=False)
             elif rr_term_type == R2RML.BlankNode:
                 raise NotImplementedError('Blank nodes are not supported yet')
-            elif rr_language is not None or rr_datatype is not None:
-                return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
-                                 mime_type, language=rr_language,
-                                 datatype=rr_datatype, is_iri=False)
+            # R2RML.IRI or no rr:termType
             else:
                 return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
                                  mime_type, language=rr_language,
-                                 datatype=rr_datatype)
+                                 datatype=rr_datatype, is_iri=True)
         elif rml_reference is not None:
             # Term type specifies IRI
             if rr_term_type == R2RML.IRI:
                 return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
                                  mime_type, language=rr_language,
-                                 datatype=rr_datatype)
+                                 datatype=rr_datatype, is_iri=True)
             elif rr_term_type == R2RML.BlankNode:
                 raise NotImplementedError('Blank nodes are not supported yet')
-            elif rr_term_type == R2RML.Literal:
-                return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
-                                 mime_type,
-                                 language=rr_language, datatype=rr_datatype,
-                                 is_iri=False)
+            # R2RML.Literal or has language tag or has datatype or no
+            # rr:termType
             else:
                 return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=False)
         elif rr_constant is not None:
-            return ObjectMap(rr_constant, TermType.CONSTANT, mime_type)
+            if rr_term_type == R2RML.Literal or rr_language is not None or \
+                    rr_datatype is not None:
+                return ObjectMap(rr_constant, TermType.CONSTANT, mime_type,
+                                 language=rr_language, datatype=rr_datatype,
+                                 is_iri=False)
+            else:
+                return ObjectMap(rr_constant, TermType.CONSTANT, mime_type,
+                                 language=rr_language, datatype=rr_datatype,
+                                 is_iri=True)
         else:  # pragma: no cover
             raise ValueError('ObjectMap requires at least 1 rr:template, '
                              'rml:reference or rr:constant. Should be catched '
                              'by shape validation, report this as an issue!')
-
-    def _resolve_object(self, o: URIRef, mime_type: MIMEType) -> ObjectMap:
-        print(f'\tObject: {o}')
-        print(f'\t\tConstant: {o}')
-        return ObjectMap(o, TermType.CONSTANT, mime_type)
 
     def _resolve_predicate_map(self, pm: URIRef, mime_type: MIMEType) \
             -> PredicateMap:
@@ -415,10 +409,10 @@ class MappingReader:
         print(f'\t\tConstant: {rr_constant}')
 
         if rr_template is not None:
-            return PredicateMap(rr_template.toPython(), TermType.CONSTANT,
+            return PredicateMap(rr_template.toPython(), TermType.TEMPLATE,
                                 mime_type)
         elif rml_reference is not None:
-            return PredicateMap(rml_reference.toPython(), TermType.CONSTANT,
+            return PredicateMap(rml_reference.toPython(), TermType.REFERENCE,
                                 mime_type)
         elif rr_constant is not None:
             return PredicateMap(rr_constant, TermType.CONSTANT, mime_type)
@@ -426,9 +420,3 @@ class MappingReader:
             raise ValueError(f'Unable to resolved rr:predicateMap {pm}. '
                              'Should be catched by shape validation, report'
                              'this as an issue!')
-
-    def _resolve_predicate(self, p: URIRef, mime_type: MIMEType) \
-            -> PredicateMap:
-        print(f'\tPredicate: {p}')
-        print(f'\t\tConstant: {p}')
-        return PredicateMap(p, TermType.CONSTANT, mime_type)

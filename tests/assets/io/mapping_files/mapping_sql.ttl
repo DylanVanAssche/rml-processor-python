@@ -22,15 +22,15 @@
     rml:logicalSource [
         rml:source <#SQL_SQLITE_NO_LOGIN_source> ;
         rr:sqlVersion rr:SQL2008;
-        rml:query '''SELECT id, name, age FROM students;''' ;
+        rml:query """SELECT id, name, age FROM students;""" ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/{NAME}_NO_LOGIN" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;
         rr:objectMap [
-            rml:reference "age"
+            rml:reference "AGE"
         ]
     ] .
 
@@ -47,14 +47,22 @@
     rml:logicalSource [
         rml:source <#SQL_SQLITE_LOGIN_source> ;
         rr:sqlVersion rr:SQL2008;
-        rml:query '''SELECT id, name, age FROM students;''' ;
+        rml:query """SELECT id, name, age FROM students;""" ;
     ] ;
 
-    rr:subjectMap [ rml:reference "name" ];
+    rr:subjectMap [ rr:template "http://example.com/{NAME}_LOGIN" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:age;
         rr:objectMap [
-            rml:reference "age"
+            rr:template "TEST_{AGE}_{ID}" ;
+            rr:termType rr:Literal ;
+        ]
+    ] ;
+    rr:predicateObjectMap [
+        rr:predicate foaf:age;
+        rr:objectMap [
+            rr:template "http://example.com/{ID}" ;
+            rr:termType rr:IRI
         ]
     ] .

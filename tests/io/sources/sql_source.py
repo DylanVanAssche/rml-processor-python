@@ -11,7 +11,7 @@ class SQLLogicalSourceTests(unittest.TestCase):
         Test the MIME type property
         """
         source = SQLLogicalSource('sqlite:///tests/assets/sql/student.db',
-                                       'SELECT id, name, age FROM students;')
+                                       'SELECT ID, NAME, AGE FROM students;')
         self.assertEqual(source.mime_type, MIMEType.SQL)
 
     def test_iterator(self) -> None:
@@ -19,13 +19,13 @@ class SQLLogicalSourceTests(unittest.TestCase):
         Test if we can iterate over every row
         """
         source = SQLLogicalSource('sqlite:///tests/assets/sql/student.db',
-                                       'SELECT id, name, age FROM students;')
+                                       'SELECT ID, NAME, AGE FROM students;')
         self.assertDictEqual(next(source),
-                             {'id': 0, 'name': 'Herman', 'age': 65})
+                             {'ID': 0, 'NAME': 'Herman', 'AGE': 65})
         self.assertDictEqual(next(source),
-                             {'id': 1, 'name': 'Ann', 'age': 62})
+                             {'ID': 1, 'NAME': 'Ann', 'AGE': 62})
         self.assertDictEqual(next(source),
-                             {'id': 2, 'name': 'Simon', 'age': 23})
+                             {'ID': 2, 'NAME': 'Simon', 'AGE': 23})
         with self.assertRaises(StopIteration):
             next(source)
 
@@ -36,7 +36,7 @@ class SQLLogicalSourceTests(unittest.TestCase):
         """
         with self.assertRaises(FileNotFoundError):
             source = SQLLogicalSource('sqlite:///this/file/does/not/exist',
-                                           'SELECT id, name, age FROM students;')
+                                           'SELECT ID, NAME, AGE FROM students;')
 
     def test_non_existing_table(self) -> None:
         """
@@ -44,7 +44,7 @@ class SQLLogicalSourceTests(unittest.TestCase):
         """
         with self.assertRaises(ValueError):
             source = SQLLogicalSource('sqlite:///tests/assets/sql/student.db',
-                                           'SELECT id, name, age FROM empty;')
+                                           'SELECT ID, NAME, AGE FROM empty;')
             next(source)
 
     def test_non_existing_column(self) -> None:
@@ -62,7 +62,7 @@ class SQLLogicalSourceTests(unittest.TestCase):
         """
         with self.assertRaises(StopIteration):
             source = SQLLogicalSource('sqlite:///tests/assets/sql/empty.db',
-                                           'SELECT id, name, age FROM students;')
+                                           'SELECT ID, NAME, AGE FROM students;')
             next(source)
 
 if __name__ == '__main__':

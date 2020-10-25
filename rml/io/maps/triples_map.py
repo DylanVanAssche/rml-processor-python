@@ -3,6 +3,7 @@ from rdflib.term import URIRef, Identifier
 
 from . import SubjectMap, PredicateObjectMap
 from rml.io.sources import LogicalSource
+from rml.namespace import RDF
 
 
 class TriplesMap:
@@ -12,13 +13,14 @@ class TriplesMap:
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
 
-    def __iter__(self) -> Iterator[List[Tuple[URIRef, URIRef, Identifier]]]:
+    def __iter__(self) \
+            -> Iterator[List[Tuple[URIRef, URIRef, Identifier, URIRef]]]:
         """
         Every Triples Map is a Python iterator
         """
         return self
 
-    def __next__(self) -> List[Tuple[URIRef, URIRef, Identifier]]:
+    def __next__(self) -> List[Tuple[URIRef, URIRef, Identifier, URIRef]]:
         """
         Generates all triples of this TriplesMap according to the given Subject
         Map, Predicate Map and Object Map for a single data record.
@@ -27,13 +29,22 @@ class TriplesMap:
         data = next(self._logical_source)
 
         # Generate subject
-        subj = self._subject_map.resolve(data)
+        try:
+            subj, rr_class, subj_graph = self._subject_map.resolve(data)
+        except ResourceWarning:
+            print('Unable to resolve SubjectMap, missing data')
+            return []
+
+        triples: List[Tuple[URIRef, URIRef, Identifier, URIRef]] = []
 
         # Generate predicate and objects
-        triples = []
         for po in self._predicate_object_maps:
-            pred, obj = po.resolve(data)
-            t = (subj, pred, obj)
+            try:
+                pred, obj, po_graph = po.resolve(data)
+            except ResourceWarning:
+                print('Unable to resolve PredicateObjectMap, missing data')
+                continue
+            t = (subj, pred, obj, po_graph)
             triples.append(t)
 
         return triples

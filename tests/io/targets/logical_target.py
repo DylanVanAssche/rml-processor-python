@@ -12,8 +12,8 @@ class MockLogicalTarget(LogicalTarget):
     def __init__(self, triples_maps: List[TriplesMap]) -> None:
         super().__init__(triples_maps)
 
-    def _add_to_target(self,
-                       triple: Tuple[URIRef, URIRef, Identifier]) -> None:
+    def _add_to_target(self, triple: Tuple[URIRef, URIRef, Identifier, \
+            Identifier]) -> None:
         print(triple)
 
 
@@ -25,7 +25,7 @@ class LogicalTargetTests(unittest.TestCase):
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.JSON)
+                        MIMEType.JSON, None, None)
         pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
                           MIMEType.JSON)
         om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)

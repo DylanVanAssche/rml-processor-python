@@ -22,7 +22,7 @@
     a rr:TriplesMap;
     rml:logicalSource [
         rml:source <#SPARQL_XML_source> ;
-        rml:query '''
+        rml:query """
             PREFIX dbo: <http://dbpedia.org/ontology/>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -34,17 +34,17 @@
                 ?actor foaf:name ?name .
                 ?actor dbo:birthDate ?birthDate .
             }
-        ''';
-        rml:referenceFormulation ql:XML;
-        rml:iterator "//result";
+        """;
+        rml:referenceFormulation ql:XPath;
+        rml:iterator "//sr:result";
     ] ;
 
-    rr:subjectMap [ rml:reference './binding[@name="actor"]/uri' ];
+    rr:subjectMap [ rr:template "{./sr:binding[@name=\"actor\"]/sr:uri}_XML" ];
 
     rr:predicateObjectMap [
         rr:predicate foaf:name;
         rr:objectMap [
-            rml:reference './binding[@name="name"]/literal';
+            rml:reference "./sr:binding[@name=\"name\"]/sr:literal";
         ]
     ] .
 
@@ -59,7 +59,7 @@
     a rr:TriplesMap;
     rml:logicalSource [
         rml:source <#SPARQL_JSON_source> ;
-        rml:query '''
+        rml:query """
             PREFIX dbo: <http://dbpedia.org/ontology/>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -71,16 +71,17 @@
                 ?actor foaf:name ?name .
                 ?actor dbo:birthDate ?birthDate .
             }
-        ''';
-        rml:referenceFormulation ql:JSON;
+        """;
+        rml:referenceFormulation ql:JSONPath;
         rml:iterator "$.results.bindings[*]";
     ] ;
 
-    rr:subjectMap [ rml:reference "actor.value" ];
+    rr:subjectMap [ rr:template "{actor.value}_JSON" ];
 
     rr:predicateObjectMap [
         rr:predicateMap [ rr:constant foaf:name ];
         rr:objectMap [
-            rml:reference "name";
+            rml:reference "name.value";
         ]
     ] .
+

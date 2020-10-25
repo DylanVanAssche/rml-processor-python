@@ -13,9 +13,9 @@ class StdoutLogicalTarget(LogicalTarget):
         super().__init__(triples_maps)
         self._number_of_triples_maps = len(self._triples_maps)
 
-    def _add_to_target(self,
-                       triple: Tuple[URIRef, URIRef, Identifier]) -> None:
+    def _add_to_target(self, triple: Tuple[URIRef, URIRef, Identifier,
+                                           URIRef]) -> None:
         """
         Adds a single triple to stdout.
         """
-        print('<%s> <%s> <%s>' % triple)
+        print('<%s> <%s> <%s> .' % triple[0:3])

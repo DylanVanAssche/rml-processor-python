@@ -4,6 +4,7 @@ import unittest
 from json.decoder import JSONDecodeError
 from lxml.etree import XMLSyntaxError, XPathEvalError
 from rdflib.term import Literal, URIRef
+from os import environ
 from os.path import abspath
 
 from rml.io.sources import DCATLogicalSource, MIMEType
@@ -32,16 +33,36 @@ WHERE {
 }
 ORDER BY DESC(?age)
 """
+HOST = environ['HOST']
 
 
 class DCATLogicalSourceTests(unittest.TestCase):
+    def _assert_rdf(self, source: DCATLogicalSource) -> None:
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/0'))
+        self.assertEqual(student['name'], Literal('Herman'))
+        self.assertEqual(student['age'], Literal('65'))
+
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/1'))
+        self.assertEqual(student['name'], Literal('Ann'))
+        self.assertEqual(student['age'], Literal('62'))
+
+        student = next(source)
+        self.assertEqual(student['person'], URIRef('http://example.com/2'))
+        self.assertEqual(student['name'], Literal('Simon'))
+        self.assertEqual(student['age'], Literal('23'))
+
+        with self.assertRaises(StopIteration):
+            next(source)
+
     def test_non_existing_resource(self) -> None:
         """
         Test if a FileNotFoundError exception is raised when the resource
         does not exist
         """
         with self.assertRaises(FileNotFoundError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/non-existing',
+            source = DCATLogicalSource(f'http://{HOST}:8000/non-existing',
                                        MIMEType.TEXT_XML)
 
     def test_unknown_format(self) -> None:
@@ -49,7 +70,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if a ValueError exception when the format is not supported.
         """
         with self.assertRaises(ValueError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.csv',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/student.csv',
                                        MIMEType.UNKNOWN)
 
     def test_non_existing_url(self) -> None:
@@ -65,7 +86,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test the MIME type property
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.csv',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/student.csv',
                                    MIMEType.CSV)
         self.assertEqual(source.mime_type, MIMEType.CSV)
 
@@ -73,14 +94,14 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can iterate over every row of an CSV resource
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.csv',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/student.csv',
                                    MIMEType.CSV)
-        self.assertDictEqual(next(source),
-                             {'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertDictEqual(next(source),
-                             {'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertDictEqual(next(source),
-                             {'id': '2', 'name': 'Simon', 'age': '23'})
+        self.assertDictEqual(next(source), {'id': '0', 'name': 'Herman',
+                                            'age': '65', 'iri': 'http://example.com/myStudent1'})
+        self.assertDictEqual(next(source), {'id': '1', 'name': 'Ann',
+                                            'age': '62', 'iri': 'http://example.com/myStudent2'})
+        self.assertDictEqual(next(source), {'id': '2', 'name': 'Simon',
+                                            'age': '23', 'iri': 'http://example.com/myStudent3'})
         with self.assertRaises(StopIteration):
             next(source)
 
@@ -89,7 +110,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if we can handle an empty CSV file
         """
         with self.assertRaises(StopIteration):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/empty.csv',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/empty.csv',
                                        MIMEType.CSV)
             next(source)
 
@@ -98,7 +119,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if we raise a ValueError when no CSV header is available
         """
         with self.assertRaises(ValueError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/no_header.csv',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/no_header.csv',
                                        MIMEType.CSV)
             next(source)
 
@@ -106,7 +127,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can handle different delimiters such as TABS in TSV files.
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/csv/student.tsv',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/csv/student.tsv',
                                    MIMEType.TSV, delimiter='\t')
         self.assertDictEqual(next(source),
                              {'id': '0', 'name': 'Herman', 'age': '65'})
@@ -121,10 +142,9 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can iterate over every row of an XML resource
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/xml/student.xml',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                    MIMEType.APPLICATION_XML,
                                    reference_formulation='/students/student')
-
         student = next(source)
         self.assertEqual(student.xpath('./id')[0].text, '0')
         self.assertEqual(student.xpath('./name')[0].text, 'Herman')
@@ -149,7 +169,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         invalid
         """
         with self.assertRaises(XPathEvalError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/xml/student.xml',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                        MIMEType.APPLICATION_XML,
                                        reference_formulation='$$$')
 
@@ -159,7 +179,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         as valid XML.
         """
         with self.assertRaises(XMLSyntaxError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/xml/invalid.xml',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/invalid.xml',
                                        MIMEType.APPLICATION_XML,
                                        reference_formulation='/students/student')
 
@@ -167,7 +187,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can handle an empty iterator
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/xml/student.xml',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                    MIMEType.APPLICATION_XML,
                                    reference_formulation='/empty')
         with self.assertRaises(StopIteration):
@@ -177,7 +197,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can iterate over every row of a JSON resource
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/json/student.json',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                    MIMEType.JSON,
                                    reference_formulation='$.students.[*]')
         self.assertDictEqual(next(source),
@@ -194,7 +214,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if we raise a ValueError when the JSONPath expression is invalid
         """
         with self.assertRaises(ValueError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/json/student.json',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                        MIMEType.JSON,
                                        reference_formulation='&$"£*W$')
 
@@ -204,7 +224,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         as valid JSON
         """
         with self.assertRaises(JSONDecodeError):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/json/invalid.json',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/invalid.json',
                                        MIMEType.JSON,
                                        reference_formulation='$.students.[*]')
 
@@ -213,7 +233,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if we handle an empty iterator
         """
         with self.assertRaises(StopIteration):
-            source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/json/student.json',
+            source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                        MIMEType.JSON,
                                        reference_formulation='$.empty')
             next(source)
@@ -222,210 +242,74 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.rdf',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.rdf',
                                    MIMEType.RDF_XML,
                                    reference_formulation=QUERY)
+        self._assert_rdf(source)
 
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
 
     def test_iterator_jsonld(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.jsonld',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.jsonld',
                                    MIMEType.JSON_LD,
                                    reference_formulation=QUERY)
-
-        student = next(source)
-        print(student)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_ntriples(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.ntriples',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ntriples',
                                    MIMEType.NTRIPLES,
                                    reference_formulation=QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_turtle(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.ttl',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ttl',
                                    MIMEType.TURTLE,
                                    reference_formulation=QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_nquads(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.nquads',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.nquads',
                                    MIMEType.NQUADS,
                                    reference_formulation=CONJUCTIVE_QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_trig(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.trig',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trig',
                                    MIMEType.TRIG,
                                    reference_formulation=CONJUCTIVE_QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_trix(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.trix',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trix',
                                    MIMEType.TRIX,
                                    reference_formulation=CONJUCTIVE_QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
     def test_iterator_n3(self) -> None:
         """
         Test if we can iterate over every row
         """
-        source = DCATLogicalSource('http://127.0.0.1:8000/tests/assets/rdf/student.n3',
+        source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.n3',
                                    MIMEType.N3,
                                    reference_formulation=QUERY)
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/0'))
-        self.assertEqual(student['name'], Literal('Herman'))
-        self.assertEqual(student['age'], Literal('65'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/1'))
-        self.assertEqual(student['name'], Literal('Ann'))
-        self.assertEqual(student['age'], Literal('62'))
-
-        student = next(source)
-        self.assertEqual(student['person'], URIRef('http://example.com/2'))
-        self.assertEqual(student['name'], Literal('Simon'))
-        self.assertEqual(student['age'], Literal('23'))
-
-        with self.assertRaises(StopIteration):
-            next(source)
+        self._assert_rdf(source)
 
 
 if __name__ == '__main__':

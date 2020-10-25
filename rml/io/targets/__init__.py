@@ -17,17 +17,18 @@ class LogicalTarget(ABC):
         """
         Write a single record of triples to target.
         """
-        exhausted_counter = 0
+        exhausted_counter: int = 0
         for tm in self._triples_maps:
             try:
                 triples = next(tm)
                 for t in triples:
                     self._add_to_target(t)
             except StopIteration:
-                exhausted_counter = exhausted_counter + 1
-                # All exhausted? Raise StopIteration
-                if exhausted_counter == self._number_of_triples_maps:
-                    raise StopIteration
+                exhausted_counter += 1
+                continue
+
+        if exhausted_counter == self._number_of_triples_maps:
+            raise StopIteration
 
     def write_all(self) -> None:
         """
@@ -40,8 +41,8 @@ class LogicalTarget(ABC):
                 return
 
     @abstractmethod
-    def _add_to_target(self,
-                       triple: Tuple[URIRef, URIRef, Identifier]) -> None:
+    def _add_to_target(self, triple: Tuple[URIRef, URIRef, Identifier,
+                                           URIRef]) -> None:
         """
         Adds a single triple to target.
         """

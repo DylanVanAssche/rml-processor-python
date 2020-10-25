@@ -27,12 +27,12 @@ class FileLogicalTarget(LogicalTarget):
         except StopIteration:
             raise StopIteration
 
-    def _add_to_target(self,
-                       triple: Tuple[URIRef, URIRef, Identifier]) -> None:
+    def _add_to_target(self, triple: Tuple[URIRef, URIRef, Identifier,
+                                           URIRef]) -> None:
         """
         Adds a single triple to the file.
         """
-        self._graph.add(triple)
+        self._graph.add(triple[0:3])
 
         # When https://github.com/RDFLib/rdflib/issues/283 is fixed, use a
         # streaming serializer to avoid writing the whole file over and over

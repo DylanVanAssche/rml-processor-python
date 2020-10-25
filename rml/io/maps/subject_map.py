@@ -1,29 +1,45 @@
-from rdflib.term import URIRef, Identifier
+from rdflib.term import URIRef, Identifier, BNode
 from jsonpath_ng import parse
-from typing import Union, Dict
+from typing import Union, Dict, Tuple, List, Optional
 from lxml.etree import Element
 
+from rml.namespace import R2RML
 from . import TermMap, TermType
 from rml.io.sources import MIMEType
 
 
 class SubjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
-                 reference_formulation: MIMEType) -> None:
+                 reference_formulation: MIMEType,
+                 rr_term_type: URIRef,
+                 rr_class: Optional[List[URIRef]] = [],
+                 rr_graph: Optional[URIRef] = None) -> None:
         """
         Creates a SubjectMap.
         """
         super().__init__(term, term_type, reference_formulation)
+        self._rr_term_type = rr_term_type
+        self._rr_class = rr_class
+        self._rr_graph = rr_graph
 
-    def resolve(self, data: Union[Element, Dict]) -> Identifier:
+    def resolve(self, data: Union[Element, Dict]) \
+            -> Tuple[Identifier, URIRef, URIRef]:
         """
         Resolves a subject into an RDF Identifier.
         """
         if self._term_type == TermType.TEMPLATE:
-            return URIRef(super()._resolve_template(data))
+            value = super()._resolve_template(data)
+            if self._rr_term_type == R2RML.BlankNode:
+                return BNode(value=value), self._rr_class, self._rr_graph
+            return URIRef(value), self._rr_class, self._rr_graph
         elif self._term_type == TermType.REFERENCE:
-            return URIRef(super()._resolve_reference(self._term, data))
+            value = super()._resolve_reference(self._term, data)
+            if self._rr_term_type == R2RML.BlankNode:
+                return BNode(value=value), self._rr_class, self._rr_graph
+            return URIRef(value), self._rr_class, self._rr_graph
         elif self._term_type == TermType.CONSTANT:
-            return URIRef(self._term)
+            if self._rr_term_type == R2RML.BlankNode:
+                return BNode(value=self._term), self._rr_class, self._rr_graph
+            return URIRef(self._term), self._rr_class, self._rr_graph
         else:
             raise ValueError(f'Unknown term type: {self._term_type}')

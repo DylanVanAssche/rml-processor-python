@@ -1,0 +1,47 @@
+@prefix ns1: <http://www.w3.org/ns/r2rml#> .
+@prefix ns2: <http://semweb.mmlab.be/ns/rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.com/base/TriplesMapCSV> a ns1:TriplesMap ;
+    ns2:logicalSource [ ns2:referenceFormulation <http://semweb.mmlab.be/ns/ql#CSV> ;
+            ns2:source "tests/assets/csv/student.csv" ] ;
+    ns1:predicateObjectMap [ ns1:objectMap [ ns1:constant <http://example.com/test> ;
+                    ns1:language "en-us" ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/name> ;
+                    ns1:termType ns1:IRI ] ],
+        [ ns1:objectMap [ ns2:reference "age" ;
+                    ns1:datatype xsd:int ;
+                    ns1:termType ns1:Literal ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/age> ;
+                    ns1:termType ns1:IRI ] ] ;
+    ns1:subjectMap [ ns1:template "http://example.com/{id}" ] .
+
+<http://example.com/base/TriplesMapCSV2> a ns1:TriplesMap ;
+    ns2:logicalSource [ ns2:referenceFormulation <http://semweb.mmlab.be/ns/ql#CSV> ;
+            ns2:source "tests/assets/csv/student.csv" ] ;
+    ns1:predicateObjectMap [ ns1:objectMap [ ns1:constant <http://example.com/test> ;
+                    ns1:termType ns1:IRI ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/name> ;
+                    ns1:termType ns1:IRI ] ],
+        [ ns1:objectMap [ ns1:datatype xsd:int ;
+                    ns1:template "{age}" ] ;
+            ns1:predicateMap [ ns1:constant <http://xmlns.com/foaf/0.1/age> ;
+                    ns1:termType ns1:IRI ] ] ;
+    ns1:subjectMap [ ns1:constant <http://example.com/MyStudentIRI> ;
+            ns1:termType ns1:IRI ] .
+
+<http://example.com/base/TriplesMapCSV3> a ns1:TriplesMap ;
+    ns2:logicalSource [ ns2:referenceFormulation <http://semweb.mmlab.be/ns/ql#CSV> ;
+            ns2:source "tests/assets/csv/student.csv" ] ;
+    ns1:predicateObjectMap [ ns1:graphMap _:Nb584846420e14fe8b2702802d4c26ed4 ;
+            ns1:objectMap [ ns1:constant <http://example.com/test> ;
+                    ns1:termType ns1:IRI ] ;
+            ns1:predicateMap [ ns1:template "http://example.com/{name}" ] ],
+        [ ns1:graphMap _:Nb584846420e14fe8b2702802d4c26ed4 ;
+            ns1:objectMap [ ns1:language "en" ;
+                    ns1:template "{age}" ] ;
+            ns1:predicateMap [ ns1:template "http://example.com/{name}_2" ] ] ;
+    ns1:subjectMap [ ns1:constant <http://example.com/MyStudentIRI2> ] .
+
+_:Nb584846420e14fe8b2702802d4c26ed4 ns1:constant <http://example.com/MyGraph> ;
+    ns1:termType ns1:IRI .

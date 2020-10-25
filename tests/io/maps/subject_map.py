@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import unittest
-from rdflib.term import URIRef
+from rdflib.term import URIRef, BNode
 from lxml import etree
 
 from rml.io.sources import MIMEType
 from rml.io.maps import SubjectMap, TermType
-from rml.namespace import FOAF
+from rml.namespace import FOAF, R2RML
 
 XML_STUDENT_1 = """
     <student>
@@ -42,13 +42,37 @@ XML_STUDENT_TITLE = """
 """
 
 class SubjectMapTests(unittest.TestCase):
+    def _check_template_kv(self, sm: SubjectMap) -> None:
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertEqual(subj[0], URIRef('http://example.com/0'))
+        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
+        self.assertEqual(subj[0], URIRef('http://example.com/1'))
+        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+        self.assertEqual(subj[0], URIRef('http://example.com/2'))
+
+    def _check_reference_kv(self, sm: SubjectMap) -> None:
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertEqual(subj[0], URIRef('Herman'))
+        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
+        self.assertEqual(subj[0], URIRef('Ann'))
+        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+        self.assertEqual(subj[0], URIRef('Simon'))
+
+    def _check_constant_kv(self, sm: SubjectMap) -> None:
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertEqual(subj[0], FOAF.Person)
+        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
+        self.assertEqual(subj[0], FOAF.Person)
+        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+        self.assertEqual(subj[0], FOAF.Person)
+
     def test_unknown_mimetype(self) -> None:
         """
         Test if we raise a ValueError when MIMEType is unknown
         """
         with self.assertRaises(ValueError):
             sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                            MIMEType.UNKNOWN)
+                            MIMEType.UNKNOWN, None, None)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
     def test_unknown_termtype(self) -> None:
@@ -57,7 +81,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         with self.assertRaises(ValueError):
             sm = SubjectMap('http://example.com/{id}', TermType.UNKNOWN,
-                            MIMEType.CSV)
+                            MIMEType.CSV, None, None)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
     def test_keyvalue_empty_template(self) -> None:
@@ -65,7 +89,7 @@ class SubjectMapTests(unittest.TestCase):
         Test if we can resolve an empty template using key-value
         """
         sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
-                        MIMEType.CSV)
+                        MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
@@ -74,7 +98,7 @@ class SubjectMapTests(unittest.TestCase):
         Test if we can resolve an empty template using key-value
         """
         sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
-                        MIMEType.CSV)
+                        MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
@@ -83,23 +107,25 @@ class SubjectMapTests(unittest.TestCase):
         Test if we can resolve an empty template using key-value
         """
         sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
-                        MIMEType.CSV)
+                        MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
 
-    def test_keyvalue_non_existing_reference(self) -> None:
+    def test_keyvalue_tabular_non_existing_reference(self) -> None:
         """
-        Test if we can resolve an non existing reference using key-value.
-        This can happen when a certain column has NULL values.
-        In this test case, only the first row has a valid value, others are
-        NULL. No subject may be generated when the reference does not exist.
+        Test if we can resolve an non existing reference using key-value
+        tabular.
+        This can happen when a certain column doesn't exist
+        In this test case, the first row is valid while the next ones are
+        missing a column. In case of tabular data, the columns cannot be
+        missing if they are present in the header.
         """
         sm = SubjectMap('title', TermType.REFERENCE,
-                        MIMEType.CSV)
+                        MIMEType.CSV, R2RML.IRI, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
         # Subject generated
-        self.assertEqual(subj, URIRef('King'))
+        self.assertEqual(subj[0], URIRef('King'))
 
         # No subject generated
         with self.assertRaises(NameError):
@@ -107,6 +133,29 @@ class SubjectMapTests(unittest.TestCase):
 
         # No subject generated
         with self.assertRaises(NameError):
+            subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
+
+    def test_keyvalue_nontabular_non_existing_reference(self) -> None:
+        """
+        Test if we can resolve an non existing reference using key-value
+        tabular data.
+        This can happen when a certain reference has NULL values.
+        In this test case, only the first row has a valid value, others are
+        NULL. No subject may be generated when the reference does not exist.
+        """
+        sm = SubjectMap('title', TermType.REFERENCE,
+                        MIMEType.RDF_XML, R2RML.IRI, None)
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
+                           'title': 'King'})
+        # Subject generated
+        self.assertEqual(subj[0], URIRef('King'))
+
+        # No subject generated
+        with self.assertRaises(ResourceWarning):
+            subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
+
+        # No subject generated
+        with self.assertRaises(ResourceWarning):
             subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
 
     def test_jsonpath_non_existing_reference(self) -> None:
@@ -117,18 +166,18 @@ class SubjectMapTests(unittest.TestCase):
         NULL. No subject may be generated when the reference does not exist.
         """
         sm = SubjectMap('$.title', TermType.REFERENCE,
-                        MIMEType.JSON)
+                MIMEType.JSON, R2RML.IRI, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
         # Subject generated
-        self.assertEqual(subj, URIRef('King'))
+        self.assertEqual(subj[0], URIRef('King'))
 
         # No subject generated
-        with self.assertRaises(NameError):
+        with self.assertRaises(ResourceWarning):
             subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
 
         # No subject generated
-        with self.assertRaises(NameError):
+        with self.assertRaises(ResourceWarning):
             subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
 
     def test_xpath_non_existing_reference(self) -> None:
@@ -139,18 +188,18 @@ class SubjectMapTests(unittest.TestCase):
         NULL. No subject may be generated when the reference does not exist.
         """
         sm = SubjectMap('/student/title', TermType.REFERENCE,
-                        MIMEType.TEXT_XML)
+                        MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_TITLE))
 
         # Subject generated
-        self.assertEqual(subj, URIRef('King'))
+        self.assertEqual(subj[0], URIRef('King'))
 
         # No subject generated
-        with self.assertRaises(NameError):
+        with self.assertRaises(ResourceWarning):
             subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
 
         # No subject generated
-        with self.assertRaises(NameError):
+        with self.assertRaises(ResourceWarning):
             subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
 
     def test_xml_template(self) -> None:
@@ -158,507 +207,355 @@ class SubjectMapTests(unittest.TestCase):
         Test if we can resolve a template using XML data
         """
         sm = SubjectMap('http://example.com/{/student/id}', TermType.TEMPLATE,
-                        MIMEType.TEXT_XML)
+                        MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
-        self.assertEqual(subj, URIRef('http://example.com/0'))
+        self.assertEqual(subj[0], URIRef('http://example.com/0'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
-        self.assertEqual(subj, URIRef('http://example.com/1'))
+        self.assertEqual(subj[0], URIRef('http://example.com/1'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+        self.assertEqual(subj[0], URIRef('http://example.com/2'))
 
     def test_xml_reference(self) -> None:
         """
         Test if we can resolve a reference using XML data
         """
         sm = SubjectMap('/student/name', TermType.REFERENCE,
-                        MIMEType.TEXT_XML)
+                        MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
-        self.assertEqual(subj, URIRef('Herman'))
+        self.assertEqual(subj[0], URIRef('Herman'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
-        self.assertEqual(subj, URIRef('Ann'))
+        self.assertEqual(subj[0], URIRef('Ann'))
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
-        self.assertEqual(subj, URIRef('Simon'))
+        self.assertEqual(subj[0], URIRef('Simon'))
 
     def test_xml_constant(self) -> None:
         """
         Test if we can resolve a constant using XML data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.TEXT_XML)
+                        MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
-        self.assertEqual(subj, FOAF.Person)
+        self.assertEqual(subj[0], FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_2))
-        self.assertEqual(subj, FOAF.Person)
+        self.assertEqual(subj[0], FOAF.Person)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_3))
-        self.assertEqual(subj, FOAF.Person)
+        self.assertEqual(subj[0], FOAF.Person)
 
     def test_json_template(self) -> None:
         """
         Test if we can resolve a template using JSON data
         """
         sm = SubjectMap('http://example.com/{$.id}', TermType.TEMPLATE,
-                        MIMEType.JSON)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.JSON, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_json_reference(self) -> None:
         """
         Test if we can resolve a reference using JSON data
         """
         sm = SubjectMap('$.name', TermType.REFERENCE,
-                        MIMEType.JSON)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.JSON, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_json_constant(self) -> None:
         """
         Test if we can resolve a constant using JSON data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.JSON)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.JSON, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_csv_template(self) -> None:
         """
         Test if we can resolve a template using CSV data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.CSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.CSV, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_csv_reference(self) -> None:
         """
         Test if we can resolve a reference using CSV data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.CSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.CSV, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_csv_constant(self) -> None:
         """
         Test if we can resolve a constant using CSV data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.CSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.CSV, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_tsv_template(self) -> None:
         """
         Test if we can resolve a template using TSV data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.TSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.TSV, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_tsv_reference(self) -> None:
         """
         Test if we can resolve a reference using TSV data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.TSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.TSV, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_tsv_constant(self) -> None:
         """
         Test if we can resolve a constant using TSV data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.TSV)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.TSV, R2RML.IRI)
+        self._check_constant_kv(sm)
 
     def test_sql_template(self) -> None:
         """
         Test if we can resolve a template using SQL data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.SQL)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.SQL, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_sql_reference(self) -> None:
         """
         Test if we can resolve a reference using SQL data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.SQL)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.SQL, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_sql_constant(self) -> None:
         """
         Test if we can resolve a constant using SQL data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.SQL)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.SQL, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_jsonld_template(self) -> None:
         """
         Test if we can resolve a template using JSON-LD data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.JSON_LD)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.JSON_LD, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_jsonld_reference(self) -> None:
         """
         Test if we can resolve a reference using JSON-LD data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.JSON_LD)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.JSON_LD, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_jsonld_constant(self) -> None:
         """
         Test if we can resolve a constant using JSON-LD data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.JSON_LD)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.JSON_LD, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_n3_template(self) -> None:
         """
         Test if we can resolve a template using N3 data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.N3)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.N3, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_n3_reference(self) -> None:
         """
         Test if we can resolve a reference using N3 data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.N3)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.N3, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_n3_constant(self) -> None:
         """
         Test if we can resolve a constant using N3 data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.N3)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.N3, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_nquads_template(self) -> None:
         """
         Test if we can resolve a template using NQUADS data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.NQUADS)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.NQUADS, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_nquads_reference(self) -> None:
         """
         Test if we can resolve a reference using NQUADS data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.NQUADS)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.NQUADS, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_nquads_constant(self) -> None:
         """
         Test if we can resolve a constant using NQUADS data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.NQUADS)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.NQUADS, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_ntriples_template(self) -> None:
         """
         Test if we can resolve a template using NTRIPLES data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.NTRIPLES)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.NTRIPLES, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_ntriples_reference(self) -> None:
         """
         Test if we can resolve a reference using NTRIPLES data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.NTRIPLES)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.NTRIPLES, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_ntriples_constant(self) -> None:
         """
         Test if we can resolve a constant using NTRIPLES data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.NTRIPLES)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.NTRIPLES, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_rdf_template(self) -> None:
         """
         Test if we can resolve a template using RDF data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.RDF_XML)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.RDF_XML, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_rdf_reference(self) -> None:
         """
         Test if we can resolve a reference using RDF data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.RDF_XML)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.RDF_XML, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_rdf_constant(self) -> None:
         """
         Test if we can resolve a constant using RDF data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.RDF_XML)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.RDF_XML, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_trig_template(self) -> None:
         """
         Test if we can resolve a template using TRIG data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.TRIG)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.TRIG, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_trig_reference(self) -> None:
         """
         Test if we can resolve a reference using TRIG data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.TRIG)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.TRIG, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_trig_constant(self) -> None:
         """
         Test if we can resolve a constant using TRIG data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.TRIG)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.TRIG, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_trix_template(self) -> None:
         """
         Test if we can resolve a template using TRIX data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.TRIX)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.TRIX, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_trix_reference(self) -> None:
         """
         Test if we can resolve a reference using TRIX data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.TRIX)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                MIMEType.TRIX, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_trix_constant(self) -> None:
         """
         Test if we can resolve a constant using TRIX data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.TRIX)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+                        MIMEType.TRIX, R2RML.IRI, None)
+        self._check_constant_kv(sm)
 
     def test_turtle_template(self) -> None:
         """
         Test if we can resolve a template using Turtle data
         """
         sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
-                        MIMEType.TURTLE)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('http://example.com/0'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('http://example.com/1'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('http://example.com/2'))
+                        MIMEType.TURTLE, R2RML.IRI, None)
+        self._check_template_kv(sm)
 
     def test_turtle_reference(self) -> None:
         """
         Test if we can resolve a reference using turtle data
         """
         sm = SubjectMap('name', TermType.REFERENCE,
-                        MIMEType.TURTLE)
-        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, URIRef('Herman'))
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, URIRef('Ann'))
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, URIRef('Simon'))
+                        MIMEType.TURTLE, R2RML.IRI, None)
+        self._check_reference_kv(sm)
 
     def test_turtle_constant(self) -> None:
         """
         Test if we can resolve a constant using Turtle data
         """
         sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
-                        MIMEType.TURTLE)
+                        MIMEType.TURTLE, R2RML.IRI, None)
+        self._check_constant_kv(sm)
+
+    def test_blanknode_template(self) -> None:
+        """
+        Test generation of a blank node using template.
+        """
+        sm = SubjectMap('blank{id}', TermType.TEMPLATE,
+                        MIMEType.TURTLE, R2RML.BlankNode, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '1', 'name': 'Ann', 'age': '62'})
-        self.assertEqual(subj, FOAF.Person)
-        subj = sm.resolve({'id': '2', 'name': 'Simon', 'age': '23'})
-        self.assertEqual(subj, FOAF.Person)
+        self.assertEqual(subj[0], BNode('blank0'))
+
+    def test_blanknode_reference(self) -> None:
+        """
+        Test generation of a blank node using constant.
+        """
+        sm = SubjectMap('name', TermType.REFERENCE,
+                        MIMEType.TURTLE, R2RML.BlankNode, None)
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertEqual(subj[0], BNode('Herman'))
+
+    def test_blanknode_constant(self) -> None:
+        """
+        Test generation of a blank node using constant.
+        """
+        sm = SubjectMap('myBlankNode', TermType.CONSTANT,
+                        MIMEType.TURTLE, R2RML.BlankNode, None)
+        subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
+        self.assertEqual(subj[0], BNode('myBlankNode'))
+
 
 if __name__ == '__main__':
     unittest.main()

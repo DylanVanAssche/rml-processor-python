@@ -57,5 +57,4 @@ from rml.io.sources.sql_source import SQLLogicalSource  # nopep8
 from rml.io.sources.xml_source import XMLLogicalSource  # nopep8
 from rml.io.sources.sparql_source import SPARQLJSONLogicalSource, \
                                          SPARQLXMLLogicalSource  # nopep8
-from rml.io.sources.hydra_source import HydraLogicalSource  # nopep8
 from rml.io.sources.dcat_source import DCATLogicalSource  # nopep8

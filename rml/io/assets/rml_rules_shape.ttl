@@ -50,7 +50,7 @@ schema:TriplesMapShape
                 sh:minCount 1 ;
                 sh:maxCount 1 ;
                 sh:nodeKind sh:BlankNodeOrIRI ;
-                sh:node schema:SubjectShape ;
+                sh:node schema:subjectShape ;
             ]
         ]
     );
@@ -423,7 +423,7 @@ schema:LogicalSourceShape
             sh:name "RML reference formulation" ;
             sh:minCount 1 ;
             sh:maxCount 1 ;
-            sh:class ql:SPARQL ;
+            sh:in (ql:JSONPath ql:XPath) ;
         ] ;
         sh:property [
             sh:path rml:query ;
@@ -541,7 +541,7 @@ schema:D2RQSourceShape
         sh:path d2rq:username ;
         sh:name "D2RQ username" ;
         sh:maxCount 1 ;
-        sh:minCount 1 ;
+        sh:minCount 0 ;
         sh:nodeKind sh:Literal ;
         sh:datatype xsd:string ;
     ];
@@ -549,7 +549,7 @@ schema:D2RQSourceShape
         sh:path d2rq:password ;
         sh:name "D2RQ password" ;
         sh:maxCount 1 ;
-        sh:minCount 1 ;
+        sh:minCount 0 ;
         sh:nodeKind sh:Literal ;
         sh:datatype xsd:string ;
     ].
@@ -761,7 +761,7 @@ schema:CSVWDialectShape
 # Validate an R2RML Subject Map
 schema:SubjectMapShape
     a sh:NodeShape ;
-    sh:targetClass sh:SubjectMap ;
+    sh:targetClass rr:SubjectMap ;
     sh:closed "true"^^xsd:boolean ;
     sh:ignoredProperties (rdf:type rr:template rml:reference rr:constant) ;
     sh:name "R2RML rr:subjectMap" ;
@@ -804,9 +804,29 @@ schema:SubjectMapShape
     sh:property [
         sh:path rr:class ;
         sh:name "R2RML rr:class" ;
-        sh:maxCount 1 ;
         sh:minCount 0 ;
         sh:nodeKind sh:IRI ;
+    ] ;
+    # Optionally rr:graph and rr:graphMap
+    sh:property [
+        sh:path [ sh:alternativePath ( rr:graph rr:graphMap ) ] ;
+        sh:name "R2RML rr:graph and rr:graphMap max count" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path rr:graphMap ;
+        sh:name "R2RML rr:graphMap shape is invalid" ;
+        sh:minCount 0;
+        sh:maxCount 1 ;
+        sh:node schema:GraphMapShape;
+    ] ;
+    sh:property [
+        sh:path rr:graph ;
+        sh:name "R2RML rr:graph should be an IRI" ;
+        sh:minCount 0;
+        sh:maxCount 1 ;
+        sh:node schema:graphShape;
     ] ;
     # Optionally rr:termType
     sh:property [
@@ -862,13 +882,10 @@ schema:ObjectMapShape
                 sh:name "R2RML constant" ;
                 sh:minCount 1 ;
                 sh:maxCount 1 ;
-                sh:nodeKind sh:IRI ;
             ]
         ]
     );
-    sh:xone (
     # Optionally rr:termType
-    [ 
         sh:property [
             sh:path rr:termType ;
             sh:name "R2RML rr:termType" ;
@@ -877,49 +894,36 @@ schema:ObjectMapShape
             sh:minCount 0 ;
             sh:in (rr:IRI rr:BlankNode rr:Literal) ;
             sh:nodeKind sh:BlankNodeOrIRI ;
-        ]
-    ]
+        ];
+    # rr:language and rr:datatype may not occur both at the same time
+    sh:property [
+        sh:path [ sh:alternativePath ( rr:language rr:datatype ) ] ;
+        sh:name "R2RML rr:language and rr:datatype" ;
+        sh:description "R2RML rr:language and rr:datatype may not occur both at the same time." ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+    ];
+
     # rr:language, with optionally rr:termType
-    [
-        sh:property [
-            sh:path rr:language ;
-            sh:name "R2RML rr:language" ;
-            sh:description "R2RML rr:language defines the language tag for a Literal." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:datatype xsd:string ;
-        ];
-        sh:property [
-            sh:path rr:termType ;
-            sh:name "R2RML rr:termType" ;
-            sh:description "R2RML rr:termType describes if the term is either an IRI, Blank Node or Literal." ;
-            sh:maxCount 1 ;
-            sh:minCount 0 ;
-            sh:in (rr:IRI rr:BlankNode rr:Literal) ;
-            sh:nodeKind sh:BlankNodeOrIRI ;
-        ]
-    ]
+    sh:property [
+        sh:path rr:language ;
+        sh:name "R2RML rr:language" ;
+    sh:pattern "^((?:(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?:([A-Za-z]{2,3}(-(?:[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?)|[A-Za-z]{4})(-(?:[A-Za-z]{4}))?(-(?:[A-Za-z]{2}|[0-9]{3}))?(-(?:[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*(-(?:[0-9A-WY-Za-wy-z](-[A-Za-z0-9]{2,8})+))*(-(?:x(-[A-Za-z0-9]{1,8})+))?)|(?:x(-[A-Za-z0-9]{1,8})+))$";
+        sh:description "R2RML rr:language defines the language tag for a Literal." ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:datatype xsd:string ;
+    ];
+
     # rr:datatype with optionally rr:termType
-    [
-        sh:property [
-            sh:path rr:datatype ;
-            sh:name "R2RML rr:datatype" ;
-            sh:description "R2RML rr:datatype defines the datatype for a Literal." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-        ];
-        sh:property [
-            sh:path rr:termType ;
-            sh:name "R2RML rr:termType" ;
-            sh:description "R2RML rr:termType describes if the term is either an IRI, Blank Node or Literal." ;
-            sh:maxCount 1 ;
-            sh:minCount 0 ;
-            sh:in (rr:IRI rr:BlankNode rr:Literal) ;
-            sh:nodeKind sh:BlankNodeOrIRI ;
-        ]
-    ]
-    ).
+    sh:property [
+        sh:path rr:datatype ;
+        sh:name "R2RML rr:datatype" ;
+        sh:description "R2RML rr:datatype defines the datatype for a Literal." ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:IRI ;
+    ].
 
 # Validate an R2RML object
 schema:objectShape
@@ -941,13 +945,39 @@ schema:PredicateMapShape
     sh:name "R2RML rr:predicateMap" ;
     sh:description "R2RML rr:predicateMap specifies the predicate used to generate the triple. It is required to have 1 rr:constant with an IRI as object." ;
     sh:message "R2RML rr:predicateMap violation" ;
-    # rr:constant is required
+    # Either an rr:template or rml:reference or rr:constant is required
+    sh:property [
+        sh:path [ sh:alternativePath ( rr:template rml:reference rr:constant ) ] ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path rr:template ;
+        sh:name "R2RML template" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:property [
+        sh:path rml:reference ;
+        sh:name "RML reference" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+    ] ;
     sh:property [
         sh:path rr:constant ;
         sh:name "R2RML constant" ;
-        sh:minCount 1 ;
+        sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path rr:termType ;
+        sh:name "R2RML term type" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:in (rr:IRI) ;
     ] .
 
 # Validate an R2RML predicate
@@ -977,7 +1007,6 @@ schema:PredicateObjectMapShape
                 sh:path rr:predicate ;
                 sh:name "R2RML predicate shortcut" ;
                 sh:minCount 1 ;
-                sh:maxCount 1 ;
                 sh:nodeKind sh:IRI ;
             ]
         ]
@@ -988,6 +1017,7 @@ schema:PredicateObjectMapShape
                 sh:minCount 1 ;
                 sh:maxCount 1 ;
                 sh:nodeKind sh:BlankNodeOrIRI ;
+                sh:node schema:PredicateMapShape ;
             ]
         ]
     );
@@ -1009,7 +1039,70 @@ schema:PredicateObjectMapShape
                 sh:minCount 1 ;
                 sh:maxCount 1 ;
                 sh:nodeKind sh:BlankNodeOrIRI;
+                sh:node schema:ObjectMapShape ;
             ]
         ]
-    ).
+    );
+    # Optionally rr:graph and rr:graphMap
+    sh:property [
+        sh:path [ sh:alternativePath ( rr:graph rr:graphMap ) ] ;
+        sh:name "R2RML rr:graph and rr:graphMap max count" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path rr:graphMap ;
+        sh:name "R2RML rr:graphMap shape is invalid" ;
+        sh:minCount 0;
+        sh:maxCount 1 ;
+        sh:node schema:GraphMapShape;
+    ] ;
+    sh:property [
+        sh:path rr:graph ;
+        sh:name "R2RML rr:graph should be an IRI" ;
+        sh:minCount 0;
+        sh:maxCount 1 ;
+        sh:node schema:graphShape;
+    ] .
+
+# Validate an R2RML graph
+schema:graphShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rr:graph ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "R2RML rr:graph" ;
+    sh:description "R2RML rr:graph <name> shortcut for rr:graphMap [ rr:constant <name> ]." ;
+    sh:message "R2RML rr:graph violation" ;
+    sh:nodeKind sh:IRI .
+
+
+# Validate an R2RML GraphMap
+schema:GraphMapShape
+    a sh:NodeShape ;
+    sh:targetClass rr:GraphMap ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "R2RML rr:graphMap" ;
+    sh:description "R2RML rr:graphMap defines the Named Graph to use" ;
+    sh:message "R2RML rr:graphMap violation" ;
+    sh:property [
+        sh:path [ sh:alternativePath ( rr:template rr:constant ) ] ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path rr:template ;
+        sh:name "R2RML template" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+    ] ;
+    sh:property [
+        sh:path rr:constant ;
+        sh:name "R2RML constant" ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+    ] .
 

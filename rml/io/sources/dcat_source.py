@@ -38,7 +38,7 @@ class DCATLogicalSource(LogicalSource):
             response: Response = self._session.get(self._url)
             response.raise_for_status()
         except (HTTPError, ConnectionError) as e:
-            raise FileNotFoundError('Unable to retrieve {self._url}: {e}')
+            raise FileNotFoundError(f'Unable to retrieve {self._url}: {e}')
 
         # Store file temporary in /tmp
         with NamedTemporaryFile(delete=False) as tmp_file:

@@ -33,6 +33,7 @@
         rr:objectMap [ 
             rml:reference "age" ;
             rr:datatype xsd:int ;
+            rr:termType rr:Literal ;
         ]
     ].
 
@@ -69,17 +70,18 @@
 	
     rr:subjectMap [ 
         rr:constant ex:MyStudentIRI2 ;
+        rr:graph ex:MyGraph;
     ]; 
 	
     rr:predicateObjectMap [ 
-        rr:predicateMap [ rml:reference "name" ] ; 
+        rr:predicateMap [ rr:template "http://example.com/{name}" ] ; 
         rr:object ex:test;
     ];
 
     rr:predicateObjectMap [ 
-        rr:predicateMap [ rr:template "{name}" ] ; 
+        rr:predicateMap [ rr:template "http://example.com/{name}_2" ] ; 
         rr:objectMap [ 
             rr:template "{age}" ;
-            rr:datatype xsd:int ;
+            rr:language 'en';
         ]
     ].
