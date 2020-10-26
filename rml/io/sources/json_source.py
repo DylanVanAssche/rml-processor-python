@@ -8,13 +8,14 @@ from rml.io.sources import LogicalSource, MIMEType
 
 
 class JSONLogicalSource(LogicalSource):
-    def __init__(self, reference_formulation: str, path: str):
+    def __init__(self, rml_iterator: str, path: str):
         """
         A JSONPath Logical Source to iterate over JSON data.
+        The RML iterator specifies the JSONPath expression to use.
         """
-        super().__init__(reference_formulation)
+        super().__init__(rml_iterator)
         try:
-            json_path: JsonPathParser = parse(self._reference_formulation)
+            json_path: JsonPathParser = parse(self._rml_iterator)
         except Exception as e:
             msg = f'Invalid JSONPath expression: {e}'
             critical(msg)

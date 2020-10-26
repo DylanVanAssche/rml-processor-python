@@ -12,7 +12,7 @@ class CSVLogicalSource(LogicalSource):
     def __init__(self, path: str, delimiter: str = ','):
         """
         A CSV Logical Source to iterate over CSV data.
-        The RML reference formulation is not used for row-based iterators.
+        The RML iterator is not used for row-based iterators.
         """
         super().__init__()
         self._path: str = path

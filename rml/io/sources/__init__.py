@@ -26,9 +26,9 @@ class MIMEType(Enum):
 
 
 class LogicalSource(ABC):
-    def __init__(self, reference_formulation: str = '') -> None:
-        self._reference_formulation: str = reference_formulation
-        debug(f'Reference formulation: {self._reference_formulation}')
+    def __init__(self, rml_iterator: str = '') -> None:
+        self._rml_iterator: str = rml_iterator
+        debug(f'Reference formulation: {self._rml_iterator}')
 
     def __iter__(self) -> Iterator:
         """

@@ -144,7 +144,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                    MIMEType.APPLICATION_XML,
-                                   reference_formulation='/students/student')
+                                   rml_iterator='/students/student')
         student = next(source)
         self.assertEqual(student.xpath('./id')[0].text, '0')
         self.assertEqual(student.xpath('./name')[0].text, 'Herman')
@@ -171,7 +171,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(NameError):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                        MIMEType.APPLICATION_XML,
-                                       reference_formulation='$$$')
+                                       rml_iterator='$$$')
 
     def test_xml_invalid_xml(self) -> None:
         """
@@ -181,7 +181,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(XMLSyntaxError):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/invalid.xml',
                                        MIMEType.APPLICATION_XML,
-                                       reference_formulation='/students/student')
+                                       rml_iterator='/students/student')
 
     def test_xml_empty_iterator(self) -> None:
         """
@@ -189,7 +189,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                    MIMEType.APPLICATION_XML,
-                                   reference_formulation='/empty')
+                                   rml_iterator='/empty')
         with self.assertRaises(StopIteration):
             next(source)
 
@@ -199,7 +199,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                    MIMEType.JSON,
-                                   reference_formulation='$.students.[*]')
+                                   rml_iterator='$.students.[*]')
         self.assertDictEqual(next(source),
                              {'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertDictEqual(next(source),
@@ -216,7 +216,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                        MIMEType.JSON,
-                                       reference_formulation='&$"£*W$')
+                                       rml_iterator='&$"£*W$')
 
     def test_json_invalid_json(self) -> None:
         """
@@ -226,7 +226,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(JSONDecodeError):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/invalid.json',
                                        MIMEType.JSON,
-                                       reference_formulation='$.students.[*]')
+                                       rml_iterator='$.students.[*]')
 
     def test_json_empty_iterator(self) -> None:
         """
@@ -235,7 +235,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         with self.assertRaises(StopIteration):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                        MIMEType.JSON,
-                                       reference_formulation='$.empty')
+                                       rml_iterator='$.empty')
             next(source)
 
     def test_iterator_rdfxml(self) -> None:
@@ -244,7 +244,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.rdf',
                                    MIMEType.RDF_XML,
-                                   reference_formulation=QUERY)
+                                   rml_iterator=QUERY)
         self._assert_rdf(source)
 
 
@@ -254,7 +254,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.jsonld',
                                    MIMEType.JSON_LD,
-                                   reference_formulation=QUERY)
+                                   rml_iterator=QUERY)
         self._assert_rdf(source)
 
     def test_iterator_ntriples(self) -> None:
@@ -263,7 +263,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ntriples',
                                    MIMEType.NTRIPLES,
-                                   reference_formulation=QUERY)
+                                   rml_iterator=QUERY)
         self._assert_rdf(source)
 
     def test_iterator_turtle(self) -> None:
@@ -272,7 +272,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ttl',
                                    MIMEType.TURTLE,
-                                   reference_formulation=QUERY)
+                                   rml_iterator=QUERY)
         self._assert_rdf(source)
 
     def test_iterator_nquads(self) -> None:
@@ -281,7 +281,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.nquads',
                                    MIMEType.NQUADS,
-                                   reference_formulation=CONJUCTIVE_QUERY)
+                                   rml_iterator=CONJUCTIVE_QUERY)
         self._assert_rdf(source)
 
     def test_iterator_trig(self) -> None:
@@ -290,7 +290,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trig',
                                    MIMEType.TRIG,
-                                   reference_formulation=CONJUCTIVE_QUERY)
+                                   rml_iterator=CONJUCTIVE_QUERY)
         self._assert_rdf(source)
 
     def test_iterator_trix(self) -> None:
@@ -299,7 +299,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trix',
                                    MIMEType.TRIX,
-                                   reference_formulation=CONJUCTIVE_QUERY)
+                                   rml_iterator=CONJUCTIVE_QUERY)
         self._assert_rdf(source)
 
     def test_iterator_n3(self) -> None:
@@ -308,7 +308,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         """
         source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.n3',
                                    MIMEType.N3,
-                                   reference_formulation=QUERY)
+                                   rml_iterator=QUERY)
         self._assert_rdf(source)
 
 
