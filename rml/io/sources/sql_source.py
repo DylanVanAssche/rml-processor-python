@@ -1,3 +1,4 @@
+from logging import debug, critical, getLogger, DEBUG
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.engine.reflection import Inspector
@@ -15,33 +16,43 @@ class SQLLogicalSource(LogicalSource):
         super().__init__()
         self._jdbc = jdbc
         self._query = query
+        debug(f'JDBC: {self._jdbc}')
+        debug(f'Query: {self._query}')
 
         # Connect to database
         try:
-            # Pass through logging
-            self._engine = create_engine(self._jdbc, echo=True)
+            # Pass through logging if level is DEBUG
+            self._engine = create_engine(self._jdbc,
+                                         echo=getLogger().isEnabledFor(DEBUG))
             self._connection = self._engine.connect()
         except OperationalError as e:
-            raise FileNotFoundError(f'Cannot connect to database {self._jdbc}:'
-                                    f' {e}')
+            msg = f'Cannot connect to database {self._jdbc}: {e}'
+            critical(msg)
+            raise FileNotFoundError(msg)
 
         # Execute SQL query on database
         try:
             self._iterator = self._connection.execute(self._query)
-        except OperationalError:
+        except OperationalError as e:
             self._connection.close()
-            raise ValueError(f'Connection to database lost: {self._jdbc}')
+            msg = f'Connection to database lost {self._jdbc}: {e}'
+            critical(msg)
+            raise ValueError(msg)
+
+        debug('Source initialization complete')
 
     def __next__(self) -> Dict:
         """
-        Returns a row from the SQL iterator.
+        Returns a result from the SQL iterator.
         raises StopIteration when exhausted.
         """
         try:
-            row = dict(next(self._iterator))
-            return row
+            result = dict(next(self._iterator))
+            debug('Result: {result}')
+            return result
         except StopIteration:
             self._connection.close()
+            debug('SQL connection closed')
             raise StopIteration
 
     @property

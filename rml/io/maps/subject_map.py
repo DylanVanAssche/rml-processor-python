@@ -1,3 +1,4 @@
+from logging import debug, critical
 from rdflib.term import URIRef, Identifier, BNode
 from jsonpath_ng import parse
 from typing import Union, Dict, Tuple, List, Optional
@@ -10,17 +11,20 @@ from rml.io.sources import MIMEType
 
 class SubjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
-                 reference_formulation: MIMEType,
-                 rr_term_type: URIRef,
+                 mime_type: MIMEType, rr_term_type: URIRef,
                  rr_class: Optional[List[URIRef]] = [],
                  rr_graph: Optional[URIRef] = None) -> None:
         """
         Creates a SubjectMap.
         """
-        super().__init__(term, term_type, reference_formulation)
+        super().__init__(term, term_type, mime_type)
         self._rr_term_type = rr_term_type
         self._rr_class = rr_class
         self._rr_graph = rr_graph
+        debug('Term type: {self._rr_term_type}')
+        debug('Class: {self._rr_class}')
+        debug('Named graph: {self._rr_graph}')
+        debug('SubjectMap initialization complete')
 
     def resolve(self, data: Union[Element, Dict]) \
             -> Tuple[Identifier, URIRef, URIRef]:
@@ -42,4 +46,6 @@ class SubjectMap(TermMap):
                 return BNode(value=self._term), self._rr_class, self._rr_graph
             return URIRef(self._term), self._rr_class, self._rr_graph
         else:
-            raise ValueError(f'Unknown term type: {self._term_type}')
+            msg = f'Unknown term type: {self._term_type}'
+            critical(msg)
+            raise ValueError(msg)

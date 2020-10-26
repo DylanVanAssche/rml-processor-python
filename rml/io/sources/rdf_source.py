@@ -1,3 +1,4 @@
+from logging import debug, critical
 from rdflib import ConjunctiveGraph, Graph
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.sparql import Query
@@ -18,6 +19,9 @@ class RDFLogicalSource(LogicalSource):
         self._query: Query = prepareQuery(query)
         self._mime_type: MIMEType = mime_type
         self._graph: Graph
+        debug(f'Path: {self._path}')
+        debug(f'Query: {self._query}')
+        debug(f'MIME type: {self._mime_type}')
 
         # Create a context-aware graph for specific mime_types
         # https://github.com/RDFLib/rdflib-jsonld/issues/40 JSON-LD requires
@@ -27,6 +31,7 @@ class RDFLogicalSource(LogicalSource):
                 f == MIMEType.JSON_LD.value or \
                 f == MIMEType.TRIG.value or \
                 f == MIMEType.TRIX.value:
+            debug('Context-aware graph enabled')
             self._graph = ConjunctiveGraph()
         # Create a normal graph for other RDF mime_types
         elif f == MIMEType.RDF_XML.value or \
@@ -36,28 +41,35 @@ class RDFLogicalSource(LogicalSource):
             self._graph = Graph()
         # Raise ValueError when MIME type is not supported
         else:
-            raise ValueError('Unknown RDF MIME type: {self._mime_type}')
+            msg = f'Unknown RDF MIME type: {self._mime_type}'
+            critical(msg)
+            raise ValueError(msg)
 
         # Parse RDF data
         try:
-            print(self._mime_type)
-            print(f'MIME type: {f}')
             self._graph.parse(path, format=f)
-        except FileNotFoundError:
-            raise FileNotFoundError(f'Unable to open {self._path}')
+        except FileNotFoundError as e:
+            msg = f'Unable to open {self._path}: {e}'
+            critical(msg)
+            raise FileNotFoundError(msg)
         except Exception as e:
-            raise ValueError(f'Unable to parse {self._path}, exception: {e}')
+            msg = f'Unable to parse {self._path}: {e}'
+            critical(msg)
+            raise ValueError(msg)
 
         # Execute SPARQL query and return results iterator
         self._iterator: Iterator = iter(self._graph.query(self._query))
 
+        debug(f'Source initialization complete')
+
     def __next__(self) -> Dict:
         """
-        Returns a row from the RDF iterator.
+        Returns a result from the RDF iterator.
         raises StopIteration when exhausted.
         """
-        record: Dict = next(self._iterator).asdict()
-        return record
+        result: Dict = next(self._iterator).asdict()
+        debug('Result: {result}')
+        return result
 
     @property
     def graph(self) -> Graph:

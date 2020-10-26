@@ -9,9 +9,6 @@ set -e
 
 # Run tests
 echo -e "\033[31;1m*** Running tests ***\033[0m"
-
-# Run tests
-echo "Running tests"
 nosetests --cover-erase --with-coverage --cover-package=rml --stop
 
 ###############################################################################

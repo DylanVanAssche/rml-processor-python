@@ -1,3 +1,4 @@
+from logging import debug
 from typing import Union, Dict, Optional
 from lxml.etree import Element
 from rdflib.term import Identifier, URIRef
@@ -14,6 +15,10 @@ class PredicateObjectMap:
         self._predicate_map = predicate_map
         self._object_map = object_map
         self._rr_graph = rr_graph
+        debug(f'PredicateMap: {self._predicate_map}')
+        debug(f'ObjectMap: {self._object_map}')
+        debug(f'Named graph: {self._rr_graph}')
+        debug('PredicateObjectMap initialization complete')
 
     def resolve(self, data: Union[Element, Dict]) \
             -> Union[Identifier, Identifier, URIRef]:

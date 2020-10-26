@@ -168,7 +168,7 @@ class DCATLogicalSourceTests(unittest.TestCase):
         Test if we raise an XPathEvalError when the XPath expression is
         invalid
         """
-        with self.assertRaises(XPathEvalError):
+        with self.assertRaises(NameError):
             source = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                        MIMEType.APPLICATION_XML,
                                        reference_formulation='$$$')

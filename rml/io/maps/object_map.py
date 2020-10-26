@@ -1,3 +1,4 @@
+from logging import debug, critical
 from rdflib import Namespace
 from rdflib.term import URIRef, Literal, Identifier
 from jsonpath_ng import parse
@@ -11,16 +12,20 @@ from rml.namespace import XSD
 
 class ObjectMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
-                 reference_formulation: MIMEType, language: str = None,
+                 mime_type: MIMEType, language: str = None,
                  datatype: Namespace = None, is_iri: bool = False) -> None:
         """
         Creates an ObjectMap
         """
-        super().__init__(term, term_type, reference_formulation)
+        super().__init__(term, term_type, mime_type)
         self._language: Optional[str] = language
         self._datatype: Optional[Namespace] = datatype
         self._is_iri: bool = is_iri
         self._rr_term_type = term_type
+        debug(f'Language: {self._language}')
+        debug(f'Datatype: {self._datatype}')
+        debug(f'Is IRI?: {self._is_iri}')
+        debug('ObjectMap initialization complete')
 
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
         """
@@ -55,19 +60,25 @@ class ObjectMap(TermMap):
         # If no IRI, return a Literal
         # Language tag or data type specified
         if self._language is not None or self._datatype is not None:
+            debug('Language (self._language) or datatype (self._datatype) '
+                  'detected')
             if self._datatype == XSD.dateTime:
                 term = term.replace(' ', 'T')
-
+                debug('Replaced \'space\' with \'T\' for XSD.dateTime')
             try:
                 return Literal(term,
                                lang=self._language,
                                datatype=self._datatype)
             # Both specified
             except TypeError:
-                raise TypeError('Literals can only have a language tag or '
-                                'a datatype, not both')
+                msg = 'Literals can only have a language tag or a '
+                'datatype, not both!'
+                critical(msg)
+                raise TypeError(msg)
             # Invalid language tag
             except Exception:
-                raise ValueError(f'Invalid language tag: {self._language}')
+                msg = f'Invalid language tag: {self._language}'
+                critical(msg)
+                raise ValueError(msg)
         else:
             return Literal(term)

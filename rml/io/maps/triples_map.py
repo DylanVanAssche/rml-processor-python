@@ -1,3 +1,4 @@
+from logging import debug, warning
 from typing import List, Iterator, Tuple
 from rdflib.term import URIRef, Identifier
 
@@ -12,6 +13,10 @@ class TriplesMap:
         self._logical_source = logical_source
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
+        debug('Logical Source: {self._logical_source}')
+        debug('Subject Map: {self._subject_map}')
+        debug('Predicate Object Maps: {self._predicate_object_maps}')
+        debug('TriplesMap initialization complete')
 
     def __iter__(self) \
             -> Iterator[List[Tuple[URIRef, URIRef, Identifier, URIRef]]]:
@@ -31,8 +36,10 @@ class TriplesMap:
         # Generate subject
         try:
             subj, rr_class, subj_graph = self._subject_map.resolve(data)
+            debug(f'Resolved SubjectMap: {subj}, {rr_class}, {subj_graph}')
         except ResourceWarning:
-            print('Unable to resolve SubjectMap, missing data')
+            warning('Unable to resolve SubjectMap {self._subject_map}: missing'
+                    ' data')
             return []
 
         triples: List[Tuple[URIRef, URIRef, Identifier, URIRef]] = []
@@ -41,8 +48,10 @@ class TriplesMap:
         for po in self._predicate_object_maps:
             try:
                 pred, obj, po_graph = po.resolve(data)
+                debug('Resolved PredicateObjectMap: {pred}, {obj}, '
+                      '{po_graph}')
             except ResourceWarning:
-                print('Unable to resolve PredicateObjectMap, missing data')
+                warning('Unable to resolve SubjectMap {po}: missing data')
                 continue
             t = (subj, pred, obj, po_graph)
             triples.append(t)

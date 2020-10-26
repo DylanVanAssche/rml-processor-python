@@ -4,6 +4,7 @@ import re
 import sys
 import datetime
 import argparse
+from logging import debug, info, warning, critical
 from os import path
 from rdflib import Graph
 from rdflib.term import URIRef, BNode, Literal
@@ -37,6 +38,7 @@ class MappingCompiler():
                         plugin.Serializer,
                         'rml.io.mapping_compiler',
                         'TurtleWithPrefixes')
+        debug('MappingCompiler initialization complete')
 
     def compile(self, rules: Graph) -> Graph:
         """
@@ -48,11 +50,17 @@ class MappingCompiler():
 
         # Compile
         rules = self._expand_shortcuts(rules)
+        info('Expanded shortcuts OK')
         rules = self._strip_jdbc(rules)
+        info('Stripped JDBC OK')
         rules = self._rewrite_rr_table_name(rules)
+        info('Rewritten rr:tableName OK')
         rules = self._add_natural_sql_datatypes(rules)
+        info('Added SQL datatypes OK')
         rules = self._rewrite_rr_graph_map(rules)
+        info('Rewritten rr:graphMap OK')
         rules = self._rewrite_rr_class(rules)
+        info('Rewritten rr:class OK')
         return rules
 
     def _expand_shortcuts(self, rules: Graph) -> Graph:
@@ -81,6 +89,7 @@ class MappingCompiler():
             rules.add((sm, R2RML.constant, s))
             rules.add((sm, R2RML.termType, R2RML.IRI))
             rules.remove(t)
+        debug('rr:subject expanded')
 
         # 2. rr:predicate expansion
         for t in rules.triples((None, R2RML.predicate, None)):
@@ -90,6 +99,7 @@ class MappingCompiler():
             rules.add((pm, R2RML.constant, p))
             rules.add((pm, R2RML.termType, R2RML.IRI))
             rules.remove(t)
+        debug('rr:predicate expanded')
 
         # 3. rr:object expansion
         for t in rules.triples((None, R2RML.object, None)):
@@ -99,6 +109,7 @@ class MappingCompiler():
             rules.add((om, R2RML.constant, o))
             rules.add((om, R2RML.termType, R2RML.IRI))
             rules.remove(t)
+        debug('rr:object expanded')
 
         # 4. rr:graph expansion
         for t in rules.triples((None, R2RML.graph, None)):
@@ -108,6 +119,7 @@ class MappingCompiler():
             rules.add((gm, R2RML.constant, g))
             rules.add((gm, R2RML.termType, R2RML.IRI))
             rules.remove(t)
+        debug('rr:graph expanded')
 
         return rules
 
@@ -119,14 +131,17 @@ class MappingCompiler():
             ls = rules.value(subject=tm, predicate=RML.logicalSource)
             rml_source = rules.value(ls, RML.source)
             rml_source_type = rules.value(rml_source, RDF.type)
+            debug(f'Found Logical Source: {ls} of {tm}')
 
             # Logical Source is not a D2RQ Database, skip
             if rml_source_type != D2RQ.Database:
-                print(f'{rml_source} is not a D2RQ Database, skip')
+                warning(f'{rml_source} is not a D2RQ Database, skipping...')
                 continue
+
             d2rq_jdbc: str = str(rules.value(rml_source, D2RQ.jdbcDSN))
             d2rq_jdbc = d2rq_jdbc.lstrip('jdbc:')  # Strip jdbc
             rules.set((rml_source, D2RQ.jdbcDSN, Literal(d2rq_jdbc)))
+            debug('Stripped JDBC prefix')
         return rules
 
     def _rewrite_rr_table_name(self, rules: Graph) -> Graph:
@@ -151,10 +166,11 @@ class MappingCompiler():
             ls = rules.value(subject=tm, predicate=RML.logicalSource)
             rml_source = rules.value(ls, RML.source)
             rml_source_type = rules.value(rml_source, RDF.type)
+            debug(f'Found Logical Source: {ls} of {tm}')
 
             # Logical Source is not a D2RQ Database, skip
             if rml_source_type != D2RQ.Database:
-                print(f'{rml_source} is not a D2RQ Database, skip')
+                warning(f'{rml_source} is not a D2RQ Database, skip')
                 continue
 
             tm_id = str(tm)
@@ -170,8 +186,9 @@ class MappingCompiler():
             rr_table_name = rules.value(ls, R2RML.tableName)
 
             if rr_table_name is None:
-                print(f'No rr:tableName found in Logical Source: {ls}')
+                warning(f'No rr:tableName found in Logical Source: {ls}')
                 continue
+            debug(f'Found table name: {rr_table_name}')
 
             # Get all possible column names
             d2rq_jdbc = str(rules.value(rml_source, D2RQ.jdbcDSN))
@@ -180,6 +197,7 @@ class MappingCompiler():
             inspector = inspect(engine)
             column_list = [c['name'] for c in
                            inspector.get_columns(rr_table_name)]
+            debug(f'Column names {column_list} for table {rr_table_name}')
 
             # Find column names for rr:SubjectMap, rr:PredicateMap and
             # rr:ObjectMap
@@ -192,6 +210,7 @@ class MappingCompiler():
 
             # Remove duplicates
             tm_list[tm_id]['columns'] = list(set(tm_list[tm_id]['columns']))
+            debug(f'Referenced column names: {tm_list[tm_id]["columns"]}')
 
         # 2. Build SQL query and replace rr:tableName with rml:query
         for tm in tm_list:
@@ -199,8 +218,8 @@ class MappingCompiler():
             rml_query = rules.value(tm_list[tm_id]['source'], RML.query)
 
             if rml_query is not None:
-                print('rml:query is already provided, not overiding it with '
-                      'rr:tableName constructed query!')
+                warning(f'rml:query {rml_query} is already provided, not '
+                        'overiding it with rr:tableName constructed query!')
                 continue
 
             # Build SQL query
@@ -217,12 +236,11 @@ class MappingCompiler():
                     else:
                         query += ', '
                 query += f'FROM {rr_table_name};'
-                print('Extracted query: ' + query)
             # No tables extracted, fall back to R2RML specification
             else:
                 query += f'* FROM {rr_table_name}'
-                print(f'WARNING: No columns extracted for TriplesMap {tm}! '
-                      'Falling back to SELECT * FROM <table_name>')
+                warning(f'No columns extracted for TriplesMap {tm}! '
+                        'Falling back to SELECT * FROM <table_name>')
 
             # Add rml:query
             rules.add((tm_list[tm_id]['source'],
@@ -232,7 +250,7 @@ class MappingCompiler():
             rules.remove((tm_list[tm_id]['source'],
                           R2RML.tableName,
                           rr_table_name))
-            print('Query converted to: '
+            debug('Extracted query: '
                   f'{rules.value(tm_list[tm_id]["source"], RML.query)}')
 
         return rules
@@ -254,13 +272,18 @@ class MappingCompiler():
             tm, _, sm = t1
             graph = rules.value(subject=sm, predicate=R2RML.graphMap)
             if graph is not None:
+                debug(f'Found rr:graphMap: {graph} in {sm}')
                 # 2. Move rr:graphMap to PredicateObjectMaps if not overiden
                 for t2 in rules.triples((tm, R2RML.predicateObjectMap, None)):
                     _, _, pom = t2
                     overide = rules.value(subject=pom,
                                           predicate=R2RML.graphMap)
                     if overide is None:
+                        debug(f'Overiden PredicateObjectMap {pom} rr:graphMap')
                         rules.add((pom, R2RML.graphMap, graph))
+                    else:  # pragma: no cover
+                        warning('PredicateObjectMap {pom} already has a '
+                                'rr:graphMap,  skipping...')
                 rules.remove((sm, R2RML.graphMap, graph))
 
         return rules
@@ -291,9 +314,11 @@ class MappingCompiler():
             rules.add((pom, R2RML.predicateMap, pm))
             rules.add((pom, R2RML.objectMap, om))
             rules.add((triples_map, R2RML.predicateObjectMap, pom))
+            debug(f'Added PredicateObjectMap with rdf:type {rr_class}')
 
             # Remove rr:class from SubjectMap
             rules.remove(t)
+            debug(f'Removed rr:class from SubjectMap {subject_map}')
 
         return rules
 
@@ -316,15 +341,17 @@ class MappingCompiler():
 
         for t in rules.triples((None, R2RML.objectMap, None)):
             pom, _, om = t
+
             # Get SQL database Logical Source
             tm = rules.value(predicate=R2RML.predicateObjectMap, object=pom)
             ls = rules.value(subject=tm, predicate=RML.logicalSource)
             rml_source = rules.value(ls, RML.source)
             rml_source_type = rules.value(rml_source, RDF.type)
+            debug(f'Found Logical Source: {ls} of {tm}')
 
             # Logical Source is not a D2RQ Database, skip
             if rml_source_type != D2RQ.Database:
-                print(f'{rml_source} is not a D2RQ Database, skip')
+                warning(f'{rml_source} is not a D2RQ Database, skip')
                 continue
 
             # Find SQL database query and column information
@@ -334,12 +361,13 @@ class MappingCompiler():
                                                          no_iri=True)
             _columns = [c.strip('\"').strip('`').strip('[').strip(']')
                         for c in _columns]
+            debug(f'Found columns: {_columns} and query: {query}')
 
             # Multiple columns result into multiple data types which is
             # impossible.
             if len(_columns) != 1:
-                print('WARNING: Unable to determine datatype with multiple '
-                      f'columns: {_columns}')
+                warning('Unable to determine datatype with multiple '
+                        f'columns: {_columns}')
                 continue
             column = _columns[0]
 
@@ -348,15 +376,17 @@ class MappingCompiler():
                 with create_engine(d2rq_jdbc).connect() as connection:
                     result = connection.execute(query).first()
                     if result is None:
-                        print(f'WARNING: {query} returned 0 rows, skipping')
+                        warning(f'{query} returned 0 rows, skipping')
                         continue
                     result = dict(result)
                     datatype = self._get_xsd_datatype(result[column])
             except KeyError as e:
-                print(f'WARNING: Column doesn\'t exist: {e}')
+                warning(f'Column doesn\'t exist: {e}')
                 continue
             except (OperationalError, ArgumentError) as e:
-                raise ValueError(f'WARNING: Unable to execute SQL query: {e}')
+                msg = f'Unable to execute SQL query: {e}'
+                critical(msg)
+                raise ValueError(msg)
 
             # Add datatypes when not provided
             overide = rules.value(om, R2RML.datatype)
@@ -365,6 +395,7 @@ class MappingCompiler():
             if datatype is not None and overide is None and \
                     language_tag is None and language_map is None:
                 rules.add((om, R2RML.datatype, datatype))
+                debug(f'Added datatype {datatype} to ObjectMap {om}')
 
         return rules
 
@@ -375,18 +406,22 @@ class MappingCompiler():
         # Handle rml:reference
         ref = rules.value(subject, RML.reference)
         if ref is not None:
+            debug('RML reference: {ref}')
             columns = [str(ref)]
         # Handle rr:template
         else:
             temp = rules.value(subject, R2RML.template)
             if temp is not None:
+                debug(f'R2RML template {temp}')
                 temp = str(temp)
                 # If needed, filter IRIs out of the column list.
                 # We don't want to add SQL datatypes to IRIs
                 if (temp.startswith('http://') or temp.startswith('https://'))\
                         and no_iri:
+                    debug(f'IRI filtering enabled, {temp} skipping...')
                     return []
                 variables: List[str] = URITEMPLATE_PATTERN.findall(temp)
+                debug(f'Extracted variables: {variables}')
                 for v in variables:
                     columns.append(v)
 
@@ -406,19 +441,26 @@ class MappingCompiler():
         """
         instance = type(value)
         if instance is bytes:
+            debug(f'{value} is xsd:hexBinary')
             return XSD.hexBinary
         # DECIMAL and FLOAT are both casted to float by Python
         elif instance is float:
+            debug(f'{value} is xsd:double')
             return XSD.double
         elif instance is int:
+            debug(f'{value} is xsd:integer')
             return XSD.integer
         elif instance is bool:
+            debug(f'{value} is xsd:boolean')
             return XSD.boolean
         elif instance is datetime.date:
+            debug(f'{value} is xsd:date')
             return XSD.date
         elif instance is datetime.time:
+            debug(f'{value} is xsd:time')
             return XSD.time
         elif instance is datetime.datetime:
+            debug(f'{value} is xsd:dateTime')
             return XSD.dateTime
         # STRING does not get a datatype
         else:
