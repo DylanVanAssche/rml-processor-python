@@ -1,4 +1,4 @@
-from logging import debug, info, warning, critical
+from logging import debug, info, warning, error, critical
 from itertools import product
 from rdflib import Graph
 from rdflib.term import URIRef, Literal, BNode, Identifier
@@ -247,11 +247,9 @@ class MappingReader:
             debug(f'\tSupported language: {sd_supported_language}')
             debug(f'\tResult format: {sd_result_format}')
 
-            # FIXME: Warn when SPARQL 1.0 is required, setting the SPARQL
-            # version is not possible at the moment, see Gitlab issue #37
             if sd_supported_language != SD.SPARQL11Query:  # pragma: no cover
-                warning('SPARQL supported language is ignored! See Gitlab '
-                        'issue #37')
+                error(f'{sd_supported_language} is not supported. Only'
+                      'SPARQL 1.1 is supported.')
 
             if sd_result_format == FORMATS.SPARQL_Results_JSON:
                 return SPARQLJSONLogicalSource(rml_iterator,
