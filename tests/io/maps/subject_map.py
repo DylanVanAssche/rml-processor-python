@@ -5,7 +5,7 @@ from rdflib.term import URIRef, BNode
 from lxml import etree
 
 from rml.io.sources import MIMEType
-from rml.io.maps import SubjectMap, TermType
+from rml.io.maps import SubjectMap, ReferenceType
 from rml.namespace import FOAF, R2RML
 
 XML_STUDENT_1 = """
@@ -71,16 +71,16 @@ class SubjectMapTests(unittest.TestCase):
         Test if we raise a ValueError when MIMEType is unknown
         """
         with self.assertRaises(ValueError):
-            sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+            sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                             MIMEType.UNKNOWN, None, None)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
     def test_unknown_termtype(self) -> None:
         """
-        Test if we raise a ValueError when TermType is unknown
+        Test if we raise a ValueError when ReferenceType is unknown
         """
         with self.assertRaises(ValueError):
-            sm = SubjectMap('http://example.com/{id}', TermType.UNKNOWN,
+            sm = SubjectMap('http://example.com/{id}', ReferenceType.UNKNOWN,
                             MIMEType.CSV, None, None)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
@@ -88,7 +88,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using key-value
         """
-        sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/', ReferenceType.TEMPLATE,
                         MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
@@ -97,7 +97,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using key-value
         """
-        sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/', ReferenceType.TEMPLATE,
                         MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
@@ -106,7 +106,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using key-value
         """
-        sm = SubjectMap('http://example.com/', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/', ReferenceType.TEMPLATE,
                         MIMEType.CSV, None, None)
         with self.assertRaises(NameError):
             subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
@@ -120,7 +120,7 @@ class SubjectMapTests(unittest.TestCase):
         missing a column. In case of tabular data, the columns cannot be
         missing if they are present in the header.
         """
-        sm = SubjectMap('title', TermType.REFERENCE,
+        sm = SubjectMap('title', ReferenceType.REFERENCE,
                         MIMEType.CSV, R2RML.IRI, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
@@ -143,7 +143,7 @@ class SubjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No subject may be generated when the reference does not exist.
         """
-        sm = SubjectMap('title', TermType.REFERENCE,
+        sm = SubjectMap('title', ReferenceType.REFERENCE,
                         MIMEType.RDF_XML, R2RML.IRI, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
@@ -165,7 +165,7 @@ class SubjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No subject may be generated when the reference does not exist.
         """
-        sm = SubjectMap('$.title', TermType.REFERENCE,
+        sm = SubjectMap('$.title', ReferenceType.REFERENCE,
                 MIMEType.JSON, R2RML.IRI, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
@@ -187,7 +187,7 @@ class SubjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No subject may be generated when the reference does not exist.
         """
-        sm = SubjectMap('/student/title', TermType.REFERENCE,
+        sm = SubjectMap('/student/title', ReferenceType.REFERENCE,
                         MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_TITLE))
 
@@ -206,7 +206,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using XML data
         """
-        sm = SubjectMap('http://example.com/{/student/id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{/student/id}', ReferenceType.TEMPLATE,
                         MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(subj[0], URIRef('http://example.com/0'))
@@ -219,7 +219,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using XML data
         """
-        sm = SubjectMap('/student/name', TermType.REFERENCE,
+        sm = SubjectMap('/student/name', ReferenceType.REFERENCE,
                         MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(subj[0], URIRef('Herman'))
@@ -232,7 +232,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using XML data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.TEXT_XML, R2RML.IRI, None)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(subj[0], FOAF.Person)
@@ -245,7 +245,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using JSON data
         """
-        sm = SubjectMap('http://example.com/{$.id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{$.id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -253,7 +253,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using JSON data
         """
-        sm = SubjectMap('$.name', TermType.REFERENCE,
+        sm = SubjectMap('$.name', ReferenceType.REFERENCE,
                         MIMEType.JSON, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -261,7 +261,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.JSON, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -269,7 +269,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using CSV data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.CSV, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -277,7 +277,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using CSV data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.CSV, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -285,7 +285,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using CSV data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.CSV, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -293,7 +293,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TSV data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TSV, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -301,7 +301,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TSV data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TSV, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -309,7 +309,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TSV data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.TSV, R2RML.IRI)
         self._check_constant_kv(sm)
 
@@ -317,7 +317,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using SQL data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.SQL, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -325,7 +325,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using SQL data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.SQL, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -333,7 +333,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using SQL data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.SQL, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -341,7 +341,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using JSON-LD data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON_LD, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -349,7 +349,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using JSON-LD data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.JSON_LD, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -357,7 +357,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON-LD data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.JSON_LD, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -365,7 +365,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using N3 data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.N3, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -373,7 +373,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using N3 data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.N3, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -381,7 +381,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using N3 data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.N3, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -389,7 +389,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using NQUADS data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.NQUADS, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -397,7 +397,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using NQUADS data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.NQUADS, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -405,7 +405,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NQUADS data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.NQUADS, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -413,7 +413,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using NTRIPLES data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.NTRIPLES, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -421,7 +421,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using NTRIPLES data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.NTRIPLES, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -429,7 +429,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NTRIPLES data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.NTRIPLES, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -437,7 +437,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using RDF data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.RDF_XML, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -445,7 +445,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using RDF data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.RDF_XML, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -453,7 +453,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using RDF data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.RDF_XML, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -461,7 +461,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TRIG data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TRIG, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -469,7 +469,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TRIG data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TRIG, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -477,7 +477,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIG data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.TRIG, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -485,7 +485,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TRIX data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TRIX, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -493,7 +493,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TRIX data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                 MIMEType.TRIX, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -501,7 +501,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIX data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.TRIX, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -509,7 +509,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using Turtle data
         """
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TURTLE, R2RML.IRI, None)
         self._check_template_kv(sm)
 
@@ -517,7 +517,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using turtle data
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TURTLE, R2RML.IRI, None)
         self._check_reference_kv(sm)
 
@@ -525,7 +525,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using Turtle data
         """
-        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = SubjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                         MIMEType.TURTLE, R2RML.IRI, None)
         self._check_constant_kv(sm)
 
@@ -533,7 +533,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test generation of a blank node using template.
         """
-        sm = SubjectMap('blank{id}', TermType.TEMPLATE,
+        sm = SubjectMap('blank{id}', ReferenceType.TEMPLATE,
                         MIMEType.TURTLE, R2RML.BlankNode, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj[0], BNode('blank0'))
@@ -542,7 +542,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test generation of a blank node using constant.
         """
-        sm = SubjectMap('name', TermType.REFERENCE,
+        sm = SubjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TURTLE, R2RML.BlankNode, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj[0], BNode('Herman'))
@@ -551,7 +551,7 @@ class SubjectMapTests(unittest.TestCase):
         """
         Test generation of a blank node using constant.
         """
-        sm = SubjectMap('myBlankNode', TermType.CONSTANT,
+        sm = SubjectMap('myBlankNode', ReferenceType.CONSTANT,
                         MIMEType.TURTLE, R2RML.BlankNode, None)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj[0], BNode('myBlankNode'))

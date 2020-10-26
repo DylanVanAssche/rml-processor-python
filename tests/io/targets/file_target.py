@@ -11,7 +11,7 @@ from rdflib.compare import to_isomorphic
 from rml.io.targets import FileLogicalTarget
 from rml.io.sources import JSONLogicalSource, SPARQLJSONLogicalSource, MIMEType
 from rml.io.maps import TriplesMap, SubjectMap, PredicateMap, \
-                        ObjectMap, PredicateObjectMap, TermType
+                        ObjectMap, PredicateObjectMap, ReferenceType
 from rml.namespace import FOAF
 
 SPARQL_QUERY = """
@@ -31,11 +31,11 @@ class FileLogicalTargetTests(unittest.TestCase):
         """
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, None, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -55,11 +55,11 @@ class FileLogicalTargetTests(unittest.TestCase):
         """
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -95,11 +95,11 @@ class FileLogicalTargetTests(unittest.TestCase):
         """
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, None, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -134,15 +134,15 @@ class FileLogicalTargetTests(unittest.TestCase):
         ls2 = SPARQLJSONLogicalSource('$.results.bindings.[*]',
                                       'http://dbpedia.org/sparql',
                                       SPARQL_QUERY)
-        sm1 = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm1 = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                          MIMEType.JSON, None, None)
-        sm2 = SubjectMap('actor.value', TermType.REFERENCE,
+        sm2 = SubjectMap('actor.value', ReferenceType.REFERENCE,
                          MIMEType.JSON, None, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON,
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
-        om2 = ObjectMap('name.value', TermType.REFERENCE, MIMEType.JSON,
+        om2 = ObjectMap('name.value', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
         pom1 = []
         pom2 = []
@@ -203,15 +203,15 @@ class FileLogicalTargetTests(unittest.TestCase):
         ls2 = SPARQLJSONLogicalSource('$.results.bindings.[*]',
                                               'http://dbpedia.org/sparql',
                                               SPARQL_QUERY)
-        sm1 = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm1 = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                          MIMEType.JSON, None, None)
-        sm2 = SubjectMap('actor.value', TermType.REFERENCE,
+        sm2 = SubjectMap('actor.value', ReferenceType.REFERENCE,
                          MIMEType.JSON, None, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON,
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
-        om2 = ObjectMap('name.value', TermType.REFERENCE, MIMEType.JSON,
+        om2 = ObjectMap('name.value', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
         pom1 = []
         pom2 = []

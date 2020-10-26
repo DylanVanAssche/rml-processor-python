@@ -5,7 +5,7 @@ from rdflib.term import URIRef
 from lxml import etree
 
 from rml.io.sources import MIMEType
-from rml.io.maps import PredicateMap, TermType
+from rml.io.maps import PredicateMap, ReferenceType
 from rml.namespace import FOAF
 
 XML_STUDENT_1 = """
@@ -35,10 +35,10 @@ XML_STUDENT_3 = """
 class PredicateMapTests(unittest.TestCase):
     def test_unknown_termtype(self) -> None:
         """
-        Test if we raise a ValueError when TermType is unknown
+        Test if we raise a ValueError when ReferenceType is unknown
         """
         with self.assertRaises(ValueError):
-            sm = PredicateMap('http://example.com/{id}', TermType.UNKNOWN,
+            sm = PredicateMap('http://example.com/{id}', ReferenceType.UNKNOWN,
                             MIMEType.CSV)
             sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
@@ -46,7 +46,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using XML data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.TEXT_XML)
         subj = sm.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(subj, FOAF.Person)
@@ -59,7 +59,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.JSON)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -72,7 +72,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using CSV data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.CSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -85,7 +85,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TSV data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.TSV)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -98,7 +98,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using SQL data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.SQL)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -111,7 +111,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON-LD data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.JSON_LD)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -124,7 +124,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using N3 data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.N3)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -137,7 +137,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NQUADS data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.NQUADS)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -150,7 +150,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NTRIPLES data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.NTRIPLES)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -163,7 +163,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using RDF data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.RDF_XML)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -176,7 +176,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIG data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.TRIG)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -189,7 +189,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIX data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.TRIX)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -202,7 +202,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using Turtle data
         """
-        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        sm = PredicateMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                           MIMEType.TURTLE)
         subj = sm.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(subj, FOAF.Person)
@@ -215,7 +215,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using JSON data
         """
-        sm = PredicateMap('{uri}', TermType.TEMPLATE, MIMEType.JSON)
+        sm = PredicateMap('{uri}', ReferenceType.TEMPLATE, MIMEType.JSON)
         subj = sm.resolve({'uri': 'http://example.com/me'})
         self.assertEqual(subj, URIRef('http://example.com/me'))
 
@@ -223,7 +223,7 @@ class PredicateMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using JSON data
         """
-        sm = PredicateMap('uri', TermType.REFERENCE, MIMEType.JSON)
+        sm = PredicateMap('uri', ReferenceType.REFERENCE, MIMEType.JSON)
         subj = sm.resolve({'uri': 'http://example.com/me'})
         self.assertEqual(subj, URIRef('http://example.com/me'))
 

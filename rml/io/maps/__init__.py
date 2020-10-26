@@ -20,7 +20,7 @@ NS = {SPARQL_RESULTS_PREFIX: SPARQL_RESULTS_NS}
 
 
 @unique
-class TermType(Enum):
+class ReferenceType(Enum):
     CONSTANT = R2RML.constant
     TEMPLATE = R2RML.template
     REFERENCE = RML.reference
@@ -28,16 +28,16 @@ class TermType(Enum):
 
 
 class TermMap(ABC):
-    def __init__(self, term: str, term_type: TermType,
+    def __init__(self, term: str, reference_type: ReferenceType,
                  reference_formulation: MIMEType):
         """
         R2RML/RML Term Map
         """
         self._term: str = term
-        self._term_type: TermType = term_type
+        self._reference_type: ReferenceType = reference_type
         self._mime_type: MIMEType = reference_formulation
         debug(f'Term: {self._term}')
-        debug(f'Term type: {self._term_type}')
+        debug(f'Term type: {self._reference_type}')
         debug(f'MIME type: {self._mime_type}')  # Gitlab bug
         debug(f'Term Map initialization complete')
 

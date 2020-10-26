@@ -5,7 +5,7 @@ from rdflib.term import URIRef, Identifier
 from rml.io.targets import LogicalTarget
 from rml.io.sources import JSONLogicalSource, MIMEType
 from rml.io.maps import TriplesMap, SubjectMap, PredicateMap, \
-                        ObjectMap, PredicateObjectMap, TermType
+                        ObjectMap, PredicateObjectMap, ReferenceType
 
 
 class MockLogicalTarget(LogicalTarget):
@@ -24,11 +24,11 @@ class LogicalTargetTests(unittest.TestCase):
         """
         ls = JSONLogicalSource('$.students.[*]',
                                'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, None, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
