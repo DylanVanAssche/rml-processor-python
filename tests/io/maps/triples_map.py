@@ -11,7 +11,7 @@ from rml.io.sources import JSONLogicalSource, XMLLogicalSource, \
                            RDFLogicalSource, DCATLogicalSource, \
                            MIMEType, LogicalSource
 from rml.io.maps import SubjectMap, PredicateMap, ObjectMap, \
-                        PredicateObjectMap, TriplesMap, TermType
+                        PredicateObjectMap, TriplesMap, ReferenceType
 from rml.namespace import FOAF, LINKED_CONNECTIONS, XSD, R2RML
 
 # Resolve RDF file to absolute path for SPARQL
@@ -158,11 +158,11 @@ class TriplesMapTests(unittest.TestCase):
 
     def _build_triples_map_single_triple(self, ls: LogicalSource,
                                          mime_type: MIMEType) -> TriplesMap:
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         mime_type, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           mime_type)
-        om = ObjectMap('name', TermType.REFERENCE, mime_type, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, mime_type, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -170,11 +170,11 @@ class TriplesMapTests(unittest.TestCase):
 
     def _build_triples_map_single_triple_rdf(self, ls: LogicalSource,
                                              mime_type: MIMEType) -> TriplesMap:
-        sm = SubjectMap('{person}', TermType.TEMPLATE,
+        sm = SubjectMap('{person}', ReferenceType.TEMPLATE,
                         mime_type, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           mime_type)
-        om = ObjectMap('name', TermType.REFERENCE, mime_type, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, mime_type, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -182,14 +182,14 @@ class TriplesMapTests(unittest.TestCase):
 
     def _build_triples_map_multiple_triples(self, ls: LogicalSource, mime_type:
             MIMEType) -> TriplesMap:
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         mime_type, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                            mime_type)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                            mime_type)
-        om1 = ObjectMap('name', TermType.REFERENCE, mime_type, is_iri=False)
-        om2 = ObjectMap('age', TermType.REFERENCE, mime_type, is_iri=False)
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, mime_type, is_iri=False)
+        om2 = ObjectMap('age', ReferenceType.REFERENCE, mime_type, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
         pom.append(PredicateObjectMap(pm2, om2))
@@ -198,14 +198,14 @@ class TriplesMapTests(unittest.TestCase):
 
     def _build_triples_map_multiple_triples_rdf(self, ls: LogicalSource, \
             mime_type: MIMEType) -> TriplesMap:
-        sm = SubjectMap('{person}', TermType.TEMPLATE, mime_type, R2RML.IRI,
+        sm = SubjectMap('{person}', ReferenceType.TEMPLATE, mime_type, R2RML.IRI,
                         None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                            mime_type)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                            mime_type)
-        om1 = ObjectMap('name', TermType.REFERENCE, mime_type, is_iri=False)
-        om2 = ObjectMap('age', TermType.REFERENCE, mime_type, is_iri=False)
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, mime_type, is_iri=False)
+        om2 = ObjectMap('age', ReferenceType.REFERENCE, mime_type, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
         pom.append(PredicateObjectMap(pm2, om2))
@@ -218,14 +218,14 @@ class TriplesMapTests(unittest.TestCase):
         because the data are missing.
         """
         ls = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om2 = ObjectMap('oops', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om2 = ObjectMap('oops', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
         pom.append(PredicateObjectMap(pm2, om2))
@@ -238,14 +238,14 @@ class TriplesMapTests(unittest.TestCase):
         to missing data.
         """
         ls = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{oops}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{oops}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om2 = ObjectMap('age', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om2 = ObjectMap('age', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
         pom.append(PredicateObjectMap(pm2, om2))
@@ -257,14 +257,14 @@ class TriplesMapTests(unittest.TestCase):
         Test named graph generation.
         """
         ls = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        om1 = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om2 = ObjectMap('age', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om2 = ObjectMap('age', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1, \
                 rr_graph = URIRef('http://example.com/Graph')))
@@ -278,11 +278,11 @@ class TriplesMapTests(unittest.TestCase):
         Test if we can create an iterator from a Triples Map.
         """
         ls = JSONLogicalSource('$.students.[*]', 'tests/assets/json/student.json')
-        sm = SubjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.JSON, is_iri=False)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.JSON, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -362,11 +362,11 @@ class TriplesMapTests(unittest.TestCase):
         ls = SPARQLJSONLogicalSource('$.results.bindings.[*]',
                                      'http://dbpedia.org/sparql',
                                      SPARQL_QUERY)
-        sm = SubjectMap('{actor.value}', TermType.TEMPLATE,
+        sm = SubjectMap('{actor.value}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om = ObjectMap('name.value', TermType.REFERENCE, MIMEType.JSON,
+        om = ObjectMap('name.value', ReferenceType.REFERENCE, MIMEType.JSON,
                        is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
@@ -380,15 +380,15 @@ class TriplesMapTests(unittest.TestCase):
         ls = SPARQLJSONLogicalSource('$.results.bindings.[*]',
                                      'http://dbpedia.org/sparql',
                                      SPARQL_QUERY)
-        sm = SubjectMap('{actor.value}', TermType.TEMPLATE,
+        sm = SubjectMap('{actor.value}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                           MIMEType.JSON)
-        om1 = ObjectMap('name.value', TermType.REFERENCE, MIMEType.JSON,
+        om1 = ObjectMap('name.value', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
-        om2 = ObjectMap('birthDate.value', TermType.REFERENCE, MIMEType.JSON,
+        om2 = ObjectMap('birthDate.value', ReferenceType.REFERENCE, MIMEType.JSON,
                         is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
@@ -404,11 +404,11 @@ class TriplesMapTests(unittest.TestCase):
                                     'http://dbpedia.org/sparql',
                                     SPARQL_QUERY)
         sm = SubjectMap('{./sr:binding[@name="actor"]/sr:uri}',
-                        TermType.TEMPLATE, MIMEType.TEXT_XML, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+                        ReferenceType.TEMPLATE, MIMEType.TEXT_XML, R2RML.IRI, None)
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.TEXT_XML)
         om = ObjectMap('./sr:binding[@name="name"]/sr:literal',
-                       TermType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
+                       ReferenceType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -421,16 +421,16 @@ class TriplesMapTests(unittest.TestCase):
         ls = SPARQLXMLLogicalSource('//sr:result',
                                     'http://dbpedia.org/sparql',
                                     SPARQL_QUERY)
-        sm = SubjectMap('{./sr:binding[@name="actor"]/sr:uri}', TermType.TEMPLATE,
+        sm = SubjectMap('{./sr:binding[@name="actor"]/sr:uri}', ReferenceType.TEMPLATE,
                         MIMEType.TEXT_XML, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                            MIMEType.TEXT_XML)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                            MIMEType.TEXT_XML)
         om1 = ObjectMap('./sr:binding[@name="name"]/sr:literal',
-                        TermType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
+                        ReferenceType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
         om2 = ObjectMap('./sr:binding[@name="birthDate"]/sr:literal',
-                        TermType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
+                        ReferenceType.REFERENCE, MIMEType.TEXT_XML, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))
         pom.append(PredicateObjectMap(pm2, om2))
@@ -443,11 +443,11 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = SQLLogicalSource('sqlite:///tests/assets/sql/student.db',
                               'SELECT id, name, age FROM students;')
-        sm = SubjectMap('http://example.com/{ID}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{ID}', ReferenceType.TEMPLATE,
                         MIMEType.SQL, R2RML.IRI, None)
-        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                           MIMEType.SQL)
-        om = ObjectMap('NAME', TermType.REFERENCE, MIMEType.SQL, is_iri=False)
+        om = ObjectMap('NAME', ReferenceType.REFERENCE, MIMEType.SQL, is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm, om))
         tm = TriplesMap(ls, sm, pom)
@@ -459,15 +459,15 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = SQLLogicalSource('sqlite:///tests/assets/sql/student.db',
                               'SELECT id, name, age FROM students;')
-        sm = SubjectMap('http://example.com/{ID}', TermType.TEMPLATE,
+        sm = SubjectMap('http://example.com/{ID}', ReferenceType.TEMPLATE,
                         MIMEType.SQL, R2RML.IRI, None)
-        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', TermType.CONSTANT,
+        pm1 = PredicateMap('http://xmlns.com/foaf/0.1/name', ReferenceType.CONSTANT,
                            MIMEType.SQL)
-        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', TermType.CONSTANT,
+        pm2 = PredicateMap('http://xmlns.com/foaf/0.1/age', ReferenceType.CONSTANT,
                            MIMEType.SQL)
-        om1 = ObjectMap('NAME', TermType.REFERENCE, MIMEType.SQL,
+        om1 = ObjectMap('NAME', ReferenceType.REFERENCE, MIMEType.SQL,
                         is_iri=False)
-        om2 = ObjectMap('AGE', TermType.REFERENCE, MIMEType.SQL,
+        om2 = ObjectMap('AGE', ReferenceType.REFERENCE, MIMEType.SQL,
                         is_iri=False)
         pom = []
         pom.append(PredicateObjectMap(pm1, om1))

@@ -5,23 +5,23 @@ from jsonpath_ng import parse
 from typing import Union, Dict, Optional
 from lxml.etree import Element
 
-from . import TermMap, TermType
+from . import TermMap, ReferenceType
 from rml.io.sources import MIMEType
 from rml.namespace import XSD
 
 
 class ObjectMap(TermMap):
-    def __init__(self, term: str, term_type: TermType,
+    def __init__(self, term: str, reference_type: ReferenceType,
                  mime_type: MIMEType, language: str = None,
                  datatype: Namespace = None, is_iri: bool = False) -> None:
         """
         Creates an ObjectMap
         """
-        super().__init__(term, term_type, mime_type)
+        super().__init__(term, reference_type, mime_type)
         self._language: Optional[str] = language
         self._datatype: Optional[Namespace] = datatype
         self._is_iri: bool = is_iri
-        self._rr_term_type = term_type
+        self._rr_reference_type = reference_type
         debug(f'Language: {self._language}')
         debug(f'Datatype: {self._datatype}')
         debug(f'Is IRI?: {self._is_iri}')
@@ -33,25 +33,25 @@ class ObjectMap(TermMap):
         """
         # R2RML template
         resolved_term: Optional[str]
-        if self._term_type == TermType.TEMPLATE:
+        if self._reference_type == ReferenceType.TEMPLATE:
             resolved_term = super()._resolve_template(data)
             if self._is_iri:
                 return URIRef(resolved_term)
             return self._handle_literal(resolved_term)
         # RML reference
-        elif self._term_type == TermType.REFERENCE:
+        elif self._reference_type == ReferenceType.REFERENCE:
             resolved_term = super()._resolve_reference(self._term, data)
             if self._is_iri:
                 return URIRef(resolved_term)
             return self._handle_literal(resolved_term)
         # R2RML constant
-        elif self._term_type == TermType.CONSTANT:
+        elif self._reference_type == ReferenceType.CONSTANT:
             if self._is_iri:
                 return URIRef(self._term)
             return self._handle_literal(self._term)
         # Term type unsupported for ObjectMap
         else:
-            raise ValueError(f'Unknown term type: {self._term_type}')
+            raise ValueError(f'Unknown term type: {self._reference_type}')
 
     def _handle_literal(self, term: str) -> Literal:
         """

@@ -4,30 +4,30 @@ from jsonpath_ng import parse
 from typing import Union, Dict
 from lxml.etree import Element
 
-from . import TermMap, TermType
+from . import TermMap, ReferenceType
 from rml.io.sources import MIMEType
 
 
 class PredicateMap(TermMap):
-    def __init__(self, term: str, term_type: TermType,
+    def __init__(self, term: str, reference_type: ReferenceType,
                  mime_type: MIMEType) -> None:
         """
         Creates a PredicateMap.
         """
-        super().__init__(term, term_type, mime_type)
+        super().__init__(term, reference_type, mime_type)
         debug('PredicateMap initialization complete')
 
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
         """
         Resolves a predicate into an RDF Identifier.
         """
-        if self._term_type == TermType.TEMPLATE:
+        if self._reference_type == ReferenceType.TEMPLATE:
             return URIRef(super()._resolve_template(data))
-        elif self._term_type == TermType.REFERENCE:
+        elif self._reference_type == ReferenceType.REFERENCE:
             return URIRef(super()._resolve_reference(self._term, data))
-        elif self._term_type == TermType.CONSTANT:
+        elif self._reference_type == ReferenceType.CONSTANT:
             return URIRef(self._term)
         else:
-            msg = f'Unknown term type: {self._term_type}'
+            msg = f'Unknown term type: {self._reference_type}'
             critical(msg)
             raise ValueError(msg)

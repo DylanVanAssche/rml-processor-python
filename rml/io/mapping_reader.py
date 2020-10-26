@@ -11,7 +11,7 @@ from rml.io.sources import LogicalSource, CSVLogicalSource, \
                            SPARQLJSONLogicalSource, MIMEType
 from rml.io.targets import LogicalTarget
 from rml.io.maps import TriplesMap, PredicateObjectMap, SubjectMap, \
-                        ObjectMap, PredicateMap, TermType
+                        ObjectMap, PredicateMap, ReferenceType
 from rml.namespace import RML, R2RML, RDF, QL, D2RQ, SD, CSVW, DCAT, HYDRA, \
                           FORMATS
 from rml.io import MappingValidator, MappingCompiler
@@ -331,22 +331,23 @@ class MappingReader:
         rr_template = self._graph.value(sm, R2RML.template)
         rml_reference = self._graph.value(sm, RML.reference)
         rr_constant: URIRef = self._graph.value(sm, R2RML.constant)
-        rr_term_type: Identifier = self._graph.value(sm, R2RML.termType)
+        rr_reference_type: Identifier = self._graph.value(sm, R2RML.termType)
 
         debug(f'\tTemplate: {rr_template}')
         debug(f'\tReference: {rml_reference}')
         debug(f'\tConstant: {rr_constant}')
-        debug(f'\tTerm type: {rr_term_type}')
+        debug(f'\tTerm type: {rr_reference_type}')
 
         if rr_template is not None:
-            return SubjectMap(rr_template.toPython(), TermType.TEMPLATE,
-                              mime_type, rr_term_type)
+            return SubjectMap(rr_template.toPython(), ReferenceType.TEMPLATE,
+                              mime_type, rr_reference_type)
         elif rml_reference is not None:
-            return SubjectMap(rml_reference.toPython(), TermType.REFERENCE,
-                              mime_type, rr_term_type)
+            return SubjectMap(rml_reference.toPython(),
+                              ReferenceType.REFERENCE, mime_type,
+                              rr_reference_type)
         elif rr_constant is not None:
-            return SubjectMap(rr_constant, TermType.CONSTANT, mime_type,
-                              rr_term_type)
+            return SubjectMap(rr_constant, ReferenceType.CONSTANT, mime_type,
+                              rr_reference_type)
         else:  # pragma: no cover
             msg: str = f'Unable to resolve rr:subjectMap {sm}, should be '
             'catched by shape validation. Report this as an issue!'
@@ -359,14 +360,14 @@ class MappingReader:
         rr_template = self._graph.value(om, R2RML.template)
         rml_reference = self._graph.value(om, RML.reference)
         rr_constant = self._graph.value(om, R2RML.constant)
-        rr_term_type = self._graph.value(om, R2RML.termType)
+        rr_reference_type = self._graph.value(om, R2RML.termType)
         rr_language = self._graph.value(om, R2RML.language)
         rr_datatype = self._graph.value(om, R2RML.datatype)
 
         debug(f'\t\tTemplate: {rr_template}')
         debug(f'\t\tReference: {rml_reference}')
         debug(f'\t\tConstant: {rr_constant}')
-        debug(f'\t\tTerm type: {rr_term_type}')
+        debug(f'\t\tTerm type: {rr_reference_type}')
 
         # No term type specified? Literal by default if one of the conditions
         # are true:
@@ -375,46 +376,50 @@ class MappingReader:
         # - has rr:datatype
         # See the RML spec (https://rml.io/spec) for a detailed explanation.
         if rr_template is not None:
-            if rr_term_type == R2RML.Literal or rr_language is not None or \
-                    rr_datatype is not None:
-                return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
-                                 mime_type, language=rr_language,
-                                 datatype=rr_datatype, is_iri=False)
-            elif rr_term_type == R2RML.BlankNode:  # pragma: no cover
+            if rr_reference_type == R2RML.Literal or rr_language is not None\
+                    or rr_datatype is not None:
+                return ObjectMap(rr_template.toPython(),
+                                 ReferenceType.TEMPLATE, mime_type,
+                                 language=rr_language, datatype=rr_datatype,
+                                 is_iri=False)
+            elif rr_reference_type == R2RML.BlankNode:  # pragma: no cover
                 msg = 'Blank nodes are not fully supported yet'
                 critical(msg)
                 raise NotImplementedError(msg)
             # R2RML.IRI or no rr:termType
             else:
-                return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
-                                 mime_type, language=rr_language,
-                                 datatype=rr_datatype, is_iri=True)
+                return ObjectMap(rr_template.toPython(),
+                                 ReferenceType.TEMPLATE, mime_type,
+                                 language=rr_language, datatype=rr_datatype,
+                                 is_iri=True)
         elif rml_reference is not None:
             # Term type specifies IRI
-            if rr_term_type == R2RML.IRI:
-                return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
+            if rr_reference_type == R2RML.IRI:
+                return ObjectMap(rml_reference.toPython(),
+                                 ReferenceType.REFERENCE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=True)
-            elif rr_term_type == R2RML.BlankNode:  # pragma: no cover
+            elif rr_reference_type == R2RML.BlankNode:  # pragma: no cover
                 msg = 'Blank nodes are not fully supported yet'
                 critical(msg)
                 raise NotImplementedError(msg)
             # R2RML.Literal or has language tag or has datatype or no
             # rr:termType
             else:
-                return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
+                return ObjectMap(rml_reference.toPython(),
+                                 ReferenceType.REFERENCE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=False)
         elif rr_constant is not None:
-            if rr_term_type == R2RML.Literal or rr_language is not None or \
-                    rr_datatype is not None:
-                return ObjectMap(rr_constant, TermType.CONSTANT, mime_type,
-                                 language=rr_language, datatype=rr_datatype,
-                                 is_iri=False)
+            if rr_reference_type == R2RML.Literal or rr_language is not None\
+                    or rr_datatype is not None:
+                return ObjectMap(rr_constant, ReferenceType.CONSTANT,
+                                 mime_type, language=rr_language,
+                                 datatype=rr_datatype, is_iri=False)
             else:
-                return ObjectMap(rr_constant, TermType.CONSTANT, mime_type,
-                                 language=rr_language, datatype=rr_datatype,
-                                 is_iri=True)
+                return ObjectMap(rr_constant, ReferenceType.CONSTANT,
+                                 mime_type, language=rr_language,
+                                 datatype=rr_datatype, is_iri=True)
         else:  # pragma: no cover
             msg = 'ObjectMap requires at least 1 rr:template, '
             'rml:reference or rr:constant. Should be catched by shape '
@@ -434,13 +439,13 @@ class MappingReader:
         debug(f'\t\tConstant: {rr_constant}')
 
         if rr_template is not None:
-            return PredicateMap(rr_template.toPython(), TermType.TEMPLATE,
+            return PredicateMap(rr_template.toPython(), ReferenceType.TEMPLATE,
                                 mime_type)
         elif rml_reference is not None:
-            return PredicateMap(rml_reference.toPython(), TermType.REFERENCE,
-                                mime_type)
+            return PredicateMap(rml_reference.toPython(),
+                                ReferenceType.REFERENCE, mime_type)
         elif rr_constant is not None:
-            return PredicateMap(rr_constant, TermType.CONSTANT, mime_type)
+            return PredicateMap(rr_constant, ReferenceType.CONSTANT, mime_type)
         else:  # pragma: no cover
             msg = f'Unable to resolved rr:predicateMap {pm}. '
             'Should be catched by shape validation, report'

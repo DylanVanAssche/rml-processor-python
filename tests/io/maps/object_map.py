@@ -5,7 +5,7 @@ from rdflib.term import URIRef, Literal
 from lxml import etree
 
 from rml.io.sources import MIMEType
-from rml.io.maps import ObjectMap, TermType
+from rml.io.maps import ObjectMap, ReferenceType
 from rml.namespace import FOAF, XSD
 
 XML_STUDENT_1 = """
@@ -47,16 +47,16 @@ class ObjectMapTests(unittest.TestCase):
         Test if we raise a ValueError when MIMEType is unknown
         """
         with self.assertRaises(ValueError):
-            om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+            om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                             MIMEType.UNKNOWN, is_iri=True)
             om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
     def test_unknown_termtype(self) -> None:
         """
-        Test if we raise a ValueError when TermType is unknown
+        Test if we raise a ValueError when ReferenceType is unknown
         """
         with self.assertRaises(ValueError):
-            om = ObjectMap('http://example.com/{id}', TermType.UNKNOWN,
+            om = ObjectMap('http://example.com/{id}', ReferenceType.UNKNOWN,
                             MIMEType.CSV, is_iri=True)
             om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
 
@@ -64,7 +64,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using key-value
         """
-        om = ObjectMap('http://example.com/', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/', ReferenceType.TEMPLATE,
                         MIMEType.CSV, is_iri=True)
         with self.assertRaises(NameError):
             obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
@@ -73,7 +73,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using JSONPath
         """
-        om = ObjectMap('http://example.com/', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/', ReferenceType.TEMPLATE,
                         MIMEType.JSON, is_iri=True)
         with self.assertRaises(NameError):
             obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
@@ -82,7 +82,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an empty template using XML
         """
-        om = ObjectMap('http://example.com/', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/', ReferenceType.TEMPLATE,
                        MIMEType.TEXT_XML, is_iri=True)
         with self.assertRaises(NameError):
             obj = om.resolve(etree.fromstring(XML_STUDENT_1))
@@ -96,7 +96,7 @@ class ObjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No object may be generated when the reference does not exist.
         """
-        om = ObjectMap('title', TermType.REFERENCE, MIMEType.CSV, is_iri=False)
+        om = ObjectMap('title', ReferenceType.REFERENCE, MIMEType.CSV, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
         # Subject generated
@@ -119,7 +119,7 @@ class ObjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No object may be generated when the reference does not exist.
         """
-        om = ObjectMap('title', TermType.REFERENCE, MIMEType.RDF_XML,
+        om = ObjectMap('title', ReferenceType.REFERENCE, MIMEType.RDF_XML,
                        is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
@@ -141,7 +141,7 @@ class ObjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No object may be generated when the reference does not exist.
         """
-        om = ObjectMap('$.title', TermType.REFERENCE, MIMEType.JSON,
+        om = ObjectMap('$.title', ReferenceType.REFERENCE, MIMEType.JSON,
                        is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65',
                            'title': 'King'})
@@ -163,7 +163,7 @@ class ObjectMapTests(unittest.TestCase):
         In this test case, only the first row has a valid value, others are
         NULL. No object may be generated when the reference does not exist.
         """
-        om = ObjectMap('/student/title', TermType.REFERENCE,
+        om = ObjectMap('/student/title', ReferenceType.REFERENCE,
                         MIMEType.TEXT_XML, is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_TITLE))
 
@@ -182,7 +182,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a literal template
         """
-        om = ObjectMap('http://example.com/{/student/id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{/student/id}', ReferenceType.TEMPLATE,
                         MIMEType.TEXT_XML, is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, Literal('http://example.com/0'))
@@ -195,7 +195,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a literal reference
         """
-        om = ObjectMap('/student/name', TermType.REFERENCE,
+        om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                        MIMEType.TEXT_XML, is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, Literal('Herman'))
@@ -208,7 +208,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can generate a Literal with a given language tag.
         """
-        om = ObjectMap('/student/name', TermType.REFERENCE,
+        om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                        MIMEType.TEXT_XML, language='en-us', is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, Literal('Herman', lang='en-us'))
@@ -221,7 +221,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can generate a Literal with a given datatype.
         """
-        om = ObjectMap('/student/name', TermType.REFERENCE,
+        om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                        MIMEType.TEXT_XML, datatype=XSD.string, is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, Literal('Herman', datatype=XSD.string))
@@ -236,7 +236,7 @@ class ObjectMapTests(unittest.TestCase):
         specified when generating a Literal.
         """
         with self.assertRaises(TypeError):
-            om = ObjectMap('/student/name', TermType.REFERENCE,
+            om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                            MIMEType.TEXT_XML, datatype=XSD.string,
                            language='en-us', is_iri=False)
             obj = om.resolve(etree.fromstring(XML_STUDENT_1))
@@ -247,7 +247,7 @@ class ObjectMapTests(unittest.TestCase):
         when generating a Literal.
         """
         with self.assertRaises(ValueError):
-            om = ObjectMap('/student/name', TermType.REFERENCE,
+            om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                            MIMEType.TEXT_XML, language='$£WDSD', is_iri=False)
             obj = om.resolve(etree.fromstring(XML_STUDENT_1))
 
@@ -255,7 +255,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an IRI template using XML data
         """
-        om = ObjectMap('http://example.com/{/student/id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{/student/id}', ReferenceType.TEMPLATE,
                         MIMEType.TEXT_XML, is_iri=True)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -268,7 +268,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve an IRI reference using XML data
         """
-        om = ObjectMap('/student/name', TermType.REFERENCE,
+        om = ObjectMap('/student/name', ReferenceType.REFERENCE,
                         MIMEType.TEXT_XML, is_iri=False)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, Literal('Herman'))
@@ -282,7 +282,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using XML data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.TEXT_XML, is_iri=True)
         obj = om.resolve(etree.fromstring(XML_STUDENT_1))
         self.assertEqual(obj, FOAF.Person)
@@ -295,7 +295,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using JSON data
         """
-        om = ObjectMap('http://example.com/{$.id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{$.id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -308,7 +308,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using JSON data
         """
-        om = ObjectMap('$.name', TermType.REFERENCE,
+        om = ObjectMap('$.name', ReferenceType.REFERENCE,
                         MIMEType.JSON, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -321,7 +321,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.JSON, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -334,7 +334,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using CSV data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.CSV, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -347,7 +347,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using CSV data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.CSV, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -360,7 +360,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using CSV data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.CSV, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -373,7 +373,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TSV data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                        MIMEType.TSV, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -386,7 +386,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TSV data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                        MIMEType.TSV, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -399,7 +399,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TSV data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.TSV, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -412,7 +412,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using SQL data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.SQL, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -425,7 +425,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using SQL data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.SQL, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -438,7 +438,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using SQL data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.SQL, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -451,7 +451,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using JSON-LD data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.JSON_LD, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -464,7 +464,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using JSON-LD data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.JSON_LD, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -477,7 +477,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using JSON-LD data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.JSON_LD, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -490,7 +490,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using N3 data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.N3, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -503,7 +503,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using N3 data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.N3, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -516,7 +516,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using N3 data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.N3, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -529,7 +529,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using NQUADS data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.NQUADS, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -542,7 +542,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using NQUADS data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.NQUADS, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -555,7 +555,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NQUADS data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.NQUADS, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -568,7 +568,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using NTRIPLES data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.NTRIPLES, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -581,7 +581,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using NTRIPLES data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.NTRIPLES, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -594,7 +594,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using NTRIPLES data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.NTRIPLES, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -607,7 +607,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using RDF data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.RDF_XML, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -620,7 +620,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using RDF data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.RDF_XML, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -633,7 +633,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using RDF data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.RDF_XML, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -646,7 +646,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TRIG data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TRIG, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -659,7 +659,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TRIG data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TRIG, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -672,7 +672,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIG data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.TRIG, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -685,7 +685,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using TRIX data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TRIX, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -698,7 +698,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using TRIX data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TRIX, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -711,7 +711,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using TRIX data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.TRIX, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -724,7 +724,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a template using Turtle data
         """
-        om = ObjectMap('http://example.com/{id}', TermType.TEMPLATE,
+        om = ObjectMap('http://example.com/{id}', ReferenceType.TEMPLATE,
                         MIMEType.TURTLE, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, URIRef('http://example.com/0'))
@@ -737,7 +737,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a reference using turtle data
         """
-        om = ObjectMap('name', TermType.REFERENCE,
+        om = ObjectMap('name', ReferenceType.REFERENCE,
                         MIMEType.TURTLE, is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, Literal('Herman'))
@@ -750,7 +750,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if we can resolve a constant using Turtle data
         """
-        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', TermType.CONSTANT,
+        om = ObjectMap('http://xmlns.com/foaf/0.1/Person', ReferenceType.CONSTANT,
                        MIMEType.TURTLE, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'Herman', 'age': '65'})
         self.assertEqual(obj, FOAF.Person)
@@ -763,7 +763,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test if a SQL datetime is converted to XSD.dateTime.
         """
-        om = ObjectMap('datetime', TermType.REFERENCE, MIMEType.TURTLE,
+        om = ObjectMap('datetime', ReferenceType.REFERENCE, MIMEType.TURTLE,
                        is_iri=False, datatype=XSD.dateTime)
         obj = om.resolve({'datetime': '2020-04-22 14:55:66'})
         print(obj)
@@ -774,7 +774,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test the generation of an object using a reference as an IRI.
         """
-        om = ObjectMap('name', TermType.REFERENCE, MIMEType.TURTLE, is_iri=True)
+        om = ObjectMap('name', ReferenceType.REFERENCE, MIMEType.TURTLE, is_iri=True)
         obj = om.resolve({'id': '0', 'name': 'http://example.com/Herman'})
         self.assertEqual(obj, URIRef('http://example.com/Herman'))
 
@@ -782,7 +782,7 @@ class ObjectMapTests(unittest.TestCase):
         """
         Test the generation of an object using a constant as Literal.
         """
-        om = ObjectMap('myConstant', TermType.CONSTANT, MIMEType.TURTLE,
+        om = ObjectMap('myConstant', ReferenceType.CONSTANT, MIMEType.TURTLE,
                        is_iri=False)
         obj = om.resolve({'id': '0', 'name': 'http://example.com/Herman'})
         self.assertEqual(obj, Literal('myConstant'))
