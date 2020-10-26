@@ -1,4 +1,5 @@
 import re
+from logging import debug, critical
 from enum import Enum
 from abc import ABC, abstractmethod
 from io import StringIO
@@ -30,20 +31,26 @@ class SPARQLLogicalSource(LogicalSource, ABC):
         self._query = query
         self._endpoint = endpoint
         self._return_format: str
+        debug(f'Query: {self._query}')
+        debug(f'SPARQL endpoint: {self._endpoint}')
 
         # Check duplicate variables
         q: str = re.sub('\n|\r', '', self._query)  # Strip new lines for regex
         try:
             select: str = SPARQL_SELECT_PATTERN.findall(q)[0]  # Find SELECT
             variables = SPARQL_VARIABLE_PATTERN.findall(select)  # Get vars
-            print(variables)
-            print(list(set(variables)))
             if sorted(variables) != sorted(list(set(variables))):
-                raise ValueError('SPARQL SELECT query must contain unique '
-                                 f'variable names! {variables}')
+                msg = 'SPARQL SELECT query must contain unique variable '
+                f'names: {variables}'
+                critical(msg)
+                raise ValueError(msg)
         except IndexError:
-            raise ValueError('SPARQL query must be a SPARQL SELECT query! '
-                             f'{self._query}')
+            msg = 'SPARQL query must be a SPARQL SELECT query: '
+            f'{self._query}'
+            critical(msg)
+            raise ValueError(msg)
+
+        debug('Source initialization complete')
 
     def _execute_query(self) -> None:
         self._engine = SPARQLWrapper(self._endpoint,
@@ -80,6 +87,7 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         self._return_format = JSON
         self._execute_query()
         self._parse_results()
+        debug(f'SPARQL results format: {self._return_format}')
 
     def _parse_results(self) -> None:
         """
@@ -88,14 +96,18 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         # Parse JSONPath expression
         try:
             self._iterator = parse(self._reference_formulation)
-        except Exception:
-            raise ValueError('Invalid JSONPath expression')
+        except Exception as e:
+            msg = f'Invalid JSONPath: {self._reference_formulation}: {e}'
+            critical(msg)
+            raise ValueError(msg)
 
         # Parse SPARQL JSON results
         try:
             results: Dict = self._engine.queryAndConvert()
         except EndPointNotFound as e:
-            raise FileNotFoundError(f'{e}')
+            msg = f'Endpoint {self._endpoint} not found: {e}'
+            critical(msg)
+            raise FileNotFoundError(msg)
 
         # Find JSONPath results
         self._iterator = iter(self._iterator.find(results))
@@ -105,8 +117,9 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         Returns a result from the SPARQL iterator.
         raises StopIteration when exhausted.
         """
-        record: Dict = next(self._iterator).value
-        return record
+        result: Dict = next(self._iterator).value
+        debug('Result: {result}')
+        return result
 
     @property
     def mime_type(self) -> MIMEType:
@@ -126,6 +139,7 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         self._return_format = XML
         self._execute_query()
         self._parse_results()
+        debug(f'SPARQL results format: {self._return_format}')
 
     def _parse_results(self) -> None:
         """
@@ -136,15 +150,18 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
             results: Document = self._engine.queryAndConvert()
             tree: Element = etree.fromstring(str(results.toxml()))
         except EndPointNotFound as e:
-            raise FileNotFoundError(f'{e}')
+            msg = f'Endpoint {self._endpoint} not found: {e}'
+            critical(msg)
+            raise FileNotFoundError(msg)
 
         # Apply XPath expression
         try:
             self._iterator = tree.xpath(self._reference_formulation,
                                         namespaces=NS)
             self._iterator = iter(self._iterator)
-        except XPathEvalError:
-            msg: str = f'Invalid XPath: {self._reference_formulation}'
+        except XPathEvalError as e:
+            msg = f'Invalid XPath: {self._reference_formulation}: {e}'
+            critical(msg)
             raise ValueError(msg)
 
     def __next__(self) -> Element:
@@ -152,8 +169,9 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
         Returns an XML element from the XML iterator.
         raises StopIteration when exhausted.
         """
-        record: Element = next(self._iterator)
-        return record
+        result: Element = next(self._iterator)
+        debug('Result: {etree.tostring(result, pretty_print=True)}')
+        return result
 
     @property
     def mime_type(self) -> MIMEType:

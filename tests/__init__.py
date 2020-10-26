@@ -1,5 +1,6 @@
 import sys
 import docker
+from logging import debug, info, error
 from docker.types import Mount
 import requests
 from sqlalchemy import create_engine
@@ -63,17 +64,20 @@ def setup_module():
     """
     # Intialize Docker client
     client = docker.from_env()
+    debug('Docker client initialized')
 
     # Stop all containers
     for c in client.containers.list():
         if c.name in [MYSQL_NAME, POSTGRESQL_NAME, SQLSERVER_NAME, \
                 SPARQL1_NAME, SPARQL2_NAME, DCAT_NAME]:
             c.stop()
+            info(f'Stopped container: {c.name}')
 
     # Run MySQL database container
     client.containers.run(MYSQL_IMAGE, environment=MYSQL_ENVIRONMENT, remove=True,
                           auto_remove=True, detach=True, name=MYSQL_NAME,
                           ports=MYSQL_PORTS)
+    debug('MySQL container started')
     environ['MYSQL_JDBC'] = CONNECTION_URL\
             .format(dialect='mysql+pymysql', username='root', password='',
                     host=HOST, port=3306, database='test')
@@ -82,6 +86,7 @@ def setup_module():
     client.containers.run(POSTGRESQL_IMAGE, environment=POSTGRESQL_ENVIRONMENT,
                           remove=True, auto_remove=True, detach=True,
                           name=POSTGRESQL_NAME, ports=POSTGRESQL_PORTS)
+    debug('PostgreSQL container started')
     environ['POSTGRESQL_JDBC'] = CONNECTION_URL\
             .format(dialect='postgresql+psycopg2', username='root', password='',
                     host=HOST, port=5432, database='test')
@@ -90,6 +95,7 @@ def setup_module():
     client.containers.run(SQLSERVER_IMAGE, environment=SQLSERVER_ENVIRONMENT,
                           remove=True, auto_remove=True, detach=True,
                           name=SQLSERVER_NAME, ports=SQLSERVER_PORTS)
+    debug('SQL Server container started')
     environ['SQLSERVER_JDBC'] = CONNECTION_URL\
             .format(dialect='mssql+pyodbc', username='sa',
                     password='yourStrong(!)Password', host=HOST,
@@ -102,6 +108,7 @@ def setup_module():
     client.containers.run(SPARQL_IMAGE, command=SPARQL2_CMD, remove=True,
                           auto_remove=True, detach=True, name=SPARQL2_NAME,
                           ports=SPARQL2_PORTS)
+    debug('Fuseki containers started')
     port1: str = '3031'
     port2: str = '3032'
     environ['SPARQL1_PORT'] = port1
@@ -115,37 +122,46 @@ def setup_module():
     client.containers.run(DCAT_IMAGE, command=DCAT_CMD, mounts=DCAT_MOUNT,
                           remove=True, auto_remove=True, detach=True,
                           name=DCAT_NAME, ports=DCAT_PORTS)
+    debug('HTTP server container started')
     environ['DCAT_PORT'] = '8000'
     environ['DCAT_HOST'] = HOST
 
     # Block until all containers are up
-    print(f'Waiting until containers are ready...')
+    info(f'Waiting until all containers are ready...')
     ready = False
     for _ in range(TIMEOUT):
+        up = []
         try:
             # Check MySQL
             engine = create_engine(environ['MYSQL_JDBC'])
             engine.connect().close()
+            up.append('MySQL')
 
             # Check PostgreSQL
             engine = create_engine(environ['POSTGRESQL_JDBC'])
             engine.connect().close()
+            up.append('PostgreSQL')
 
             # Check SQL Server
             engine = create_engine(environ['SQLSERVER_JDBC'])
             engine.connect().close()
+            up.append('SQL Server')
 
             # Check Fuseki
             requests.get(SPARQL1_PING).raise_for_status()
             requests.get(SPARQL2_PING).raise_for_status()
+            up.append('Fuseki')
 
             # Check DCAT
             requests.get(DCAT_PING).raise_for_status()
+            up.append('HTTP server')
 
             ready = True
             break;
         except Exception as e:
-            print(e)
+            info(f'Not all containers are up ({up}), retrying in 1s...')
+            up = []
+            debug(e)
             sleep(1)
 
     # MS SQLSERVER doesn't allow to specify a default database in their Docker
@@ -153,6 +169,7 @@ def setup_module():
     engine = create_engine(environ['SQLSERVER_JDBC'])
     engine = engine.execution_options(isolation_level='AUTOCOMMIT')
     engine.execute('CREATE DATABASE TestDB;')
+    debug('Initilization SQL Server complete')
 
     # Set JDBC connection string to 'test' database
     environ['SQLSERVER_JDBC'] = CONNECTION_URL.format(dialect='mssql+pyodbc',
@@ -161,8 +178,7 @@ def setup_module():
 
     # Exit tests when container initialization fails
     if not ready:
-        print(f'ERROR: Containers are not initialized after {TIMEOUT}s! '
-              'Aborting!')
+        error(f'Containers are not initialized after {TIMEOUT}s!')
         sys.exit(1)
 
 def teardown_module():
@@ -171,12 +187,14 @@ def teardown_module():
     """
     # Intialize Docker client
     client = docker.from_env()
+    debug('Docker client initialized')
 
     # Stop all containers
     for c in client.containers.list():
         if c.name in [MYSQL_NAME, POSTGRESQL_NAME, SQLSERVER_NAME, \
                 SPARQL1_NAME, SPARQL2_NAME, DCAT_NAME]:
             c.stop()
+            info(f'Stopped container: {c.name}')
 
 # Tests for sources
 from tests.io.sources.logical_source import LogicalSourceTests

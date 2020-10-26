@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from lxml.etree import XMLSyntaxError, XPathEvalError
+from lxml.etree import XMLSyntaxError
 from lxml import etree
 
 from rml.io.sources import XMLLogicalSource, MIMEType
@@ -44,23 +44,25 @@ class XMLLogicalSourceTests(unittest.TestCase):
         not exist
         """
         with self.assertRaises(FileNotFoundError):
-            source = XMLLogicalSource('/students/student', 'this/file/does/not/exist')
+            source = XMLLogicalSource('/students/student',
+                                      'this/file/does/not/exist')
 
     def test_invalid_xpath(self) -> None:
         """
         Test if we raise an XPathEvalError when the XPath expression is
         invalid
         """
-        with self.assertRaises(XPathEvalError):
+        with self.assertRaises(NameError):
             source = XMLLogicalSource('$$$', 'tests/assets/xml/student.xml')
 
     def test_invalid_xml(self) -> None:
         """
-        Test if we raise an XMLSyntaxError when the input file cannot be parsed
-        as valid XML.
+        Test if we raise an XMLSyntaxError when the input file cannot be
+        parsed as valid XML.
         """
         with self.assertRaises(XMLSyntaxError):
-            source = XMLLogicalSource('/students/student', 'tests/assets/xml/invalid.xml')
+            source = XMLLogicalSource('/students/student',
+                                      'tests/assets/xml/invalid.xml')
 
     def test_empty_iterator(self) -> None:
         """

@@ -1,3 +1,4 @@
+from logging import debug, critical
 from requests import Session, Response
 from requests.exceptions import HTTPError, ConnectionError
 from requests_file import FileAdapter
@@ -32,13 +33,17 @@ class DCATLogicalSource(LogicalSource):
         self._tmp_file: str
         self._session = Session()
         self._session.mount('file://', FileAdapter())  # Support local files
+        debug(f'URL: {self._url}')
+        debug(f'Delimiter: {self._delimiter}')
 
         # Get file from DCAT catalogue
         try:
             response: Response = self._session.get(self._url)
             response.raise_for_status()
         except (HTTPError, ConnectionError) as e:
-            raise FileNotFoundError(f'Unable to retrieve {self._url}: {e}')
+            msg = f'Unable to retrieve {self._url}: {e}'
+            critical(msg)
+            raise FileNotFoundError(msg)
 
         # Store file temporary in /tmp
         with NamedTemporaryFile(delete=False) as tmp_file:
@@ -50,13 +55,16 @@ class DCATLogicalSource(LogicalSource):
         f: str = self._mime_type.value
         if f == MIMEType.CSV.value \
                 or f == MIMEType.TSV.value:
+            debug(f'CSV/TSV source detected: {self._mime_type}')
             self._source = CSVLogicalSource(self._tmp_file,
                                             self._delimiter)
         elif f == MIMEType.JSON.value:
+            debug(f'JSON source detected: {self._mime_type}')
             self._source = JSONLogicalSource(self._reference_formulation,
                                              self._tmp_file)
         elif f == MIMEType.TEXT_XML.value or \
                 f == MIMEType.APPLICATION_XML.value:
+            debug(f'XML source detected: {self._mime_type}')
             self._source = XMLLogicalSource(self._reference_formulation,
                                             self._tmp_file)
         elif f == MIMEType.RDF_XML.value or \
@@ -67,22 +75,30 @@ class DCATLogicalSource(LogicalSource):
                 f == MIMEType.TRIG.value or \
                 f == MIMEType.TRIX.value or \
                 f == MIMEType.TURTLE.value:
+            debug(f'RDF source detected: {self._mime_type}')
             self._source = RDFLogicalSource(self._tmp_file,
                                             self._reference_formulation,
                                             self._mime_type)
         else:
-            raise ValueError(f'Unsupported MIME type: {self._mime_type}')
+            msg = f'Unsupported MIME type: {self._mime_type}'
+            critical(msg)
+            raise ValueError(msg)
+
+        debug('Source initialization complete')
 
     def __next__(self) -> Union[Dict, Element]:
         """
-        Returns a row from the underlying source.
+        Returns a result from the underlying source.
         Raises StopIteration when exhausted.
         """
         try:
-            return next(self._source)
+            result: Union[Element, Dict] = next(self._source)
+            debug(f'Interator: {result}')
+            return result
         except StopIteration:
             if self._tmp_file is not None:
                 remove(self._tmp_file)
+                debug('Temporary file removed')
             raise StopIteration
 
     @property

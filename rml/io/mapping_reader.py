@@ -1,3 +1,4 @@
+from logging import debug, info, warning, critical
 from itertools import product
 from rdflib import Graph
 from rdflib.term import URIRef, Literal, BNode, Identifier
@@ -37,9 +38,13 @@ class MappingReader:
         try:
             rules = self._graph.parse(self._path, format='turtle')
         except FileNotFoundError:
-            raise FileNotFoundError(f'Unable to open {self._path}')
-        except Exception:
-            raise ValueError(f'Unable to parse {self._path} as Turtle')
+            msg = f'Unable to open {self._path}'
+            critical(msg)
+            raise FileNotFoundError(msg)
+        except Exception as e:
+            msg = f'Unable to parse {self._path} as Turtle: {e}'
+            critical(msg)
+            raise ValueError(msg)
 
     @property
     def rules(self) -> Graph:
@@ -53,10 +58,11 @@ class MappingReader:
         for tm in self._graph.subjects(predicate=RDF.type,
                                        object=R2RML.TriplesMap):
             tm_list.append(self._resolve_triples_map(tm))
+            info(f'Resolved TriplesMap: {tm}')
         return tm_list
 
     def _resolve_triples_map(self, tm: URIRef) -> TriplesMap:
-        print(f'Triples Map: {tm}')
+        info(f'Triples Map: {tm}')
 
         # Logical Source
         ls_list: List[LogicalSource] = []
@@ -69,6 +75,7 @@ class MappingReader:
         sm_list: List[SubjectMap] = []
         for subject_map in self._graph.objects(tm, R2RML.subjectMap):
             sm_list.append(self._resolve_subject_map(subject_map, mime_type))
+        info(f'Resolved SubjectMaps: {sm_list}')
 
         # Predicate Object Maps
         pom_list: List[PredicateObjectMap] = []
@@ -76,17 +83,20 @@ class MappingReader:
                                                 R2RML.predicateObjectMap):
             pom_list += self._resolve_predicate_object_map(pred_obj_map,
                                                            mime_type)
+        info(f'Resolved PredicateObjectMaps: {pom_list}')
 
         resolved_tm: TriplesMap = TriplesMap(ls_list[0], sm_list[0], pom_list)
-        print('-' * 80)
+        debug('-' * 80)
 
         return resolved_tm
 
     def _resolve_logical_source(self, ls: URIRef) -> LogicalSource:
-        print(f'Logical Source: {ls}')
+        info(f'Logical Source: {ls}')
+
         rml_source_type: URIRef = None
         _rml_source = self._graph.value(ls, RML.source)
         rml_source: Union[str, URIRef]
+
         # Convert Literal to string (local file Logical Source)
         if isinstance(_rml_source, Literal):
             rml_source = _rml_source.toPython()  # Convert Literal to Python
@@ -108,18 +118,18 @@ class MappingReader:
         rml_query: Literal = self._graph.value(ls, RML.query)
         rr_table_name: Literal = self._graph.value(ls, R2RML.tableName)
 
-        print(f'\tSource: {rml_source}')
-        print(f'\tType: {rml_source_type}')
-        print(f'\tReference formulation: {rml_reference_formulation}')
-        print(f'\tIterator: {rml_iterator}')
-        print(f'\tQuery: {rml_query}')
-        print(f'\tTable Name: {rr_table_name}')
+        debug(f'\tSource: {rml_source}')
+        debug(f'\tType: {rml_source_type}')
+        debug(f'\tReference formulation: {rml_reference_formulation}')
+        debug(f'\tIterator: {rml_iterator}')
+        debug(f'\tQuery: {rml_query}')
+        debug(f'\tTable Name: {rr_table_name}')
 
         # Local file
         if rml_source_type is None:
             # CSV file
             if rml_reference_formulation == QL.CSV:
-                print('Local CSV file')
+                debug('Local CSV file')
                 # CSVW dialect support (https://www.w3.org/ns/csvw) is limited
                 # to:
                 # - csvw:delimiter (Dialect.delimiter)
@@ -165,34 +175,35 @@ class MappingReader:
                                                           CSVW.encoding,
                                                           default='utf-8'))
 
-                print(f'\tDelimiter: {csvw_delimiter}')
-                print(f'\tDouble quote enabled: {csvw_double_quote}')
-                print(f'\tQuote char: {csvw_quote_char}')
-                print(f'\tSkip initial space: {csvw_skip_initial_space}')
+                debug(f'\tDelimiter: {csvw_delimiter}')
+                debug(f'\tDouble quote enabled: {csvw_double_quote}')
+                debug(f'\tQuote char: {csvw_quote_char}')
+                debug(f'\tSkip initial space: {csvw_skip_initial_space}')
 
                 # FIXME: Support more CSV dialect options, see Gitlab issue #35
                 if csvw_double_quote or csvw_quote_char == '"' or \
                         csvw_skip_initial_space or csvw_encoding != 'utf-8':
-                    print('WARNING: Only limited CSV dialect support is '
-                          'implemented, see Gitlab issue #35')
+                    warning('Only limited CSV dialect support is implemented, '
+                            'see Gitlab issue #35')
 
                 return CSVLogicalSource(rml_source, csvw_delimiter)
             # JSON file
             elif rml_reference_formulation == QL.JSONPath:
-                print('Local JSON file')
-                print(rml_iterator)
+                debug('Local JSON file')
                 return JSONLogicalSource(rml_iterator, rml_source)
             # XML file
             elif rml_reference_formulation == QL.XPath:
-                print('Local XML file')
+                debug('Local XML file')
                 return XMLLogicalSource(rml_iterator, rml_source)
             # Unknown local file
-            else:
-                raise NotImplementedError('Unknown RML reference formulation: '
-                                          '{rml_reference_formulation}')
+            else:  # pragma: no cover
+                msg = 'Unknown RML reference formulation: '
+                f'{rml_reference_formulation}'
+                critical(msg)
+                raise NotImplementedError(msg)
         # SQL database
         elif rml_source_type == D2RQ.Database:
-            print('SQL database')
+            debug('SQL database')
             rr_sql_version: URIRef = self._graph.value(ls, R2RML.sqlVersion)
             d2rq_jdbc_DSN: str = self._graph.value(rml_source,
                                                    D2RQ.jdbcDSN).toPython()
@@ -207,17 +218,17 @@ class MappingReader:
                 d2rq_username = d2rq_username.toPython()
             if d2rq_password is not None:
                 d2rq_password = d2rq_password.toPython()
-            print(f'\tSQL version: {rr_sql_version}')
-            print(f'\tJDBC DSN: {d2rq_jdbc_DSN}')
-            print(f'\tJDBC driver: {d2rq_jdbc_driver}')
-            print(f'\tUsername: {d2rq_username}')
-            print(f'\tPassword: {d2rq_password}')
+            debug(f'\tSQL version: {rr_sql_version}')
+            debug(f'\tJDBC DSN: {d2rq_jdbc_DSN}')
+            debug(f'\tJDBC driver: {d2rq_jdbc_driver}')
+            debug(f'\tUsername: {d2rq_username}')
+            debug(f'\tPassword: {d2rq_password}')
             # FIXME: SQL database access is not completely implemented, see
             # Gitlab issue #36
             if d2rq_username is not None or d2rq_password is not None or \
                     d2rq_jdbc_driver is not None:
-                print('WARNING: Only limited SQL database access is '
-                      'supported, see Gitlab issue #36')
+                warning('Only limited SQL database access is supported, see '
+                        'Gitlab issue #36')
 
             # Mapping validator enforces rr:tableName or rml:query
             # Mapping compiler translates rr:tableName to rml:query
@@ -225,22 +236,22 @@ class MappingReader:
 
         # SPARQL endpoint
         elif rml_source_type == SD.Service:
-            print('SPARQL endpoint')
+            debug('SPARQL endpoint')
             sd_endpoint: str = self._graph.value(rml_source,
                                                  SD.endpoint).toPython()
             sd_supported_language: URIRef = \
                 self._graph.value(rml_source, SD.supportedLanguage)
             sd_result_format: URIRef = self._graph.value(rml_source,
                                                          SD.resultFormat)
-            print(f'\tEndpoint: {sd_endpoint}')
-            print(f'\tSupported language: {sd_supported_language}')
-            print(f'\tResult format: {sd_result_format}')
+            debug(f'\tEndpoint: {sd_endpoint}')
+            debug(f'\tSupported language: {sd_supported_language}')
+            debug(f'\tResult format: {sd_result_format}')
 
             # FIXME: Warn when SPARQL 1.0 is required, setting the SPARQL
             # version is not possible at the moment, see Gitlab issue #37
             if sd_supported_language != SD.SPARQL11Query:  # pragma: no cover
-                print('WARNING: SPARQL supported language is ignored! See '
-                      'Gitlab issue #37')
+                warning('SPARQL supported language is ignored! See Gitlab '
+                        'issue #37')
 
             if sd_result_format == FORMATS.SPARQL_Results_JSON:
                 return SPARQLJSONLogicalSource(rml_iterator,
@@ -250,12 +261,14 @@ class MappingReader:
                 return SPARQLXMLLogicalSource(rml_iterator,
                                               sd_endpoint,
                                               rml_query.toPython())
-            else:
-                raise NotImplementedError('SPARQL results format not '
-                                          'implemented, see Gitlab issue #31')
+            else:  # pragma: no cover
+                msg = 'SPARQL results format not implemented, see Gitlab '
+                'issue #31'
+                critical(msg)
+                raise NotImplementedError(msg)
         # DCAT dataset
         elif rml_source_type == DCAT.Dataset:
-            print('DCAT dataset')
+            debug('DCAT dataset')
             dcat_distribution: Union[URIRef, BNode] = \
                 self._graph.value(_rml_source, DCAT.distribution)
             dcat_download_url: str = \
@@ -265,15 +278,16 @@ class MappingReader:
                 self._graph.value(dcat_distribution, DCAT.mediaType).toPython()
             try:
                 dcat_media_type = MIMEType(_dcat_media_type)
-            # Needs to be changed anyway, see
-            # https://gitlab.com/dylanvanassche/rml-blocks/-/issues/42
+                # Needs to be changed anyway, see
+                # https://gitlab.com/dylanvanassche/rml-blocks/-/issues/42
             except ValueError:  # pragma: no cover
-                raise NotImplementedError('DCAT Dataset MIME type '
-                                          '{_dcat_media_type} is not '
-                                          'supported')
-            print(f'DCAT distribution: {dcat_distribution}')
-            print(f'DCAT download URL: {dcat_download_url}')
-            print(f'DCAT media type: {dcat_media_type}')
+                msg = f'DCAT Dataset MIME type {_dcat_media_type} is not '
+                'supported'
+                critical(msg)
+                raise NotImplementedError(msg)
+            debug(f'DCAT distribution: {dcat_distribution}')
+            debug(f'DCAT download URL: {dcat_download_url}')
+            debug(f'DCAT media type: {dcat_media_type}')
             # If no RML iterator is provided, an RML query is provided for
             # iterating over RDF sources
             if rml_iterator == '':
@@ -281,24 +295,28 @@ class MappingReader:
             return DCATLogicalSource(dcat_download_url, dcat_media_type,
                                      rml_iterator)
         else:  # pragma: no cover
-            raise ValueError(f'Unknown Logical Source description: {ls}. This '
-                             'should be catched by the shape validation! '
-                             'Report this as an issue!')
+            msg = f'Unknown Logical Source description: {ls}. This '
+            'should be catched by the shape validation! Report this as an '
+            'issue!'
+            critical(msg)
+            raise ValueError(msg)
 
     def _resolve_predicate_object_map(self, pom: URIRef, mime_type: MIMEType) \
             -> List[PredicateObjectMap]:
-        print(f'Predicate Object Map: {pom}')
+        debug(f'Predicate Object Map: {pom}')
 
         # Predicate Map
         pm_list = []
         for predicate_map in self._graph.objects(pom, R2RML.predicateMap):
             pm_list.append(self._resolve_predicate_map(predicate_map,
                                                        mime_type))
+        debug(f'PredicateMaps: {pm_list}')
 
         # Object Map
         om_list = []
         for object_map in self._graph.objects(pom, R2RML.objectMap):
             om_list.append(self._resolve_object_map(object_map, mime_type))
+        debug(f'ObjectMaps: {om_list}')
 
         pom_list: List[PredicateObjectMap] = []
         for pm, om in product(pm_list, om_list):
@@ -308,17 +326,17 @@ class MappingReader:
 
     def _resolve_subject_map(self, sm: URIRef,
                              mime_type: MIMEType) -> SubjectMap:
-        print(f'Subject Map: {sm}')
+        debug(f'Subject Map: {sm}')
 
         rr_template = self._graph.value(sm, R2RML.template)
         rml_reference = self._graph.value(sm, RML.reference)
         rr_constant: URIRef = self._graph.value(sm, R2RML.constant)
         rr_term_type: Identifier = self._graph.value(sm, R2RML.termType)
 
-        print(f'\tTemplate: {rr_template}')
-        print(f'\tReference: {rml_reference}')
-        print(f'\tConstant: {rr_constant}')
-        print(f'\tTerm type: {rr_term_type}')
+        debug(f'\tTemplate: {rr_template}')
+        debug(f'\tReference: {rml_reference}')
+        debug(f'\tConstant: {rr_constant}')
+        debug(f'\tTerm type: {rr_term_type}')
 
         if rr_template is not None:
             return SubjectMap(rr_template.toPython(), TermType.TEMPLATE,
@@ -330,13 +348,14 @@ class MappingReader:
             return SubjectMap(rr_constant, TermType.CONSTANT, mime_type,
                               rr_term_type)
         else:  # pragma: no cover
-            raise ValueError(f'Unable to resolve rr:subjectMap {sm}, should '
-                             'be catched by shape validation. Report this as '
-                             'an issue!')
+            msg: str = f'Unable to resolve rr:subjectMap {sm}, should be '
+            'catched by shape validation. Report this as an issue!'
+            critical(msg)
+            raise ValueError(msg)
 
     def _resolve_object_map(self, om: URIRef, mime_type: MIMEType) \
             -> ObjectMap:
-        print(f'\tObject Map: {om}')
+        debug(f'\tObject Map: {om}')
         rr_template = self._graph.value(om, R2RML.template)
         rml_reference = self._graph.value(om, RML.reference)
         rr_constant = self._graph.value(om, R2RML.constant)
@@ -344,10 +363,10 @@ class MappingReader:
         rr_language = self._graph.value(om, R2RML.language)
         rr_datatype = self._graph.value(om, R2RML.datatype)
 
-        print(f'\t\tTemplate: {rr_template}')
-        print(f'\t\tReference: {rml_reference}')
-        print(f'\t\tConstant: {rr_constant}')
-        print(f'\t\tTerm type: {rr_term_type}')
+        debug(f'\t\tTemplate: {rr_template}')
+        debug(f'\t\tReference: {rml_reference}')
+        debug(f'\t\tConstant: {rr_constant}')
+        debug(f'\t\tTerm type: {rr_term_type}')
 
         # No term type specified? Literal by default if one of the conditions
         # are true:
@@ -361,8 +380,10 @@ class MappingReader:
                 return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=False)
-            elif rr_term_type == R2RML.BlankNode:
-                raise NotImplementedError('Blank nodes are not supported yet')
+            elif rr_term_type == R2RML.BlankNode:  # pragma: no cover
+                msg = 'Blank nodes are not fully supported yet'
+                critical(msg)
+                raise NotImplementedError(msg)
             # R2RML.IRI or no rr:termType
             else:
                 return ObjectMap(rr_template.toPython(), TermType.TEMPLATE,
@@ -374,8 +395,10 @@ class MappingReader:
                 return ObjectMap(rml_reference.toPython(), TermType.REFERENCE,
                                  mime_type, language=rr_language,
                                  datatype=rr_datatype, is_iri=True)
-            elif rr_term_type == R2RML.BlankNode:
-                raise NotImplementedError('Blank nodes are not supported yet')
+            elif rr_term_type == R2RML.BlankNode:  # pragma: no cover
+                msg = 'Blank nodes are not fully supported yet'
+                critical(msg)
+                raise NotImplementedError(msg)
             # R2RML.Literal or has language tag or has datatype or no
             # rr:termType
             else:
@@ -393,20 +416,22 @@ class MappingReader:
                                  language=rr_language, datatype=rr_datatype,
                                  is_iri=True)
         else:  # pragma: no cover
-            raise ValueError('ObjectMap requires at least 1 rr:template, '
-                             'rml:reference or rr:constant. Should be catched '
-                             'by shape validation, report this as an issue!')
+            msg = 'ObjectMap requires at least 1 rr:template, '
+            'rml:reference or rr:constant. Should be catched by shape '
+            'validation, report this as an issue!'
+            critical(msg)
+            raise ValueError(msg)
 
     def _resolve_predicate_map(self, pm: URIRef, mime_type: MIMEType) \
             -> PredicateMap:
-        print(f'\tPredicate Map: {pm}')
+        debug(f'\tPredicate Map: {pm}')
         rr_template: Literal = self._graph.value(pm, R2RML.template)
         rml_reference: Literal = self._graph.value(pm, RML.reference)
         rr_constant: URIRef = self._graph.value(pm, R2RML.constant)
 
-        print(f'\t\tTemplate: {rr_template}')
-        print(f'\t\tReference: {rml_reference}')
-        print(f'\t\tConstant: {rr_constant}')
+        debug(f'\t\tTemplate: {rr_template}')
+        debug(f'\t\tReference: {rml_reference}')
+        debug(f'\t\tConstant: {rr_constant}')
 
         if rr_template is not None:
             return PredicateMap(rr_template.toPython(), TermType.TEMPLATE,
@@ -417,6 +442,8 @@ class MappingReader:
         elif rr_constant is not None:
             return PredicateMap(rr_constant, TermType.CONSTANT, mime_type)
         else:  # pragma: no cover
-            raise ValueError(f'Unable to resolved rr:predicateMap {pm}. '
-                             'Should be catched by shape validation, report'
-                             'this as an issue!')
+            msg = f'Unable to resolved rr:predicateMap {pm}. '
+            'Should be catched by shape validation, report'
+            'this as an issue!'
+            critical(msg)
+            raise ValueError(msg)

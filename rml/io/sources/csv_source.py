@@ -1,3 +1,4 @@
+from logging import debug, warning, critical
 from typing import Iterator, IO, Dict, Sequence, Optional
 from csv import DictReader, Sniffer, Error
 
@@ -16,22 +17,27 @@ class CSVLogicalSource(LogicalSource):
         super().__init__()
         self._path: str = path
         self._delimiter: str = delimiter
+        debug(f'Path: {self._path}')
+        debug(f'Delimiter: {self._delimiter}')
 
         with open(self._path) as f:
             # Check if the CSV file contains a header
             sniffer: Sniffer = Sniffer()
             try:
                 if not sniffer.has_header(f.read(BYTES_TO_SNIFF)):
-                    raise ValueError('CSV file requires a header')
+                    msg = 'CSV file requires a header'
+                    critical(msg)
+                    raise ValueError(msg)
             # Sniffer raises Error when delimiter cannot be determined
             except Error as e:  # pragma: no cover
-                print('WARNING: Unable to determine delimiter, falling back to'
-                      f' default ({DEFAULT_DELIMITER})')
+                warning('Unable to determine delimiter, falling back to '
+                        f'default ({DEFAULT_DELIMITER})')
 
         # Create CSV file iterator
         self._file: IO = open(self._path)
         self._iterator: Iterator = DictReader(self._file,
                                               delimiter=self._delimiter)
+        debug('Source initialization complete')
 
     def __next__(self) -> Dict:
         """
@@ -39,10 +45,13 @@ class CSVLogicalSource(LogicalSource):
         raises StopIteration when exhausted.
         """
         try:
-            return next(self._iterator)
+            result: Dict = next(self._iterator)
+            debug(f'Iterator: {result}')
+            return result
         # Iterator exhausted
         except StopIteration:
             self._file.close()
+            debug('File closed')
             raise StopIteration
 
     @property

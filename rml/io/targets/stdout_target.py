@@ -1,8 +1,9 @@
-from rml.io.targets import LogicalTarget
+from logging import debug
 from typing import List, Tuple
 from rdflib.term import URIRef, Identifier
 
 from rml.io.maps.triples_map import TriplesMap
+from rml.io.targets import LogicalTarget
 
 
 class StdoutLogicalTarget(LogicalTarget):
@@ -12,6 +13,7 @@ class StdoutLogicalTarget(LogicalTarget):
         """
         super().__init__(triples_maps)
         self._number_of_triples_maps = len(self._triples_maps)
+        debug('Target initialization complete')
 
     def _add_to_target(self, triple: Tuple[URIRef, URIRef, Identifier,
                                            URIRef]) -> None:

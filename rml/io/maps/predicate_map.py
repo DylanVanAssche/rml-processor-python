@@ -1,3 +1,4 @@
+from logging import debug, critical
 from rdflib.term import URIRef, Identifier
 from jsonpath_ng import parse
 from typing import Union, Dict
@@ -9,11 +10,12 @@ from rml.io.sources import MIMEType
 
 class PredicateMap(TermMap):
     def __init__(self, term: str, term_type: TermType,
-                 reference_formulation: MIMEType) -> None:
+                 mime_type: MIMEType) -> None:
         """
         Creates a PredicateMap.
         """
-        super().__init__(term, term_type, reference_formulation)
+        super().__init__(term, term_type, mime_type)
+        debug('PredicateMap initialization complete')
 
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
         """
@@ -26,4 +28,6 @@ class PredicateMap(TermMap):
         elif self._term_type == TermType.CONSTANT:
             return URIRef(self._term)
         else:
-            raise ValueError(f'Unknown term type: {self._term_type}')
+            msg = f'Unknown term type: {self._term_type}'
+            critical(msg)
+            raise ValueError(msg)

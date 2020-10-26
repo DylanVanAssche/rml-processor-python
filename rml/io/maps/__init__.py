@@ -1,4 +1,5 @@
 import re
+from logging import debug, warning, critical
 from urllib.parse import quote
 from abc import ABC, abstractmethod
 from enum import Enum, unique
@@ -34,7 +35,11 @@ class TermMap(ABC):
         """
         self._term: str = term
         self._term_type: TermType = term_type
-        self._reference_formulation: MIMEType = reference_formulation
+        self._mime_type: MIMEType = reference_formulation
+        debug(f'Term: {self._term}')
+        debug(f'Term type: {self._term_type}')
+        debug(f'MIME type: {self._mime_type}')  # Gitlab bug
+        debug(f'Term Map initialization complete')
 
     @abstractmethod
     def resolve(self, data: Union[Element, Dict]) -> Identifier:
@@ -50,6 +55,7 @@ class TermMap(ABC):
         variables: List[str] = URITEMPLATE_PATTERN.findall(self._term)
 
         if variables:
+            debug(f'Variables: {variables} from {self._term}')
             for v in variables:
                 var: str = str(v)
                 resolved_var: str = self._resolve_reference(var, data)
@@ -61,9 +67,13 @@ class TermMap(ABC):
                     resolved_var = quote(resolved_var)
 
                 term = term.replace(var, resolved_var)
+                debug(f'Replaced {var} with {resolved_var}')
         else:
-            raise NameError(f'Template is empty: {self._term}')
+            msg = f'Template is empty: {self._term}'
+            critical(msg)
+            raise NameError(msg)
 
+        debug(f'Resolved template: {term}')
         return term
 
     def _resolve_reference(self, reference: str,
@@ -72,93 +82,107 @@ class TermMap(ABC):
         Resolves a reference.
         """
         # XPath reference (XML)
-        if self._reference_formulation == MIMEType.APPLICATION_XML or \
-           self._reference_formulation == MIMEType.TEXT_XML:
+        if self._mime_type == MIMEType.APPLICATION_XML or \
+           self._mime_type == MIMEType.TEXT_XML:
             xml: str
             try:
                 xml_ref: Element = cast(Element, data).xpath(reference,
                                                              namespaces=NS)[0]
-                value = str(xml_ref.text)
+                value_xml: str = str(xml_ref.text)
                 # No result: empty string
-                if not value.strip():
+                if not value_xml.strip():
                     xml = etree.tostring(cast(Element, data),
                                          pretty_print=True)
-                    raise ResourceWarning(f'Reference {reference} not found in'
-                                          f'{xml}')
-                return value
+                    msg = f'Reference {reference} not found in {xml}'
+                    warning(msg)
+                    raise ResourceWarning(msg)
+                return value_xml
             # Avoid catching ResourceWarning as Exception below
             except ResourceWarning as w:
                 raise w
             # No result: reference 0 results
             except IndexError:
                 xml = etree.tostring(cast(Element, data), pretty_print=True)
-                raise ResourceWarning(f'Reference {reference} not found in '
-                                      f'{xml}')
+                msg = f'Reference {reference} not found in {xml}'
+                warning(msg)
+                raise ResourceWarning(msg)
             # Syntax error in XPath
             except Exception as e:
-                raise NameError(f'Reference {reference} invalid XPath: {e}')
+                msg = f'Reference {reference} invalid XPath: {e}'
+                raise NameError(msg)
         # JSONPath reference (JSON)
-        elif self._reference_formulation == MIMEType.JSON:
+        elif self._mime_type == MIMEType.JSON:
             try:
                 # JSONPath module cannot deal with spaces without escaping them
                 reference = self._escape_spaces_jsonpath(reference)
                 jsonpath: JsonPathParser = parse(reference)
                 json_ref: JSONPath = jsonpath.find(cast(Dict, data))
                 json_ref = json_ref[0]
+                value_json = json_ref.value
                 # No result: value is None
-                if json_ref.value is None:
-                    raise ResourceWarning(f'Reference {reference} not found in'
-                                          f' {data}')
-                return str(json_ref.value)
+                if value_json is None:
+                    msg = f'Reference {reference} is None in {data}'
+                    warning(msg)
+                    raise ResourceWarning(msg)
+                return str(value_json)
             # Avoid catching ResourceWarning as Exception below
             except ResourceWarning as w:
                 raise w
             # No result: reference 0 results
             except IndexError:
-                raise ResourceWarning(f'Reference {reference} not found in '
-                                      f'{data}')
+                msg = f'Reference {reference} not found in {data}'
+                warning(msg)
+                raise ResourceWarning(msg)
             # Syntax error in JSONPath
             except Exception as e:
-                raise NameError(f'Reference {reference} invalid JSONPath: {e}')
+                msg = f'Reference {reference} invalid JSONPath: {e}'
+                critical(msg)
+                raise NameError(msg)
 
         # Key-Value reference (CSV, TSV, SQL, RDF, SPARQL, Hydra, ...)
-        elif self._reference_formulation == MIMEType.CSV or \
-                self._reference_formulation == MIMEType.TSV or \
-                self._reference_formulation == MIMEType.SQL or \
-                self._reference_formulation == MIMEType.JSON_LD or \
-                self._reference_formulation == MIMEType.N3 or \
-                self._reference_formulation == MIMEType.NQUADS or \
-                self._reference_formulation == MIMEType.NTRIPLES or \
-                self._reference_formulation == MIMEType.RDF_XML or \
-                self._reference_formulation == MIMEType.TRIG or \
-                self._reference_formulation == MIMEType.TRIX or \
-                self._reference_formulation == MIMEType.TURTLE:
+        elif self._mime_type == MIMEType.CSV or \
+                self._mime_type == MIMEType.TSV or \
+                self._mime_type == MIMEType.SQL or \
+                self._mime_type == MIMEType.JSON_LD or \
+                self._mime_type == MIMEType.N3 or \
+                self._mime_type == MIMEType.NQUADS or \
+                self._mime_type == MIMEType.NTRIPLES or \
+                self._mime_type == MIMEType.RDF_XML or \
+                self._mime_type == MIMEType.TRIG or \
+                self._mime_type == MIMEType.TRIX or \
+                self._mime_type == MIMEType.TURTLE:
             try:
                 # Strip quoting SQL dialects
                 reference = reference.strip('\"')  # PostgreSQL
                 reference = reference.strip('`')  # MySQL
                 reference = reference.strip('[').strip(']')  # MSSQL
-                value = cast(Dict, data)[reference]
-                if value is None:
-                    raise ResourceWarning(f'Reference {reference} value is '
-                                          f'None in {data}')
-                return str(value)
+                value_kv = cast(Dict, data)[reference]
+                # No result: value is None
+                if value_kv is None:
+                    msg = f'Reference {reference} is None in {data}'
+                    warning(msg)
+                    raise ResourceWarning(msg)
+                return str(value_kv)
             # No result: column not in row
             except KeyError as e:
                 # Tabular data: fixed columns. Column not available, raise
                 # error to stop the execution
-                if self._reference_formulation == MIMEType.CSV or \
-                        self._reference_formulation == MIMEType.TSV or \
-                        self._reference_formulation == MIMEType.SQL:
-                    raise NameError(f'Reference {reference} not found in '
-                                    f'{data}')
+                if self._mime_type == MIMEType.CSV or \
+                        self._mime_type == MIMEType.TSV or \
+                        self._mime_type == MIMEType.SQL:
+                    msg = f'Reference {reference} not found in {data}'
+                    critical(msg)
+                    raise NameError(msg)
                 # Other data: unfixed data schema. Reference not available,
                 # raise warning to ignore the triple
                 else:
-                    raise ResourceWarning(f'Reference {reference} not found in'
-                                          f' {data}')
+                    msg = f'Reference {reference} not found in {data}'
+                    warning(msg)
+                    raise ResourceWarning(msg)
         else:
-            raise ValueError('Unknown MIMEType: {self._reference_formulation}')
+            msg = f'Unknown MIMEType: {self._mime_type}'
+            critical(msg)
+            raise ValueError(msg)
 
     def _escape_spaces_jsonpath(self, path: str) -> str:
         if ' ' in path:

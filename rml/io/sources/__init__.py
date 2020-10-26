@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from logging import debug
 from typing import Iterator, Dict
 from abc import ABC, abstractmethod
 from enum import Enum, unique
@@ -27,6 +28,7 @@ class MIMEType(Enum):
 class LogicalSource(ABC):
     def __init__(self, reference_formulation: str = '') -> None:
         self._reference_formulation: str = reference_formulation
+        debug(f'Reference formulation: {self._reference_formulation}')
 
     def __iter__(self) -> Iterator:
         """

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from logging import debug
 from typing import List, Iterator, Tuple
 from rdflib.term import URIRef, Identifier
 
@@ -12,6 +13,7 @@ class LogicalTarget(ABC):
         """
         self._triples_maps: List[TriplesMap] = triples_maps
         self._number_of_triples_maps = len(self._triples_maps)
+        debug('TriplesMaps: {self._triples_maps}')
 
     def write(self) -> None:
         """
@@ -24,10 +26,12 @@ class LogicalTarget(ABC):
                 for t in triples:
                     self._add_to_target(t)
             except StopIteration:
+                debug(f'{tm} exhausted')
                 exhausted_counter += 1
                 continue
 
         if exhausted_counter == self._number_of_triples_maps:
+            debug('All TriplesMaps are exhausted')
             raise StopIteration
 
     def write_all(self) -> None:
