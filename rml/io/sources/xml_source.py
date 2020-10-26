@@ -6,12 +6,12 @@ from rml.io.sources import LogicalSource, MIMEType
 
 
 class XMLLogicalSource(LogicalSource):
-    def __init__(self, reference_formulation: str, path: str):
+    def __init__(self, rml_iterator: str, path: str):
         """
         An XML Logical Source to iterate over XML data.
-        The RML reference formulation is an XPath expression.
+        The RML iterator is an XPath expression.
         """
-        super().__init__(reference_formulation)
+        super().__init__(rml_iterator)
         self._path = path
         debug(f'Path: {self._path}')
 
@@ -21,11 +21,11 @@ class XMLLogicalSource(LogicalSource):
 
         # Apply XPath expression
         try:
-            self._iterator = self._iterator.xpath(self._reference_formulation)
+            self._iterator = self._iterator.xpath(self._rml_iterator)
             self._iterator = iter(self._iterator)
         # Syntax error in XPath
         except Exception as e:
-            msg = f'Reference {self._reference_formulation} invalid XPath: {e}'
+            msg = f'Reference {self._rml_iterator} invalid XPath: {e}'
             critical(msg)
             raise NameError(msg)
 

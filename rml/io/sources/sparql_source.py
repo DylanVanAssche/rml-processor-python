@@ -21,13 +21,13 @@ SPARQL_VARIABLE_PATTERN = re.compile(r'(\?\w+)')
 
 
 class SPARQLLogicalSource(LogicalSource, ABC):
-    def __init__(self, reference_formulation: str, endpoint: str, query: str):
+    def __init__(self, rml_iterator: str, endpoint: str, query: str):
         """
         An SPARQL Logical Source to iterate over RDF data.
-        The RML reference formulation is used to select the JSON results or XML
+        The RML iterator is used to select the JSON results or XML
         results depending on return_format.
         """
-        super().__init__(reference_formulation)
+        super().__init__(rml_iterator)
         self._query = query
         self._endpoint = endpoint
         self._return_format: str
@@ -78,12 +78,12 @@ class SPARQLLogicalSource(LogicalSource, ABC):
 
 
 class SPARQLJSONLogicalSource(SPARQLLogicalSource):
-    def __init__(self, reference_formulation: str, endpoint: str, query: str):
+    def __init__(self, rml_iterator: str, endpoint: str, query: str):
         """
         An SPARQL JSON Logical Source to iterate over RDF data with results
         returned as JSON.
         """
-        super().__init__(reference_formulation, endpoint, query)
+        super().__init__(rml_iterator, endpoint, query)
         self._return_format = JSON
         self._execute_query()
         self._parse_results()
@@ -95,9 +95,9 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
         """
         # Parse JSONPath expression
         try:
-            self._iterator = parse(self._reference_formulation)
+            self._iterator = parse(self._rml_iterator)
         except Exception as e:
-            msg = f'Invalid JSONPath: {self._reference_formulation}: {e}'
+            msg = f'Invalid JSONPath: {self._rml_iterator}: {e}'
             critical(msg)
             raise ValueError(msg)
 
@@ -130,12 +130,12 @@ class SPARQLJSONLogicalSource(SPARQLLogicalSource):
 
 
 class SPARQLXMLLogicalSource(SPARQLLogicalSource):
-    def __init__(self, reference_formulation: str, endpoint: str, query: str):
+    def __init__(self, rml_iterator: str, endpoint: str, query: str):
         """
         An SPARQL XML Logical Source to iterate over RDF data with results
         returned as XML.
         """
-        super().__init__(reference_formulation, endpoint, query)
+        super().__init__(rml_iterator, endpoint, query)
         self._return_format = XML
         self._execute_query()
         self._parse_results()
@@ -156,11 +156,11 @@ class SPARQLXMLLogicalSource(SPARQLLogicalSource):
 
         # Apply XPath expression
         try:
-            self._iterator = tree.xpath(self._reference_formulation,
+            self._iterator = tree.xpath(self._rml_iterator,
                                         namespaces=NS)
             self._iterator = iter(self._iterator)
         except XPathEvalError as e:
-            msg = f'Invalid XPath: {self._reference_formulation}: {e}'
+            msg = f'Invalid XPath: {self._rml_iterator}: {e}'
             critical(msg)
             raise ValueError(msg)
 

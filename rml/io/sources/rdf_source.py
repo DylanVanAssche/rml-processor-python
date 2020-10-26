@@ -11,7 +11,7 @@ class RDFLogicalSource(LogicalSource):
     def __init__(self, path: str, query: str, mime_type: MIMEType) -> None:
         """
         An RDF Logical Source to iterate over triples.
-        The RML reference formulation is not used for row-based iterators.
+        The RML iterator is not used for row based results.
         The query is a SPARQL query to select triples.
         """
         super().__init__()

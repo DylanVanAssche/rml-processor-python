@@ -17,15 +17,15 @@ ITER_BYTES = 1024
 
 class DCATLogicalSource(LogicalSource):
     def __init__(self, url: str, mime_type: MIMEType,
-                 reference_formulation: str = '',
+                 rml_iterator: str = '',
                  delimiter: str = ',') -> None:
         """
         A DCAT Logical Source to retrieve data from the Web and iterate over
         it.
-        The RML reference formulation is not used for row-based iterators,
+        The RML iterator is not used for row-based iterators,
         but is used for XML (XPath) or JSON (JSONPath) data.
         """
-        super().__init__(reference_formulation)
+        super().__init__(rml_iterator)
         self._url: str = url
         self._delimiter: str = delimiter
         self._mime_type: MIMEType = mime_type
@@ -60,12 +60,12 @@ class DCATLogicalSource(LogicalSource):
                                             self._delimiter)
         elif f == MIMEType.JSON.value:
             debug(f'JSON source detected: {self._mime_type}')
-            self._source = JSONLogicalSource(self._reference_formulation,
+            self._source = JSONLogicalSource(self._rml_iterator,
                                              self._tmp_file)
         elif f == MIMEType.TEXT_XML.value or \
                 f == MIMEType.APPLICATION_XML.value:
             debug(f'XML source detected: {self._mime_type}')
-            self._source = XMLLogicalSource(self._reference_formulation,
+            self._source = XMLLogicalSource(self._rml_iterator,
                                             self._tmp_file)
         elif f == MIMEType.RDF_XML.value or \
                 f == MIMEType.JSON_LD.value or \
@@ -77,7 +77,7 @@ class DCATLogicalSource(LogicalSource):
                 f == MIMEType.TURTLE.value:
             debug(f'RDF source detected: {self._mime_type}')
             self._source = RDFLogicalSource(self._tmp_file,
-                                            self._reference_formulation,
+                                            self._rml_iterator,
                                             self._mime_type)
         else:
             msg = f'Unsupported MIME type: {self._mime_type}'

@@ -11,7 +11,7 @@ class SQLLogicalSource(LogicalSource):
     def __init__(self, jdbc: str, query: str = None, table_name: str = None):
         """
         An SQL Logical Source to iterate over RDB data.
-        The RML reference formulation is not used for row-based iterators.
+        The RML iterator is not used for row-based iterators.
         """
         super().__init__()
         self._jdbc = jdbc

@@ -641,7 +641,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                MIMEType.JSON,
-                               reference_formulation='$.students.[*]')
+                               rml_iterator='$.students.[*]')
         tm = self._build_triples_map_single_triple(ls, MIMEType.JSON)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -651,7 +651,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/json/student.json',
                                MIMEType.JSON,
-                               reference_formulation='$.students.[*]')
+                               rml_iterator='$.students.[*]')
         tm = self._build_triples_map_multiple_triples(ls, MIMEType.JSON)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -661,7 +661,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                MIMEType.APPLICATION_XML,
-                               reference_formulation='/students/student')
+                               rml_iterator='/students/student')
         tm = self._build_triples_map_single_triple(ls, MIMEType.APPLICATION_XML)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -671,7 +671,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/xml/student.xml',
                                MIMEType.APPLICATION_XML,
-                               reference_formulation='/students/student')
+                               rml_iterator='/students/student')
         tm = self._build_triples_map_multiple_triples(ls,
                                                       MIMEType.APPLICATION_XML)
         self.assertTrue(self._assert_multiple_triples(tm))
@@ -718,7 +718,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.rdf',
                                MIMEType.RDF_XML,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.RDF_XML)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -728,7 +728,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.rdf',
                                MIMEType.RDF_XML,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.RDF_XML)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -738,7 +738,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.jsonld',
                                MIMEType.JSON_LD,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.JSON_LD)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -748,7 +748,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.jsonld',
                                MIMEType.JSON_LD,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.JSON_LD)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -758,7 +758,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.nquads',
                                MIMEType.NQUADS,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.NQUADS)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -768,7 +768,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.nquads',
                                MIMEType.NQUADS,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.NQUADS)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -778,7 +778,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trig',
                                MIMEType.TRIG,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.TRIG)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -788,7 +788,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trig',
                                MIMEType.TRIG,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.TRIG)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -798,7 +798,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trix',
                                MIMEType.TRIX,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.TRIX)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -808,7 +808,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.trix',
                                MIMEType.TRIX,
-                               reference_formulation=CONJUCTIVE_QUERY)
+                               rml_iterator=CONJUCTIVE_QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.TRIX)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -818,7 +818,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.n3',
                                MIMEType.N3,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.N3)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -828,7 +828,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.n3',
                                MIMEType.N3,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.N3)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -838,7 +838,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ttl',
                                MIMEType.TURTLE,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.TURTLE)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -848,7 +848,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ttl',
                                MIMEType.TURTLE,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.TURTLE)
         self.assertTrue(self._assert_multiple_triples(tm))
 
@@ -858,7 +858,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ntriples',
                                MIMEType.NTRIPLES,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_single_triple_rdf(ls, MIMEType.NTRIPLES)
         self.assertTrue(self._assert_single_triple(tm))
 
@@ -868,7 +868,7 @@ class TriplesMapTests(unittest.TestCase):
         """
         ls = DCATLogicalSource(f'http://{HOST}:8000/tests/assets/rdf/student.ntriples',
                                MIMEType.NTRIPLES,
-                               reference_formulation=QUERY)
+                               rml_iterator=QUERY)
         tm = self._build_triples_map_multiple_triples_rdf(ls, MIMEType.NTRIPLES)
         self.assertTrue(self._assert_multiple_triples(tm))
 
