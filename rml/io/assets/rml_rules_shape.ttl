@@ -697,13 +697,57 @@ schema:CSVWSourceShape
         sh:datatype xsd:string ;
     ] ;
     sh:property [
+        sh:path csvw:tableSchema ;
+        sh:name "CSVW Table Schema" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:BlankNode ;
+        sh:node schema:CSVWTableSchemaShape ;
+    ] ;
+    sh:property [
         sh:path csvw:dialect ;
-        sh:name "CSVW dialect" ;
+        sh:name "CSVW Dialect" ;
         sh:maxCount 1 ;
         sh:minCount 0 ;
         sh:nodeKind sh:BlankNode ;
         sh:node schema:CSVWDialectShape ;
     ] .
+
+schema:CSVWTableSchemaShape
+    a sh:NodeShape ;
+    sh:targetClass csvw:TableSchema ;
+    sh:closed "true"^^xsd:boolean ;
+    sh:ignoredProperties (rdf:type) ;
+    sh:name "CSVW Table Schema" ;
+    sh:description "Table Schema description for a CSVW Table. A RDF sequence of columns with a csvw:name and csvw:nullValue." ;
+    sh:message "CSVW Table Schema violation" ;
+    sh:property [                                                 
+    sh:path csvw:columns ;                                    
+    sh:node dash:ListShape ;                                  
+    sh:name "CSVW columns" ;                                  
+    sh:minCount 1 ;                                           
+    sh:property [   
+        sh:closed "true"^^xsd:boolean;                                          
+        sh:path ( [ sh:zeroOrMorePath rdf:rest ] rdf:first ) ;
+        sh:minCount 1 ;                                       
+        sh:property [                                         
+            sh:path csvw:name ;                               
+            sh:name "CSVW name" ;                             
+            sh:maxCount 1 ;                                   
+            sh:minCount 1 ;                                   
+            sh:nodeKind sh:Literal ;                          
+            sh:datatype xsd:string ;                          
+        ] ;                                                   
+        sh:property [                                         
+            sh:path csvw:null ;                               
+            sh:name "CSVW null" ;                             
+            sh:maxCount 1 ;                                   
+            sh:minCount 0 ;                                   
+            sh:nodeKind sh:Literal ;                          
+            sh:datatype xsd:string ;                          
+        ] ;                                                   
+    ] ;                                                       
+] .                                                           
 
 schema:CSVWDialectShape
     a sh:NodeShape ;
@@ -750,13 +794,90 @@ schema:CSVWDialectShape
         sh:datatype xsd:string ;
     ] ;
     sh:property [
+        sh:path csvw:escapeChar ;
+        sh:name "CSVW escape character" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:minLength 1 ;
+        sh:maxLength 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ];
+    sh:property [
+        sh:path csvw:lineTerminators ;
+        sh:name "CSVW line terminators" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:minLength 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ];
+    sh:property [
+        sh:path csvw:trim ;
+        sh:name "CSVW trim mode";
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:or (
+            [
+                sh:datatype xsd:string;
+            ]
+            [
+                sh:datatype xsd:boolean;
+            ]
+        );
+    ];
+    sh:property [
         sh:path csvw:skipInitialSpace ;
         sh:name "CSVW skip initial space" ;
         sh:maxCount 1 ;
         sh:minCount 0 ;
         sh:nodeKind sh:Literal ;
         sh:datatype xsd:boolean ;
-    ] .
+    ] ;
+    sh:property [
+        sh:path csvw:header ;
+        sh:name "CSVW header provided in CSV file" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path csvw:headerRowCount ;
+        sh:name "CSVW header row count" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:integer ;
+    ] ;
+    sh:property [
+        sh:path csvw:skipColumns ;
+        sh:name "CSVW skip columns";
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal;
+        sh:datatype xsd:integer ;
+    ] ;
+    sh:property [
+        sh:path csvw:skipRows ;
+        sh:name "CSVW skip rows";
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:nodeKind sh:Literal;
+        sh:datatype xsd:integer ;
+    ] ;
+    sh:property [
+        sh:path csvw:commentPrefix ;
+        sh:name "CSVW comment prefix" ;
+        sh:maxCount 1 ;
+        sh:minCount 0 ;
+        sh:minLength 1 ;
+        sh:maxLength 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:datatype xsd:string ;
+    ] ;
+.
 
 # Validate an R2RML Subject Map
 schema:SubjectMapShape
@@ -1105,4 +1226,5 @@ schema:GraphMapShape
         sh:maxCount 1 ;
         sh:nodeKind sh:IRI ;
     ] .
+
 

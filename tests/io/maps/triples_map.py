@@ -9,7 +9,7 @@ from rml.io.sources import JSONLogicalSource, XMLLogicalSource, \
                            CSVLogicalSource, SPARQLXMLLogicalSource, \
                            SPARQLJSONLogicalSource, SQLLogicalSource, \
                            RDFLogicalSource, DCATLogicalSource, \
-                           MIMEType, LogicalSource
+                           MIMEType, LogicalSource, CSVWTrimMode
 from rml.io.maps import SubjectMap, PredicateMap, ObjectMap, \
                         PredicateObjectMap, TriplesMap, ReferenceType
 from rml.namespace import FOAF, LINKED_CONNECTIONS, XSD, R2RML
@@ -338,6 +338,46 @@ class TriplesMapTests(unittest.TestCase):
         ls = CSVLogicalSource('tests/assets/csv/student.csv')
         tm = self._build_triples_map_multiple_triples(ls, MIMEType.CSV)
         self.assertTrue(self._assert_multiple_triples(tm))
+
+    def test_csv_dialect_generate_multiple_triples(self) -> None:
+        """
+        Test if we can generate multiple triples using a CSV dialect as data.
+        """
+        ls = CSVLogicalSource('tests/assets/csv/dialect_mix.csv',
+                              double_quote=True,
+                              trim_mode=CSVWTrimMode.START_AND_END,
+                              skip_initial_space=True, has_header=True,
+                              comment_prefix='$')
+        tm = self._build_triples_map_multiple_triples(ls, MIMEType.CSV)
+        # Triples 1
+        expected_result = [(URIRef('http://example.com/0'), \
+                            FOAF.name, \
+                            Literal('"Herman"'), None), \
+                           (URIRef('http://example.com/0'), \
+                            FOAF.age, \
+                            Literal('65'), None)]
+        self.assertEqual(next(tm), expected_result)
+
+        # Triples 2
+        expected_result = [(URIRef('http://example.com/1'), \
+                            FOAF.name, \
+                            Literal('"Ann"'), None),
+                           (URIRef('http://example.com/1'), \
+                            FOAF.age, \
+                            Literal('62'), None)]
+        self.assertEqual(next(tm), expected_result)
+
+        # Triples 3
+        expected_result = [(URIRef('http://example.com/2'), \
+                            FOAF.name, \
+                            Literal('Simon'), None),
+                           (URIRef('http://example.com/2'), \
+                            FOAF.age, \
+                            Literal('23'), None)]
+        self.assertEqual(next(tm), expected_result)
+
+        with self.assertRaises(StopIteration):
+            next(tm)
 
     def test_tsv_generate_triple(self) -> None:
         """

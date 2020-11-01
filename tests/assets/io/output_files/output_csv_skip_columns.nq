@@ -1,0 +1,3 @@
+<http://example.com/Ann> <http://xmlns.com/foaf/0.1/age> "62" .
+<http://example.com/Simon> <http://xmlns.com/foaf/0.1/age> "23" .
+<http://example.com/Herman> <http://xmlns.com/foaf/0.1/age> "65" .
