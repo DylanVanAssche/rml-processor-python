@@ -13,9 +13,9 @@ class TriplesMap:
         self._logical_source = logical_source
         self._subject_map = subject_map
         self._predicate_object_maps = predicate_object_maps
-        debug('Logical Source: {self._logical_source}')
-        debug('Subject Map: {self._subject_map}')
-        debug('Predicate Object Maps: {self._predicate_object_maps}')
+        debug(f'Logical Source: {self._logical_source}')
+        debug(f'Subject Map: {self._subject_map}')
+        debug(f'Predicate Object Maps: {self._predicate_object_maps}')
         debug('TriplesMap initialization complete')
 
     def __iter__(self) \
@@ -38,8 +38,8 @@ class TriplesMap:
             subj, rr_class, subj_graph = self._subject_map.resolve(data)
             debug(f'Resolved SubjectMap: {subj}, {rr_class}, {subj_graph}')
         except ResourceWarning:
-            warning('Unable to resolve SubjectMap {self._subject_map}: missing'
-                    ' data')
+            warning(f'Unable to resolve SubjectMap {self._subject_map}: '
+                    'missing data')
             return []
 
         triples: List[Tuple[URIRef, URIRef, Identifier, URIRef]] = []
@@ -48,10 +48,10 @@ class TriplesMap:
         for po in self._predicate_object_maps:
             try:
                 pred, obj, po_graph = po.resolve(data)
-                debug('Resolved PredicateObjectMap: {pred}, {obj}, '
-                      '{po_graph}')
+                debug(f'Resolved PredicateObjectMap: {pred}, {obj}, '
+                      f'{po_graph}')
             except ResourceWarning:
-                warning('Unable to resolve SubjectMap {po}: missing data')
+                warning(f'Unable to resolve SubjectMap {po}: missing data')
                 continue
             t = (subj, pred, obj, po_graph)
             triples.append(t)

@@ -2,13 +2,14 @@ from logging import debug, info, warning, error, critical
 from itertools import product
 from rdflib import Graph
 from rdflib.term import URIRef, Literal, BNode, Identifier
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from rml.io.sources import LogicalSource, CSVLogicalSource, \
                            JSONLogicalSource, XMLLogicalSource, \
                            RDFLogicalSource, DCATLogicalSource, \
                            SQLLogicalSource, SPARQLXMLLogicalSource, \
-                           SPARQLJSONLogicalSource, MIMEType
+                           SPARQLJSONLogicalSource, MIMEType, CSVColumn, \
+                           CSVWTrimMode
 from rml.io.targets import LogicalTarget
 from rml.io.maps import TriplesMap, PredicateObjectMap, SubjectMap, \
                         ObjectMap, PredicateMap, ReferenceType
@@ -130,63 +131,150 @@ class MappingReader:
             # CSV file
             if rml_reference_formulation == QL.CSV:
                 debug('Local CSV file')
-                # CSVW dialect support (https://www.w3.org/ns/csvw) is limited
-                # to:
-                # - csvw:delimiter (Dialect.delimiter)
-                # - csvw:doubleQuote (Dialect.doublequote)
-                # - csvw:quoteChar (Dialect.quotechar)
-                # - csvw:skipInitialSpace (Dialect.skipinitialspace)
-                # - csvw:encoding (open statement 'encoding')
-                #
-                # Other dialect options of CSVW are not supported by the
-                # Python CSV module:
-                # - csvw:header: a header is required in all cases.
-                # - csvw:headerRowCount: not supported by Python's CSV module.
-                # - csvw:lineTerminators: not supported by Python's CSV module.
-                # - csvw:skipColumns: not supported by Python's CSV module.
-                # - csvw:skipRows: not supported by Python's CSV module.
-                # - csvw:trim: not supported by this processor yet.
-                # - csvw:skipBlankRows: not supported by this processor yet.
                 csvw_dialect: URIRef = self._graph.value(_rml_source,
                                                          CSVW.dialect)
-                csvw_delimiter: str = ','
-                csvw_double_quote: bool = False
-                csvw_quote_char: str = '"'
-                csvw_skip_initial_space: bool = False
-                csvw_encoding: str = 'utf-8'
+                csvw_table_schema: URIRef = self._graph.value(_rml_source,
+                                                              CSVW.tableSchema)
+                config: Dict = {}
 
+                # Handle CSVW dialects
                 if csvw_dialect is not None:
-                    csvw_delimiter = \
-                        str(self._graph.value(csvw_dialect, CSVW.delimiter,
-                                              default=csvw_delimiter))
-                    csvw_double_quote = \
-                        bool(self._graph.value(csvw_dialect,
-                                               CSVW.doubleQuote,
-                                               default=csvw_double_quote))
-                    csvw_quote_char = \
-                        str(self._graph.value(csvw_dialect, CSVW.quoteChar,
-                                              default=csvw_quote_char))
-                    csvw_skip_initial_space = \
-                        self._graph.value(csvw_dialect,
-                                          CSVW.skipInitialSpace,
-                                          default=csvw_skip_initial_space)
-                    csvw_skip_initial_space = bool(csvw_skip_initial_space)
-                    csvw_encoding = str(self._graph.value(csvw_dialect,
-                                                          CSVW.encoding,
-                                                          default='utf-8'))
+                    debug('CSVW:Dialect')
+                    csvw_delimiter: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.delimiter)
+                    csvw_double_quote: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.doubleQuote)
+                    csvw_quote_char: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.quoteChar)
+                    csvw_skip_initial_space: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.skipInitialSpace)
+                    csvw_encoding: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.encoding)
+                    csvw_line_terminators: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.lineTerminators)
+                    csvw_trim_mode: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.trim)
+                    csvw_skip_columns: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.skipColumns)
+                    csvw_skip_rows: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.skipRows)
+                    csvw_comment_prefix: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.commentPrefix)
+                    csvw_escape_char: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.escapeChar)
+                    csvw_has_header: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.header)
+                    csvw_header_row_count: Optional[Identifier] = \
+                        self._graph.value(csvw_dialect, CSVW.headerRowCount)
 
-                debug(f'\tDelimiter: {csvw_delimiter}')
-                debug(f'\tDouble quote enabled: {csvw_double_quote}')
-                debug(f'\tQuote char: {csvw_quote_char}')
-                debug(f'\tSkip initial space: {csvw_skip_initial_space}')
+                    debug(f'\tDelimiter: {csvw_delimiter}')
+                    debug(f'\tDouble quote enabled: {csvw_double_quote}')
+                    debug(f'\tQuote char: {csvw_quote_char}')
+                    debug(f'\tSkip initial space: {csvw_skip_initial_space}')
+                    debug(f'\tEncoding: {csvw_encoding}')
+                    debug(f'\tLine terminators: {csvw_line_terminators}')
+                    debug(f'\tTrim mode: {csvw_trim_mode}')
+                    debug(f'\tSkipping first {csvw_skip_columns} columns')
+                    debug(f'\tSkipping first {csvw_skip_rows} rows')
+                    debug(f'\tComment prefix: {csvw_comment_prefix}')
+                    debug(f'\tEscape character: {csvw_escape_char}')
+                    debug(f'\tHas header: {csvw_has_header}')
+                    debug(f'\tHeader row count: {csvw_header_row_count}')
 
-                # FIXME: Support more CSV dialect options, see Gitlab issue #35
-                if csvw_double_quote or csvw_quote_char == '"' or \
-                        csvw_skip_initial_space or csvw_encoding != 'utf-8':
-                    warning('Only limited CSV dialect support is implemented, '
-                            'see Gitlab issue #35')
+                    # Build dynamic arguments based on the specified CSVW
+                    # properties. Unspecified properties will get a default
+                    # value in the CSV Logical Source
+                    if csvw_delimiter is not None:
+                        config['delimiter'] = csvw_delimiter.toPython()
+                    if csvw_double_quote is not None:
+                        config['double_quote'] = csvw_double_quote.toPython()
+                    if csvw_quote_char is not None:
+                        config['quote_char'] = csvw_quote_char.toPython()
+                    if csvw_skip_initial_space is not None:
+                        config['skip_initial_space'] = \
+                                csvw_skip_initial_space.toPython()
+                    if csvw_encoding is not None:
+                        config['encoding'] = csvw_encoding.toPython()
+                    if csvw_line_terminators is not None:
+                        config['line_terminators'] = \
+                                csvw_line_terminators.toPython()
+                    if csvw_trim_mode is not None:
+                        mode: Union[str, bool] = csvw_trim_mode.toPython()
+                        # CSVW:trim can be provided as bool
+                        if isinstance(mode, bool):
+                            if mode:
+                                config['trim_mode'] = \
+                                        CSVWTrimMode.START_AND_END
+                            else:
+                                config['trim_mode'] = CSVWTrimMode.NONE
+                        # Or as string with more fine grade control
+                        else:
+                            if mode == 'start':
+                                config['trim_mode'] = CSVWTrimMode.START
+                            elif mode == 'end':
+                                config['trim_mode'] = CSVWTrimMode.END
+                            elif mode == 'true':
+                                config['trim_mode'] = \
+                                        CSVWTrimMode.START_AND_END
+                            elif mode == 'false':
+                                config['trim_mode'] = CSVWTrimMode.NONE
+                            else:  # pragma: no cover - fallback for validator
+                                msg = f'Unknown CSVW trim: {mode}. This should'
+                                ' be catched by the validator, report '
+                                'this as an issue!'
+                                critical(msg)
+                                raise ValueError(msg)
+                    if csvw_skip_columns is not None:
+                        config['skip_columns'] = csvw_skip_columns.toPython()
+                    if csvw_skip_rows is not None:
+                        config['skip_rows'] = csvw_skip_rows.toPython()
+                    if csvw_comment_prefix is not None:
+                        config['comment_prefix'] = \
+                                csvw_comment_prefix.toPython()
+                    if csvw_escape_char is not None:
+                        config['escape_char'] = csvw_escape_char.toPython()
+                    if csvw_has_header is not None:
+                        config['has_header'] = csvw_has_header.toPython()
+                    if csvw_header_row_count is not None:
+                        config['header_row_count'] = \
+                                csvw_header_row_count.toPython()
+                    # If no csvw:headerRowCount is provided, but csvw:header is
+                    # set to True, csvw:headerRowCount is set to 1
+                    # If False, csvw:headerRowCount is set to 0
+                    elif 'has_header' in config:
+                        if config['has_header']:
+                            config['header_row_count'] = 1
+                        else:
+                            config['header_row_count'] = 0
 
-                return CSVLogicalSource(rml_source, csvw_delimiter)
+                # Handle CSVW provided header
+                if csvw_table_schema is not None:
+                    debug('CSVW:TableSchema')
+                    csvw_columns: URIRef = self._graph.value(csvw_table_schema,
+                                                             CSVW.columns)
+                    # csvw:columns contains an ordered list (rdf:List)
+                    columns: List[CSVColumn] = []
+                    for column in self._graph.items(csvw_columns):
+                        name: str = \
+                            self._graph.value(column, CSVW.name).toPython()
+                        null_value: Optional[str] = \
+                            self._graph.value(column, CSVW.null)
+                        if null_value is not None:
+                            columns.append(CSVColumn(name, null_value))
+                        # If null value is not provided, fallback to default
+                        else:
+                            warning('CSVW:null missing, falling back to '
+                                    'default')
+                            columns.append(CSVColumn(name))
+
+                        debug(f'\tName: {name}')
+                        debug(f'\tNull value: {null_value}')
+                    config['header'] = columns
+
+                info(f'CSVW header & dialect configuration: {config}')
+
+                # Expand config dictionary to arguments
+                return CSVLogicalSource(rml_source, **config)
             # JSON file
             elif rml_reference_formulation == QL.JSONPath:
                 debug('Local JSON file')

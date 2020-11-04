@@ -54,7 +54,8 @@ class LogicalSource(ABC):
 # Expose classes at module level
 from rml.io.sources.rdf_source import RDFLogicalSource  # nopep8
 from rml.io.sources.json_source import JSONLogicalSource  # nopep8
-from rml.io.sources.csv_source import CSVLogicalSource  # nopep8
+from rml.io.sources.csv_source import CSVLogicalSource, CSVWTrimMode, \
+                                      CSVColumn  # nopep8
 from rml.io.sources.sql_source import SQLLogicalSource  # nopep8
 from rml.io.sources.xml_source import XMLLogicalSource  # nopep8
 from rml.io.sources.sparql_source import SPARQLJSONLogicalSource, \

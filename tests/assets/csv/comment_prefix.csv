@@ -1,0 +1,5 @@
+id,name,age
+$ This is a comment with a custom comment prefix
+0,Herman,65
+1,Ann,62
+2,Simon,23
